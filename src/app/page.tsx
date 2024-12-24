@@ -4,15 +4,29 @@ import HeronLogo from "./components/icons/HeronLogo";
 import { Button, Flex, Typography } from "antd";
 import Image from "next/image";
 import HowItWorkIcon from "./components/icons/HowItWorkIcon";
+import { howItWorkContent } from "./constants";
 
 const Home: React.FC = () => {
   return (
     <div>
+      <div
+        style={{
+          height: "800px",
+          width: "100%",
+          backgroundImage: "url('/images/background_shading.png')",
+          position: "absolute",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "right bottom",
+          top: 0,
+          right: 0,
+          zIndex: -1,
+        }}
+      />
       <Flex
         justify="center"
         align="center"
         gap={30}
-        style={{ height: "80px", marginBottom: 60 }}
+        style={{ height: "80px", marginBottom: 30 }}
       >
         <div style={{ position: "absolute", top: 10, left: 50 }}>
           <HeronLogo />
@@ -24,34 +38,59 @@ const Home: React.FC = () => {
 
       {/* TODO: Hero section */}
       <Flex justify="center" align="center" vertical>
-        <Typography.Title level={1}>
-          Unlock Targeted Marketing,
+        <Typography.Title level={1} style={{ textAlign: "center" }}>
+          <span style={{ lineHeight: "80px" }}>Unlock Targeted Marketing,</span>
+          <br />
+          <span>Personalize Customer experience</span>
         </Typography.Title>
-        <Typography.Title level={1}>
-          Personalize Customer experience
-        </Typography.Title>
-        <Typography.Text>
+        <Typography.Text type="secondary">
           Create survey, generate insights, and build customer personas without
           coding or any technical skills - all in Heron Analytica
         </Typography.Text>
 
-        {/* TODO: Screen with video */}
+        <div
+          style={{
+            height: "800px",
+            width: "100%",
+            backgroundImage: "url('/images/monitor.png')",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            backgroundSize: "contain",
+          }}
+        />
       </Flex>
 
-      <Flex justify="center" align="center" vertical>
-        <Button type="primary">Sign up now</Button>
+      <Flex justify="center" align="center" vertical style={{ margin: 30 }}>
+        <Button
+          type="primary"
+          style={{
+            borderRadius: 0,
+            backgroundColor: "#222F65",
+            fontSize: 18,
+            padding: "20px",
+          }}
+        >
+          Sign up now
+        </Button>
       </Flex>
 
       {/* Fetaure Overview */}
       <Flex justify="center" align="center" vertical>
-        <Typography.Title level={1}>
+        <Typography.Title level={2}>
           If you target everyone, you target no one.
         </Typography.Title>
-        <Typography.Text>
+        <Typography.Text type="secondary">
           Take the guesswork out of understanding your customers
         </Typography.Text>
-        <Flex justify="space-between" align="center">
-          {/* Display image progressional_quality.png */}
+        <br />
+        <br />
+        <br />
+        <Flex
+          justify="space-between"
+          align="center"
+          gap="100px"
+          style={{ padding: "0 15%", margin: "20px 0" }}
+        >
           <Image
             src="/images/progressional_quality.png"
             alt="Progressional Quality"
@@ -60,7 +99,7 @@ const Home: React.FC = () => {
           />
           <div>
             <Typography.Title level={1}>Progressional quality</Typography.Title>
-            <Typography.Text>
+            <Typography.Text type="secondary">
               Get the same precision and depth of analysis that you’d expect
               from a market research company. Achieve professional-grade
               insights powered by an advanced algorithm crafted by market
@@ -68,7 +107,12 @@ const Home: React.FC = () => {
             </Typography.Text>
           </div>
         </Flex>
-        <Flex justify="space-between" align="center">
+        <Flex
+          justify="space-between"
+          align="center"
+          gap="100px"
+          style={{ padding: "0 15%", margin: "20px 0" }}
+        >
           {/* Display image progressional_quality.png */}
           <Image
             src="/images/save_time_and_cut_costs.png"
@@ -80,13 +124,18 @@ const Home: React.FC = () => {
             <Typography.Title level={1}>
               Save Time and Cut Costs
             </Typography.Title>
-            <Typography.Text>
+            <Typography.Text type="secondary">
               Cut research time by 2x and save 3x the cost by eliminating the
               need for hiring a market research company.
             </Typography.Text>
           </div>
         </Flex>
-        <Flex justify="space-between" align="center">
+        <Flex
+          justify="space-between"
+          align="center"
+          gap="100px"
+          style={{ padding: "0 15%", margin: "20px 0" }}
+        >
           {/* Display image progressional_quality.png */}
           <Image
             src="/images/no_coding_no_complexity.png"
@@ -98,35 +147,68 @@ const Home: React.FC = () => {
             <Typography.Title level={1}>
               No Coding, No Complexity
             </Typography.Title>
-            <Typography.Text>
+            <Typography.Text type="secondary">
               Built for small and medium sized businesses — no code or no
               technical expertise needed.
             </Typography.Text>
           </div>
         </Flex>
-        <Typography.Title level={1}>
-          Transform Your Marketing Campaign and Improve Return On Investment
+        <Typography.Title
+          level={2}
+          style={{ textAlign: "center", margin: "120px 0" }}
+        >
+          Transform Your Marketing Campaign and
+          <br />
+          Improve Return On Investment
         </Typography.Title>
       </Flex>
 
       {/* How it works */}
-      <Flex justify="center" align="center" vertical>
-        <Flex justify="center" align="center">
-          <HowItWorkIcon />
-          <Flex justify="flex-start" align="center" vertical>
-            <Typography.Title level={5}>1. Define</Typography.Title>
-            <Typography.Text>
-              Decide what customer behaviors, interests, or psychographics you
-              want to analyze—whether it’s buying patterns, brand loyalty, or
-              values.
-            </Typography.Text>
+      <Flex
+        align="flex-start"
+        vertical
+        style={{ padding: "0 15%" }}
+        gap={"30px"}
+      >
+        <Typography.Title level={2}>How it works</Typography.Title>
+        {howItWorkContent.map((item, index) => (
+          <Flex key={index} justify="center">
+            <HowItWorkIcon style={{ marginRight: 10, minWidth: "40px" }} />
+            <Flex align="flex-start" vertical>
+              <Typography.Title level={5}>
+                {item.index}.&nbsp;{item.title}
+              </Typography.Title>
+              <Typography.Text>{item.description}</Typography.Text>
+            </Flex>
           </Flex>
-        </Flex>
+        ))}
       </Flex>
 
-      <Flex justify="center" align="center" vertical>
-        <Button type="primary">Sign up now</Button>
+      <Flex justify="center" align="center" vertical style={{ margin: 30 }}>
+        <Button
+          type="primary"
+          style={{
+            borderRadius: 0,
+            backgroundColor: "#222F65",
+            fontSize: 18,
+            padding: "20px",
+          }}
+        >
+          Sign up now
+        </Button>
       </Flex>
+
+      {/* Footer */}
+      <div
+        style={{
+          height: "200px",
+          width: "100%",
+          backgroundImage: "url('/images/footer_shading.png')",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center",
+          zIndex: -1,
+        }}
+      ></div>
     </div>
   );
 };
