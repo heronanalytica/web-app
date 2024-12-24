@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import Image from "next/image";
 import styles from "./page.module.css";
 
@@ -46,20 +47,12 @@ export default function Home() {
           </a>
         </div>
         <div>
-          <form name="contact" method="POST" data-netlify="true">
-            <label>
-              Name:
-              <input type="text" name="name" required />
-            </label>
-            <label>
-              Email:
-              <input type="email" name="email" required />
-            </label>
-            <label>
-              Message:
-              <textarea name="message" required></textarea>
-            </label>
-            <button type="submit">Submit</button>
+          {/* @ts-ignore */}
+          <form name="contact" method="POST" netlify>
+            <input type="text" name="name" />
+            <input type="email" name="email" />
+            <textarea name="message"></textarea>
+            <button type="submit">Send</button>
           </form>
         </div>
       </main>
