@@ -45,6 +45,23 @@ export default function Home() {
             Read our docs
           </a>
         </div>
+        <div>
+          <form name="contact" method="POST" data-netlify="true">
+            <label>
+              Name:
+              <input type="text" name="name" required />
+            </label>
+            <label>
+              Email:
+              <input type="email" name="email" required />
+            </label>
+            <label>
+              Message:
+              <textarea name="message" required></textarea>
+            </label>
+            <button type="submit">Submit</button>
+          </form>
+        </div>
       </main>
       <footer className={styles.footer}>
         <a
