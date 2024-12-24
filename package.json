@@ -9,8 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ant-design/nextjs-registry": "^1.0.2",
     "@netlify/plugin-nextjs": "^5.9.2",
     "@supabase/supabase-js": "^2.47.10",
+    "antd": "^5.22.6",
     "next": "^15.1.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

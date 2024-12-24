@@ -1,128 +1,134 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+"use client";
+import React from "react";
+import HeronLogo from "./components/icons/HeronLogo";
+import { Button, Flex, Typography } from "antd";
 import Image from "next/image";
-import styles from "./page.module.css";
+import HowItWorkIcon from "./components/icons/HowItWorkIcon";
 
-export default function Home() {
+const Home: React.FC = () => {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div>
+      <Flex
+        justify="center"
+        align="center"
+        gap={30}
+        style={{ height: "80px", marginBottom: 60 }}
+      >
+        <div style={{ position: "absolute", top: 10, left: 50 }}>
+          <HeronLogo />
+        </div>
+        <div>Home</div>
+        <div>Pricing</div>
+        <div>Contact</div>
+      </Flex>
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-        <div>
-          {/* @ts-ignore */}
-          <form name="contact" method="POST" netlify>
-            <p>
-              <label>
-                Your Name: <input type="text" name="name" />
-              </label>
-            </p>
-            <p>
-              <label>
-                Your Email: <input type="email" name="email" />
-              </label>
-            </p>
-            <p>
-              <label>
-                Your Role:{" "}
-                <select name="role[]" multiple>
-                  <option value="leader">Leader</option>
-                  <option value="follower">Follower</option>
-                </select>
-              </label>
-            </p>
-            <p>
-              <label>
-                Message: <textarea name="message"></textarea>
-              </label>
-            </p>
-            <p>
-              <button type="submit">Send</button>
-            </p>
-          </form>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+      {/* TODO: Hero section */}
+      <Flex justify="center" align="center" vertical>
+        <Typography.Title level={1}>
+          Unlock Targeted Marketing,
+        </Typography.Title>
+        <Typography.Title level={1}>
+          Personalize Customer experience
+        </Typography.Title>
+        <Typography.Text>
+          Create survey, generate insights, and build customer personas without
+          coding or any technical skills - all in Heron Analytica
+        </Typography.Text>
+
+        {/* TODO: Screen with video */}
+      </Flex>
+
+      <Flex justify="center" align="center" vertical>
+        <Button type="primary">Sign up now</Button>
+      </Flex>
+
+      {/* Fetaure Overview */}
+      <Flex justify="center" align="center" vertical>
+        <Typography.Title level={1}>
+          If you target everyone, you target no one.
+        </Typography.Title>
+        <Typography.Text>
+          Take the guesswork out of understanding your customers
+        </Typography.Text>
+        <Flex justify="space-between" align="center">
+          {/* Display image progressional_quality.png */}
           <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+            src="/images/progressional_quality.png"
+            alt="Progressional Quality"
+            height={400}
+            width={500}
           />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+          <div>
+            <Typography.Title level={1}>Progressional quality</Typography.Title>
+            <Typography.Text>
+              Get the same precision and depth of analysis that you’d expect
+              from a market research company. Achieve professional-grade
+              insights powered by an advanced algorithm crafted by market
+              researchers & data scientists from top market research companies.
+            </Typography.Text>
+          </div>
+        </Flex>
+        <Flex justify="space-between" align="center">
+          {/* Display image progressional_quality.png */}
           <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
+            src="/images/save_time_and_cut_costs.png"
+            alt="Progressional Quality"
+            height={400}
+            width={500}
           />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+          <div>
+            <Typography.Title level={1}>
+              Save Time and Cut Costs
+            </Typography.Title>
+            <Typography.Text>
+              Cut research time by 2x and save 3x the cost by eliminating the
+              need for hiring a market research company.
+            </Typography.Text>
+          </div>
+        </Flex>
+        <Flex justify="space-between" align="center">
+          {/* Display image progressional_quality.png */}
           <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
+            src="/images/no_coding_no_complexity.png"
+            alt="Progressional Quality"
+            height={400}
+            width={500}
           />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          <div>
+            <Typography.Title level={1}>
+              No Coding, No Complexity
+            </Typography.Title>
+            <Typography.Text>
+              Built for small and medium sized businesses — no code or no
+              technical expertise needed.
+            </Typography.Text>
+          </div>
+        </Flex>
+        <Typography.Title level={1}>
+          Transform Your Marketing Campaign and Improve Return On Investment
+        </Typography.Title>
+      </Flex>
+
+      {/* How it works */}
+      <Flex justify="center" align="center" vertical>
+        <Flex justify="center" align="center">
+          <HowItWorkIcon />
+          <Flex justify="flex-start" align="center" vertical>
+            <Typography.Title level={5}>1. Define</Typography.Title>
+            <Typography.Text>
+              Decide what customer behaviors, interests, or psychographics you
+              want to analyze—whether it’s buying patterns, brand loyalty, or
+              values.
+            </Typography.Text>
+          </Flex>
+        </Flex>
+      </Flex>
+
+      <Flex justify="center" align="center" vertical>
+        <Button type="primary">Sign up now</Button>
+      </Flex>
     </div>
   );
-}
+};
+
+export default Home;
