@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { Form, Input, Button, Typography } from "antd";
+
+const { Title } = Typography;
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -45,53 +48,77 @@ export default function Contact() {
   };
 
   if (submitted) {
-    return <p>Thank you for getting in touch! We&apos;ll respond soon.</p>;
+    return (
+      <div style={{ textAlign: "center", marginTop: "50px" }}>
+        <Title level={2} style={{ color: "#101010" }}>
+          Thank you for getting in touch!
+        </Title>
+        <p>We&apos;ll respond to your inquiry soon.</p>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <h1>Contact Us</h1>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>
-            Name:
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
-          </label>
-        </div>
-        <div>
-          <label>
-            Email:
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </label>
-        </div>
-        <div>
-          <label>
-            Message:
-            <textarea
-              name="message"
-              value={formData.message}
-              onChange={handleChange}
-              required
-            />
-          </label>
-        </div>
-        <button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Submitting..." : "Submit"}
-        </button>
-      </form>
+    <div style={{ padding: "50px 20px", maxWidth: "600px", margin: "auto" }}>
+      <Title level={2} style={{ textAlign: "center", marginBottom: "40px" }}>
+        Get In Touch
+      </Title>
+      {error && (
+        <p style={{ color: "red", textAlign: "center", marginBottom: "20px" }}>
+          {error}
+        </p>
+      )}
+      <Form layout="vertical" onSubmitCapture={handleSubmit}>
+        <Form.Item label="Your Name" required style={{ marginBottom: "20px" }}>
+          <Input
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="Enter your name"
+            required
+          />
+        </Form.Item>
+        <Form.Item label="Your Email" required style={{ marginBottom: "20px" }}>
+          <Input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Enter your email"
+            required
+          />
+        </Form.Item>
+        <Form.Item
+          label="Your Message"
+          required
+          style={{ marginBottom: "30px" }}
+        >
+          <Input.TextArea
+            name="message"
+            value={formData.message}
+            onChange={handleChange}
+            placeholder="Enter your message"
+            rows={4}
+            required
+          />
+        </Form.Item>
+        <Form.Item>
+          <Button
+            type="primary"
+            htmlType="submit"
+            style={{
+              backgroundColor: "#001F54",
+              borderColor: "#001F54",
+              color: "#FFFFFF",
+              fontSize: "16px",
+              width: "100%",
+            }}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Submitting..." : "Submit"}
+          </Button>
+        </Form.Item>
+      </Form>
     </div>
   );
 }

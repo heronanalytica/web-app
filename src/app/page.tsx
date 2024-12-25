@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
-import HeronLogo from "./components/icons/HeronLogo";
-import { Button, Flex, Typography } from "antd";
+import { Button, Divider, Flex, Typography } from "antd";
 import Image from "next/image";
 import HowItWorkIcon from "./components/icons/HowItWorkIcon";
 import { howItWorkContent } from "./constants";
@@ -9,33 +8,6 @@ import { howItWorkContent } from "./constants";
 const Home: React.FC = () => {
   return (
     <div>
-      <div
-        style={{
-          height: "800px",
-          width: "100%",
-          backgroundImage: "url('/images/background_shading.png')",
-          position: "absolute",
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "right bottom",
-          top: 0,
-          right: 0,
-          zIndex: -1,
-        }}
-      />
-      <Flex
-        justify="center"
-        align="center"
-        gap={30}
-        style={{ height: "80px", marginBottom: 30 }}
-      >
-        <div style={{ position: "absolute", top: 10, left: 50 }}>
-          <HeronLogo />
-        </div>
-        <div>Home</div>
-        <div>Pricing</div>
-        <div>Contact</div>
-      </Flex>
-
       {/* TODO: Hero section */}
       <Flex justify="center" align="center" vertical>
         <Typography.Title level={1} style={{ textAlign: "center" }}>
@@ -64,7 +36,6 @@ const Home: React.FC = () => {
         <Button
           type="primary"
           style={{
-            borderRadius: 0,
             backgroundColor: "#222F65",
             fontSize: 18,
             padding: "20px",
@@ -184,31 +155,61 @@ const Home: React.FC = () => {
         ))}
       </Flex>
 
-      <Flex justify="center" align="center" vertical style={{ margin: 30 }}>
-        <Button
-          type="primary"
-          style={{
-            borderRadius: 0,
-            backgroundColor: "#222F65",
-            fontSize: 18,
-            padding: "20px",
-          }}
-        >
-          Sign up now
-        </Button>
-      </Flex>
-
       {/* Footer */}
       <div
         style={{
-          height: "200px",
+          height: "400px",
           width: "100%",
           backgroundImage: "url('/images/footer_shading.png')",
           backgroundRepeat: "no-repeat",
           backgroundPosition: "center",
+          backgroundSize: "cover", // Ensure the image fits the width and height
           zIndex: -1,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          marginTop: "100px",
         }}
-      ></div>
+      >
+        <Flex justify="center" align="center" vertical style={{ margin: 30 }}>
+          <Button
+            type="primary"
+            style={{
+              backgroundColor: "#222F65",
+              fontSize: 18,
+              padding: "20px",
+              marginTop: "70px",
+            }}
+          >
+            Sign up now
+          </Button>
+        </Flex>
+        <div
+          style={{
+            height: "200px",
+            width: "100%",
+            backgroundColor: "#E7ECFF",
+            padding: "20px 10%",
+          }}
+        >
+          <Flex align="center" style={{ height: "80px" }}>
+            <Typography.Text type="secondary">
+              @2024 Heronalytica
+            </Typography.Text>
+          </Flex>
+          <Divider />
+          <Flex justify="space-between" align="center">
+            <Flex align="center" gap={"40px"}>
+              <Typography.Text type="secondary">Home</Typography.Text>
+              <Typography.Text type="secondary">About</Typography.Text>
+              <Typography.Text type="secondary">Contact</Typography.Text>
+            </Flex>
+            <Flex align="center">
+              <div />
+            </Flex>
+          </Flex>
+        </div>
+      </div>
     </div>
   );
 };

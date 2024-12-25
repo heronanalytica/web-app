@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import "./globals.css";
-import { AntdRegistry } from "@ant-design/nextjs-registry";
+import ClientLayout from "./clientLayout"; // Import the client component
 
 const roboto = Roboto({
   variable: "--font-roboto",
@@ -11,7 +11,7 @@ const roboto = Roboto({
 
 export const metadata: Metadata = {
   title: "Heron Analytica",
-  description: "Unlock Targeted Marketing, Personalize Customer experience",
+  description: "Unlock Targeted Marketing, Personalize Customer Experience",
 };
 
 export default function RootLayout({
@@ -22,7 +22,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${roboto.variable}`}>
-        <AntdRegistry>{children}</AntdRegistry>
+        {/* Render the client-side layout */}
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );
