@@ -39,19 +39,13 @@ export default function ClientLayout({
           <div style={{ position: "absolute", top: 10, left: 50 }}>
             <HeronLogo />
           </div>
-          <Link href={"/"} style={{ color: "#505F98", cursor: "pointer" }}>
+          <Link href={"/"} style={{ color: "#505F98" }}>
             Home
           </Link>
-          <Link
-            href={"/pricing"}
-            style={{ color: "#505F98", cursor: "pointer" }}
-          >
+          <Link href={"/pricing"} style={{ color: "#505F98" }}>
             Pricing
           </Link>
-          <Link
-            href={"/contact"}
-            style={{ color: "#505F98", cursor: "pointer" }}
-          >
+          <Link href={"/contact"} style={{ color: "#505F98" }}>
             Contact
           </Link>
         </Space>

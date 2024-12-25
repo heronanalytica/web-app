@@ -1,14 +1,23 @@
 "use client";
+
 import React from "react";
 import { Button, Divider, Flex, Typography } from "antd";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import HowItWorkIcon from "./components/icons/HowItWorkIcon";
 import { howItWorkContent } from "./constants";
+import Link from "next/link";
 
 const Home: React.FC = () => {
+  const router = useRouter();
+
+  const handleNavigateToContact = () => {
+    router.push("/contact");
+  };
+
   return (
     <div>
-      {/* TODO: Hero section */}
+      {/* Hero Section */}
       <Flex justify="center" align="center" vertical>
         <Typography.Title level={1} style={{ textAlign: "center" }}>
           <span style={{ lineHeight: "80px" }}>Unlock Targeted Marketing,</span>
@@ -35,17 +44,19 @@ const Home: React.FC = () => {
       <Flex justify="center" align="center" vertical style={{ margin: 30 }}>
         <Button
           type="primary"
+          size="large"
           style={{
             backgroundColor: "#222F65",
-            fontSize: 18,
-            padding: "20px",
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+            marginTop: "70px",
           }}
+          onClick={handleNavigateToContact}
         >
           Sign up now
         </Button>
       </Flex>
 
-      {/* Fetaure Overview */}
+      {/* Feature Overview */}
       <Flex justify="center" align="center" vertical>
         <Typography.Title level={2}>
           If you target everyone, you target no one.
@@ -84,10 +95,9 @@ const Home: React.FC = () => {
           gap="100px"
           style={{ padding: "0 15%", margin: "20px 0" }}
         >
-          {/* Display image progressional_quality.png */}
           <Image
             src="/images/save_time_and_cut_costs.png"
-            alt="Progressional Quality"
+            alt="Save Time and Cut Costs"
             height={400}
             width={500}
           />
@@ -107,10 +117,9 @@ const Home: React.FC = () => {
           gap="100px"
           style={{ padding: "0 15%", margin: "20px 0" }}
         >
-          {/* Display image progressional_quality.png */}
           <Image
             src="/images/no_coding_no_complexity.png"
-            alt="Progressional Quality"
+            alt="No Coding, No Complexity"
             height={400}
             width={500}
           />
@@ -163,7 +172,7 @@ const Home: React.FC = () => {
           backgroundImage: "url('/images/footer_shading.png')",
           backgroundRepeat: "no-repeat",
           backgroundPosition: "center",
-          backgroundSize: "cover", // Ensure the image fits the width and height
+          backgroundSize: "cover",
           zIndex: -1,
           display: "flex",
           flexDirection: "column",
@@ -174,12 +183,13 @@ const Home: React.FC = () => {
         <Flex justify="center" align="center" vertical style={{ margin: 30 }}>
           <Button
             type="primary"
+            size="large"
             style={{
               backgroundColor: "#222F65",
-              fontSize: 18,
-              padding: "20px",
+              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
               marginTop: "70px",
             }}
+            onClick={handleNavigateToContact}
           >
             Sign up now
           </Button>
@@ -200,9 +210,15 @@ const Home: React.FC = () => {
           <Divider />
           <Flex justify="space-between" align="center">
             <Flex align="center" gap={"40px"}>
-              <Typography.Text type="secondary">Home</Typography.Text>
-              <Typography.Text type="secondary">About</Typography.Text>
-              <Typography.Text type="secondary">Contact</Typography.Text>
+              <Link href={"/"} style={{ color: "#929ECC" }}>
+                Home
+              </Link>
+              <Link href={"/pricing"} style={{ color: "#929ECC" }}>
+                Pricing
+              </Link>
+              <Link href={"/contact"} style={{ color: "#929ECC" }}>
+                Contact
+              </Link>
             </Flex>
             <Flex align="center">
               <div />
