@@ -1,15 +1,23 @@
 "use client";
 
 import { AntdRegistry } from "@ant-design/nextjs-registry";
-import { Space } from "antd";
+import { Drawer, Button } from "antd";
 import HeronLogo from "./components/icons/HeronLogo";
 import Link from "next/link";
+import { useState } from "react";
+import { MenuOutlined } from "@ant-design/icons";
 
 export default function ClientLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  const toggleDrawer = () => {
+    setIsDrawerOpen(!isDrawerOpen);
+  };
+
   return (
     <AntdRegistry>
       <div>
@@ -26,29 +34,92 @@ export default function ClientLayout({
             zIndex: -1,
           }}
         />
-        <Space
-          align="center"
-          size="large"
+        <div
           style={{
             height: "80px",
-            marginBottom: 30,
             display: "flex",
-            justifyContent: "center",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "0 20px",
           }}
         >
-          <div style={{ position: "absolute", top: 10, left: 50 }}>
+          {/* Dummyy Mobile Hamburger Menu to style */}
+          <Button type="text" style={{ visibility: "hidden" }} />
+
+          {/* Logo */}
+          <div
+            style={{
+              position: "absolute",
+              top: "0px",
+              left: "10px",
+            }}
+          >
             <HeronLogo />
           </div>
-          <Link href={"/"} style={{ color: "#505F98" }}>
-            Home
-          </Link>
-          <Link href={"/pricing"} style={{ color: "#505F98" }}>
-            Pricing
-          </Link>
-          <Link href={"/contact"} style={{ color: "#505F98" }}>
-            Contact
-          </Link>
-        </Space>
+
+          {/* Desktop Navigation */}
+          <div className="desktop-menu">
+            <Link href={"/"} style={{ color: "#505F98", margin: "0 15px" }}>
+              Home
+            </Link>
+            <Link
+              href={"/pricing"}
+              style={{ color: "#505F98", margin: "0 15px" }}
+            >
+              Pricing
+            </Link>
+            <Link
+              href={"/contact"}
+              style={{ color: "#505F98", margin: "0 15px" }}
+            >
+              Contact
+            </Link>
+          </div>
+
+          {/* Mobile Hamburger Menu */}
+          <Button
+            type="text"
+            icon={
+              <MenuOutlined style={{ fontSize: "24px", color: "#505F98" }} />
+            }
+            onClick={toggleDrawer}
+            className="mobile-menu"
+          />
+        </div>
+
+        {/* Drawer for Mobile Navigation */}
+        <Drawer
+          title="Navigation"
+          placement="right"
+          onClose={toggleDrawer}
+          open={isDrawerOpen}
+        >
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "20px" }}
+          >
+            <Link
+              href={"/"}
+              onClick={toggleDrawer}
+              style={{ color: "#505F98" }}
+            >
+              Home
+            </Link>
+            <Link
+              href={"/pricing"}
+              onClick={toggleDrawer}
+              style={{ color: "#505F98" }}
+            >
+              Pricing
+            </Link>
+            <Link
+              href={"/contact"}
+              onClick={toggleDrawer}
+              style={{ color: "#505F98" }}
+            >
+              Contact
+            </Link>
+          </div>
+        </Drawer>
       </div>
       {children}
     </AntdRegistry>

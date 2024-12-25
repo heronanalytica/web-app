@@ -4,3 +4,26 @@
   margin: 0;
   font-family: "roboto", sans-serif;
 }
+
+.desktop-menu {
+  display: flex;
+}
+.mobile-menu {
+  visibility: hidden;
+}
+
+@media (max-width: 768px) {
+  .desktop-menu {
+    display: none;
+  }
+  .mobile-menu {
+    display: inline-block;
+    visibility: visible;
+  }
+}
+
+@media (max-width: 768px) {
+  .signup-button {
+    margin-top: 30px !important; /* Reduce margin on mobile screens */
+  }
+}

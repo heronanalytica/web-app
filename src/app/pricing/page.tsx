@@ -15,9 +15,8 @@ export default function PricingPage() {
   return (
     <div
       style={{
-        padding: "50px 20px",
+        padding: "50px 15%",
         textAlign: "center",
-        maxWidth: "800px",
         margin: "auto",
       }}
     >
@@ -112,7 +111,7 @@ export default function PricingPage() {
         size="middle"
         style={{
           display: "block",
-          textAlign: "left",
+          textAlign: "center", // Centered text
           margin: "0 auto",
           maxWidth: "600px",
         }}
@@ -157,12 +156,18 @@ export default function PricingPage() {
       </Space>
 
       {/* Waitlist Form */}
-      <div style={{ marginTop: "30px", textAlign: "center" }}>
-        <Space.Compact style={{ width: "100%" }}>
+      <div
+        style={{
+          marginTop: "30px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center", // Center form content
+        }}
+      >
+        <Space.Compact style={{ width: "100%", maxWidth: "600px" }}>
           <Input
             placeholder="Enter your email address"
             style={{
-              maxWidth: "600px",
               padding: "0px 20px",
               fontSize: "16px",
               display: "inline-block",
