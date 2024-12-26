@@ -37,7 +37,18 @@ export default function PricingPage() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to join waitlist. Please try again.");
+        const errorData = await response.json();
+
+        if (response.status === 409 && errorData.error === "Duplicate email") {
+          // Handle duplicate email case
+          messageApi.warning(
+            "This email is already registered on the waitlist."
+          );
+        } else {
+          throw new Error(errorData.error || "Failed to join waitlist.");
+        }
+
+        return;
       }
 
       messageApi.success("You have successfully joined the waitlist!");
