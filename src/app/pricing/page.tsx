@@ -1,10 +1,55 @@
 "use client";
 
-import { Typography, Button, Input, Checkbox, Space } from "antd";
+import { useState } from "react";
+import { Typography, Button, Input, Checkbox, Space, message } from "antd";
 
 const { Title, Paragraph, Text } = Typography;
 
 export default function PricingPage() {
+  const [email, setEmail] = useState("");
+  const [receiveUpdatesOnly, setReceiveUpdatesOnly] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
+
+  const isValidEmail = (email: string) => {
+    // Regular expression to validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleJoinWaitlist = async () => {
+    if (!email) {
+      messageApi.error("Please enter your email address.");
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      messageApi.error("Please enter a valid email address.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch("/api/join-waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, receiveUpdatesOnly }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to join waitlist. Please try again.");
+      }
+
+      messageApi.success("You have successfully joined the waitlist!");
+      setEmail("");
+      setReceiveUpdatesOnly(false);
+    } catch (error: any) {
+      messageApi.error(error.message || "An error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleTakeSurveyClick = () => {
     window.open(
       "https://qualtricsxmxgbgmdqqg.yul1.qualtrics.com/jfe/preview/previewId/9a3bd3c9-6a32-47e1-b439-ed6c4949e81b/SV_1RkAzL1J9jsIUjY?Q_CHL=preview&Q_SurveyVersionID=current",
@@ -20,6 +65,7 @@ export default function PricingPage() {
         margin: "auto",
       }}
     >
+      {contextHolder}
       {/* Main Title */}
       <Title level={1} style={{ color: "#101010", marginBottom: "20px" }}>
         Heron Analytica is
@@ -167,15 +213,20 @@ export default function PricingPage() {
         <Space.Compact style={{ width: "100%", maxWidth: "600px" }}>
           <Input
             placeholder="Enter your email address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             style={{
               padding: "0px 20px",
               fontSize: "16px",
               display: "inline-block",
             }}
+            type="email" // Ensure the browser performs basic email validation
           />
           <Button
             type="primary"
             size="large"
+            loading={loading}
+            onClick={handleJoinWaitlist}
             style={{
               backgroundColor: "#001F54",
               borderColor: "#001F54",
@@ -188,7 +239,12 @@ export default function PricingPage() {
         </Space.Compact>
 
         <div style={{ marginTop: "10px" }}>
-          <Checkbox>I just want to receive updates.</Checkbox>
+          <Checkbox
+            checked={receiveUpdatesOnly}
+            onChange={(e) => setReceiveUpdatesOnly(e.target.checked)}
+          >
+            I just want to receive updates.
+          </Checkbox>
         </div>
         <Text style={{ display: "block", marginTop: "10px" }}>
           Join <strong>28</strong> others waiting for no-code customer

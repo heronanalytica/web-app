@@ -59,18 +59,33 @@ export default function ClientLayout({
 
           {/* Desktop Navigation */}
           <div className="desktop-menu">
-            <Link href={"/"} style={{ color: "#505F98", margin: "0 15px" }}>
+            <Link
+              href={"/"}
+              style={{
+                color: "#505F98",
+                margin: "0 15px",
+                textDecoration: "unset",
+              }}
+            >
               Home
             </Link>
             <Link
               href={"/pricing"}
-              style={{ color: "#505F98", margin: "0 15px" }}
+              style={{
+                color: "#505F98",
+                margin: "0 15px",
+                textDecoration: "unset",
+              }}
             >
               Pricing
             </Link>
             <Link
               href={"/contact"}
-              style={{ color: "#505F98", margin: "0 15px" }}
+              style={{
+                color: "#505F98",
+                margin: "0 15px",
+                textDecoration: "unset",
+              }}
             >
               Contact
             </Link>
