@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @next/next/no-sync-scripts */
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 import ClientLayout from "./clientLayout";
 
@@ -21,28 +22,28 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const GA_TRACKING_ID = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
-  const APP_ENV = process.env.NEXT_PUBLIC_APP_ENV;
 
   return (
     <html lang="en">
       <head>
-        {APP_ENV === "production" && (
-          <>
-            {/* Google Analytics Scripts */}
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`}
-              strategy="afterInteractive"
-            />
-            <Script id="google-analytics" strategy="afterInteractive">
-              {`
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', '${GA_TRACKING_ID}');
-              `}
-            </Script>
-          </>
-        )}
+        <script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`}
+          // @ts-ignore
+          strategy="afterInteractive"
+        />
+
+        <script
+          id="google-analytics"
+          // @ts-ignore
+          strategy="afterInteractive"
+        >
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_TRACKING_ID}');
+          `}
+        </script>
       </head>
       <body className={`${roboto.variable}`}>
         {/* Render the client-side layout */}
