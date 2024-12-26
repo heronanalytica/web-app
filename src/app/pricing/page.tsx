@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Typography, Button, Input, Checkbox, Space, message } from "antd";
 
 const { Title, Paragraph, Text } = Typography;
@@ -9,10 +9,10 @@ export default function PricingPage() {
   const [email, setEmail] = useState("");
   const [receiveUpdatesOnly, setReceiveUpdatesOnly] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [count, setCount] = useState<number | null>(null); // State for waitlist count
   const [messageApi, contextHolder] = message.useMessage();
 
   const isValidEmail = (email: string) => {
-    // Regular expression to validate email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
@@ -38,28 +38,42 @@ export default function PricingPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-
         if (response.status === 409 && errorData.error === "Duplicate email") {
-          // Handle duplicate email case
-          messageApi.warning(
-            "This email is already registered on the waitlist."
-          );
+          messageApi.warning("This email is already registered on the waitlist.");
         } else {
           throw new Error(errorData.error || "Failed to join waitlist.");
         }
-
         return;
       }
 
       messageApi.success("You have successfully joined the waitlist!");
       setEmail("");
       setReceiveUpdatesOnly(false);
+      fetchWaitlistCount(); // Refresh the count after a successful join
     } catch (error: any) {
       messageApi.error(error.message || "An error occurred.");
     } finally {
       setLoading(false);
     }
   };
+
+  const fetchWaitlistCount = async () => {
+    try {
+      const response = await fetch("/api/waitlist-count", { method: "GET" });
+      if (!response.ok) {
+        throw new Error("Failed to fetch waitlist count.");
+      }
+      const data = await response.json();
+      setCount(data.count);
+    } catch (error) {
+      console.error("Error fetching waitlist count:", error);
+      setCount(null);
+    }
+  };
+
+  useEffect(() => {
+    fetchWaitlistCount(); // Fetch the count on component mount
+  }, []);
 
   const handleTakeSurveyClick = () => {
     window.open(
@@ -112,7 +126,7 @@ export default function PricingPage() {
           marginBottom: "40px",
           height: "auto",
         }}
-        onClick={handleTakeSurveyClick} // Open survey link in a new tab
+        onClick={handleTakeSurveyClick}
       >
         Take the survey now
       </Button>
@@ -168,7 +182,7 @@ export default function PricingPage() {
         size="middle"
         style={{
           display: "block",
-          textAlign: "center", // Centered text
+          textAlign: "center",
           margin: "0 auto",
           maxWidth: "600px",
         }}
@@ -218,7 +232,7 @@ export default function PricingPage() {
           marginTop: "30px",
           display: "flex",
           flexDirection: "column",
-          alignItems: "center", // Center form content
+          alignItems: "center",
         }}
       >
         <Space.Compact style={{ width: "100%", maxWidth: "600px" }}>
@@ -231,7 +245,7 @@ export default function PricingPage() {
               fontSize: "16px",
               display: "inline-block",
             }}
-            type="email" // Ensure the browser performs basic email validation
+            type="email"
           />
           <Button
             type="primary"
@@ -258,8 +272,8 @@ export default function PricingPage() {
           </Checkbox>
         </div>
         <Text style={{ display: "block", marginTop: "10px" }}>
-          Join <strong>28</strong> others waiting for no-code customer
-          segmentation.
+          Join <strong>{count !== null ? count : "..."}</strong> others waiting
+          for no-code customer segmentation.
         </Text>
       </div>
     </div>
