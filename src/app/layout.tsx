@@ -2,6 +2,7 @@
 /* eslint-disable @next/next/no-sync-scripts */
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
+import { Suspense } from "react"; // Import Suspense
 import "./globals.css";
 import ClientLayout from "./clientLayout";
 
@@ -46,8 +47,10 @@ export default function RootLayout({
         </script>
       </head>
       <body className={`${roboto.variable}`}>
-        {/* Render the client-side layout */}
-        <ClientLayout>{children}</ClientLayout>
+        {/* Wrap the client layout in Suspense */}
+        <Suspense fallback={<div>Loading...</div>}>
+          <ClientLayout>{children}</ClientLayout>
+        </Suspense>
       </body>
     </html>
   );
