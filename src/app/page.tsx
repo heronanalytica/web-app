@@ -7,11 +7,17 @@ import HowItWorkIcon from "./components/icons/HowItWorkIcon";
 import { howItWorkContent } from "./constants";
 import Link from "next/link";
 import FeatureSection from "./components/FeatureSection";
+import { trackEvent } from "@/lib/analytics";
 
 const Home: React.FC = () => {
   const router = useRouter();
 
   const handleNavigateToContact = () => {
+    trackEvent({
+      action: "click",
+      category: "Homepage",
+      label: "Sign Up Now",
+    });
     router.push("/contact");
   };
 

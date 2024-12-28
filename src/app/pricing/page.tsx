@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Typography, Button, Input, Checkbox, Space, message } from "antd";
+import { trackEvent } from "@/lib/analytics";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -18,6 +19,13 @@ export default function PricingPage() {
   };
 
   const handleJoinWaitlist = async () => {
+    trackEvent({
+      action: "join_waitlist",
+      category: "Pricing",
+      label: "Waitlist Form",
+      value: 1, // Example: Increment the count
+    });
+
     if (!email) {
       messageApi.error("Please enter your email address.");
       return;
@@ -39,7 +47,9 @@ export default function PricingPage() {
       if (!response.ok) {
         const errorData = await response.json();
         if (response.status === 409 && errorData.error === "Duplicate email") {
-          messageApi.warning("This email is already registered on the waitlist.");
+          messageApi.warning(
+            "This email is already registered on the waitlist."
+          );
         } else {
           throw new Error(errorData.error || "Failed to join waitlist.");
         }
@@ -76,6 +86,12 @@ export default function PricingPage() {
   }, []);
 
   const handleTakeSurveyClick = () => {
+    trackEvent({
+      action: "click",
+      category: "Pricing",
+      label: "Take Survey",
+    });
+
     window.open(
       "https://qualtricsxmxgbgmdqqg.yul1.qualtrics.com/jfe/preview/previewId/9a3bd3c9-6a32-47e1-b439-ed6c4949e81b/SV_1RkAzL1J9jsIUjY?Q_CHL=preview&Q_SurveyVersionID=current",
       "_blank"

@@ -4,15 +4,25 @@ import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { Drawer, Button } from "antd";
 import HeronLogo from "./components/icons/HeronLogo";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MenuOutlined } from "@ant-design/icons";
+import { trackPageView } from "../lib/analytics";
+import { usePathname, useSearchParams } from "next/navigation";
 
 export default function ClientLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    const url = `${pathname}${searchParams ? `?${searchParams}` : ""}`;
+    trackPageView(url); // Track the current page view
+  }, [pathname, searchParams]);
 
   const toggleDrawer = () => {
     setIsDrawerOpen(!isDrawerOpen);

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Form, Input, Button, Typography } from "antd";
+import { trackEvent } from "@/lib/analytics";
 
 const { Title } = Typography;
 
@@ -23,6 +24,12 @@ export default function Contact() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    trackEvent({
+      action: "submit_form",
+      category: "Contact",
+      label: "Contact Form",
+    });
+
     e.preventDefault();
     setIsSubmitting(true);
     setError("");
