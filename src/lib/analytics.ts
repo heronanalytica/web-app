@@ -24,8 +24,8 @@ export const trackEvent = ({
   label?: string;
   value?: number;
 }) => {
-  console.log("trackEvent", action, category, label, value);
   if (!isGAEnabled) return;
+  console.log("trackEvent", action, category, label, value);
   (window as any).gtag?.("event", action, {
     event_category: category,
     event_label: label,
