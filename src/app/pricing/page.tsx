@@ -1,8 +1,21 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Typography, Button, Input, Checkbox, Space, message } from "antd";
+import {
+  Typography,
+  Button,
+  Input,
+  Checkbox,
+  Space,
+  message,
+  Flex,
+  Row,
+  Col,
+} from "antd";
 import { trackEvent } from "@/lib/analytics";
+import Image from "next/image";
+import { RightOutlined } from "@ant-design/icons";
+import { motion } from "framer-motion";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -10,7 +23,7 @@ export default function PricingPage() {
   const [email, setEmail] = useState("");
   const [receiveUpdatesOnly, setReceiveUpdatesOnly] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [count, setCount] = useState<number | null>(null); // State for waitlist count
+  const [count, setCount] = useState<number | null>(null);
   const [messageApi, contextHolder] = message.useMessage();
 
   const isValidEmail = (email: string) => {
@@ -23,7 +36,7 @@ export default function PricingPage() {
       action: "join_waitlist",
       category: "Pricing",
       label: "Waitlist Form",
-      value: 1, // Example: Increment the count
+      value: 1,
     });
 
     if (!email) {
@@ -59,7 +72,7 @@ export default function PricingPage() {
       messageApi.success("You have successfully joined the waitlist!");
       setEmail("");
       setReceiveUpdatesOnly(false);
-      fetchWaitlistCount(); // Refresh the count after a successful join
+      fetchWaitlistCount();
     } catch (error: any) {
       messageApi.error(error.message || "An error occurred.");
     } finally {
@@ -82,7 +95,7 @@ export default function PricingPage() {
   };
 
   useEffect(() => {
-    fetchWaitlistCount(); // Fetch the count on component mount
+    fetchWaitlistCount();
   }, []);
 
   const handleTakeSurveyClick = () => {
@@ -101,196 +114,229 @@ export default function PricingPage() {
   return (
     <div
       style={{
-        padding: "50px 15%",
+        padding: "50px 0",
         textAlign: "center",
         margin: "auto",
       }}
     >
       {contextHolder}
-      {/* Main Title */}
-      <Title level={1} style={{ color: "#101010", marginBottom: "20px" }}>
+
+      {/* Hero Section */}
+      <Title
+        level={1}
+        style={{
+          color: "#101010",
+          marginBottom: "30px",
+          fontSize: "3rem",
+        }}
+      >
         Heron Analytica is
         <br />
         launching soon
       </Title>
-
-      {/* Survey Section */}
       <Paragraph
         style={{
           fontSize: "18px",
-          marginBottom: "30px",
-          color: "#6F7CB2",
+          marginBottom: "120px",
+          color: "#4E4E4E",
           fontWeight: "bold",
         }}
       >
         Complete our quick survey
         <sup>1</sup> for a chance to win a $100 Amazon gift card
-        <sup>2,3</sup> <br />
+        <sup>2,3</sup>
+        <br />
         Or join the waitlist for early access at no cost and receive the latest
         updates.
       </Paragraph>
 
-      <Button
-        type="primary"
-        size="large"
-        style={{
-          backgroundColor: "#001F54",
-          borderColor: "#001F54",
-          fontSize: "20px",
-          padding: "10px 30px",
-          color: "#FFFFFF",
-          marginBottom: "40px",
-          height: "auto",
-        }}
-        onClick={handleTakeSurveyClick}
+      {/* Survey Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        viewport={{ once: true }}
+        style={{ margin: "60px 10%" }}
       >
-        Take the survey now
-      </Button>
-
-      {/* Notes Section */}
-      <Space
-        direction="vertical"
-        size="small"
-        style={{
-          display: "block",
-          textAlign: "left",
-          margin: "0 auto",
-          maxWidth: "600px",
-        }}
-      >
-        <Text
-          type="secondary"
-          style={{
-            color: "#6F7CB2",
-          }}
-        >
-          <sup>1</sup> The deadline to complete the survey is Jan 31, 2025.
-        </Text>
-        <Text
-          type="secondary"
-          style={{
-            color: "#6F7CB2",
-          }}
-        >
-          <sup>2</sup> Gift card is applicable to participants in North America
-          only and is issued in USD. If issued in CAD, the value will be
-          converted using the exchange rate at the time of issuance.
-        </Text>
-        <Text
-          type="secondary"
-          style={{
-            color: "#6F7CB2",
-          }}
-        >
-          <sup>3</sup> Each participant is eligible for 1 entry only.
-        </Text>
-      </Space>
+        <Row justify="center" align="middle" gutter={[32, 32]}>
+          <Col xs={24} sm={24} md={12} style={{ textAlign: "left" }}>
+            <Title level={1} style={{ marginBottom: "20px" }}>
+              Take our survey
+            </Title>
+            <Space direction="vertical" size="small">
+              <Text type="secondary" style={{ color: "#4E4E4E" }}>
+                <sup>1</sup> The deadline to complete the survey is Jan 31,
+                2025.
+              </Text>
+              <Text type="secondary" style={{ color: "#4E4E4E" }}>
+                <sup>2</sup> Gift card is applicable to participants in North
+                America only and is issued in USD. If issued in CAD, the value
+                will be converted using the exchange rate at the time of
+                issuance.
+              </Text>
+              <Text type="secondary" style={{ color: "#4E4E4E" }}>
+                <sup>3</sup> Each participant is eligible for 1 entry only.
+              </Text>
+            </Space>
+            <Button
+              type="primary"
+              size="large"
+              style={{
+                backgroundColor: "#512C7E",
+                marginTop: "20px",
+                color: "#fff",
+              }}
+              onClick={handleTakeSurveyClick}
+            >
+              Take the survey now &nbsp;
+              <RightOutlined />
+            </Button>
+          </Col>
+          <Col xs={24} sm={24} md={12}>
+            <Image
+              src={"/images/take_survey_picture.png"}
+              alt={"Survey Picture"}
+              width={500}
+              height={400}
+              style={{
+                maxWidth: "100%",
+                height: "auto",
+                borderRadius: "10px",
+              }}
+            />
+          </Col>
+        </Row>
+      </motion.div>
 
       {/* Waitlist Section */}
-      <Title level={2} style={{ color: "#101010", margin: "80px 0 20px" }}>
-        Or Join Waitlist
-      </Title>
-      <Title level={4} style={{ marginBottom: "20px", color: "#6F7CB2" }}>
-        WHY JOIN?
-      </Title>
-      <Space
-        direction="vertical"
-        size="middle"
-        style={{
-          display: "block",
-          textAlign: "center",
-          margin: "0 auto",
-          maxWidth: "600px",
-        }}
-      >
-        <div>
-          <Text
-            style={{
-              fontWeight: "bold",
-              color: "#6F7CB2",
-            }}
-          >
-            • Exclusive Early Access At No Cost:
-          </Text>
-          &nbsp;
-          <Text
-            style={{
-              color: "#6F7CB2",
-            }}
-          >
-            Experience psychographic and demographic personas and insights
-            before anyone else at no cost.
-          </Text>
-        </div>
-        <div>
-          <Text
-            style={{
-              fontWeight: "bold",
-              color: "#6F7CB2",
-            }}
-          >
-            • Priority Support:
-          </Text>
-          &nbsp;
-          <Text
-            style={{
-              color: "#6F7CB2",
-            }}
-          >
-            Get hands-on onboarding and personal assistance.
-          </Text>
-        </div>
-      </Space>
-
-      {/* Waitlist Form */}
       <div
         style={{
-          marginTop: "30px",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
+          backgroundImage: "url('/images/cta_background.png')",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+          padding: "50px",
+          height: "500px",
         }}
       >
-        <Space.Compact style={{ width: "100%", maxWidth: "600px" }}>
-          <Input
-            placeholder="Enter your email address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={{
-              padding: "0px 20px",
-              fontSize: "16px",
-              display: "inline-block",
-            }}
-            type="email"
-          />
-          <Button
-            type="primary"
-            size="large"
-            loading={loading}
-            onClick={handleJoinWaitlist}
-            style={{
-              backgroundColor: "#001F54",
-              borderColor: "#001F54",
-              color: "#FFFFFF",
-              fontSize: "16px",
-            }}
-          >
-            Join waitlist
-          </Button>
-        </Space.Compact>
+        <Title level={1} style={{ color: "#fff", margin: "20px 0" }}>
+          Or Join Waitlist
+        </Title>
+        <Title level={4} style={{ marginBottom: "20px", color: "#fff" }}>
+          WHY JOIN?
+        </Title>
+        <Space
+          direction="vertical"
+          size="middle"
+          style={{
+            display: "block",
+            textAlign: "center",
+            margin: "0 auto",
+            maxWidth: "600px",
+          }}
+        >
+          <div>
+            <Text
+              style={{
+                fontWeight: "bold",
+                color: "#fff",
+              }}
+            >
+              • Exclusive Early Access At No Cost:
+            </Text>
+            &nbsp;
+            <Text
+              style={{
+                color: "#cccccc",
+              }}
+            >
+              Experience psychographic and demographic personas and insights
+              before anyone else at no cost.
+            </Text>
+          </div>
+          <div>
+            <Text
+              style={{
+                fontWeight: "bold",
+                color: "#fff",
+              }}
+            >
+              • Priority Support:
+            </Text>
+            &nbsp;
+            <Text
+              style={{
+                color: "#cccccc",
+              }}
+            >
+              Get hands-on onboarding and personal assistance.
+            </Text>
+          </div>
+        </Space>
 
-        <div style={{ marginTop: "10px" }}>
-          <Checkbox
-            checked={receiveUpdatesOnly}
-            onChange={(e) => setReceiveUpdatesOnly(e.target.checked)}
+        {/* Waitlist Form */}
+        <div
+          style={{
+            marginTop: "80px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "100%",
+          }}
+        >
+          <Flex align="center" justify="center" style={{ width: "100%" }}>
+            <Space.Compact>
+              <Input
+                placeholder="Your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{
+                  padding: "0px 20px",
+                  fontSize: "16px",
+                  display: "inline-block",
+                  width: "300px",
+                }}
+                type="email"
+              />
+              <Button
+                type="primary"
+                size="large"
+                loading={loading}
+                onClick={handleJoinWaitlist}
+                style={{
+                  backgroundColor: "#512C7E",
+                  borderColor: "#001F54",
+                  color: "#FFFFFF",
+                  fontSize: "16px",
+                  padding: "0px 20px",
+                }}
+              >
+                Join waitlist
+              </Button>
+            </Space.Compact>
+          </Flex>
+          <div style={{ marginTop: "10px" }}>
+            <Checkbox
+              checked={receiveUpdatesOnly}
+              onChange={(e) => setReceiveUpdatesOnly(e.target.checked)}
+              style={{ color: "#fff" }}
+            >
+              I just want to receive updates.
+            </Checkbox>
+          </div>
+          <Text
+            style={{
+              display: "block",
+              marginTop: "10px",
+              color: "#fff",
+              fontWeight: "bold",
+            }}
           >
-            I just want to receive updates.
-          </Checkbox>
+            Join <strong>{count !== null ? count : "..."}</strong> others
+            waiting for no-code customer segmentation.
+          </Text>
         </div>
-        <Text style={{ display: "block", marginTop: "10px" }}>
-          Join <strong>{count !== null ? count : "..."}</strong> others waiting
-          for no-code customer segmentation.
-        </Text>
       </div>
     </div>
   );

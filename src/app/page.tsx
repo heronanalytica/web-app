@@ -4,16 +4,9 @@ import React from "react";
 import { Col, Flex, Row, Typography } from "antd";
 import { useRouter } from "next/navigation";
 import { howItWorkContent } from "./constants";
-import Link from "next/link";
 import FeatureSection from "./components/FeatureSection";
 import { trackEvent } from "@/lib/analytics";
-import {
-  FacebookFilled,
-  LinkedinFilled,
-  RightOutlined,
-  TwitterCircleFilled,
-} from "@ant-design/icons";
-import HeronLogo from "./components/icons/HeronLogo";
+import { RightOutlined } from "@ant-design/icons";
 import { motion } from "framer-motion";
 
 const Home: React.FC = () => {
@@ -299,51 +292,6 @@ const Home: React.FC = () => {
           </motion.button>
         </Flex>
       </div>
-
-      {/* Footer */}
-      <Flex
-        justify="space-between"
-        align="center"
-        style={{ marginTop: "50px", padding: "30px 10%" }}
-      >
-        <HeronLogo />
-        <Flex justify="space-between" align="center">
-          <Flex align="center" gap={"40px"} justify="center">
-            <Link href={"/"} style={{ color: "#929ECC" }}>
-              Home
-            </Link>
-            <Link href={"/pricing"} style={{ color: "#929ECC" }}>
-              Pricing
-            </Link>
-            <Link href={"/contact"} style={{ color: "#929ECC" }}>
-              Contact
-            </Link>
-          </Flex>
-          <Flex align="center">
-            <div />
-          </Flex>
-        </Flex>
-        <Flex align="center" gap={"20px"}>
-          {[
-            { icon: <FacebookFilled />, color: "#1877F2" },
-            { icon: <LinkedinFilled />, color: "#0077B5" },
-            { icon: <TwitterCircleFilled />, color: "#1da1f2" },
-          ].map((social, index) => (
-            <motion.div
-              key={index}
-              whileHover={{ scale: 1.2, rotate: 10 }}
-              transition={{ duration: 0.3 }}
-              style={{
-                fontSize: "24px",
-                color: social.color,
-                cursor: "pointer",
-              }}
-            >
-              {social.icon}
-            </motion.div>
-          ))}
-        </Flex>
-      </Flex>
     </div>
   );
 };
