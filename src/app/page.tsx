@@ -1,13 +1,14 @@
 "use client";
 
 import React from "react";
-import { Button, Divider, Flex, Typography } from "antd";
+import { Button, Col, Divider, Flex, Row, Typography } from "antd";
 import { useRouter } from "next/navigation";
 import HowItWorkIcon from "./components/icons/HowItWorkIcon";
 import { howItWorkContent } from "./constants";
 import Link from "next/link";
 import FeatureSection from "./components/FeatureSection";
 import { trackEvent } from "@/lib/analytics";
+import { RightOutlined } from "@ant-design/icons";
 
 const Home: React.FC = () => {
   const router = useRouter();
@@ -51,7 +52,7 @@ const Home: React.FC = () => {
               margin: "40px 0",
               display: "flex",
               justifyContent: "center",
-              marginTop: "100px"
+              marginTop: "100px",
             }}
           >
             <iframe
@@ -67,21 +68,51 @@ const Home: React.FC = () => {
         </Flex>
       </div>
 
-      <Flex justify="center" align="center" vertical style={{ margin: 30 }}>
-        <Button
-          type="primary"
-          size="large"
-          style={{
-            backgroundColor: "#222F65",
-            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-            marginTop: "70px",
-          }}
-          className="signup-button"
-          onClick={handleNavigateToContact}
-        >
-          Sign up now
-        </Button>
-      </Flex>
+      <div
+        style={{
+          backgroundImage: "url('/images/cta_background.png')",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+          padding: "50px 0",
+        }}
+      >
+        <Flex justify="center" align="center" vertical style={{ margin: 30 }}>
+          <Row justify="center">
+            <Col span={24}>
+              <Typography.Title
+                level={1}
+                style={{ textAlign: "center", color: "#fff" }}
+              >
+                If you target everyone,
+                <br />
+                you target no one.
+              </Typography.Title>
+              <Typography.Text
+                type="secondary"
+                style={{ textAlign: "center", display: "block", color: "#fff" }}
+              >
+                Take the guesswork out of understanding your customers
+              </Typography.Text>
+            </Col>
+          </Row>
+          <Button
+            type="primary"
+            size="large"
+            style={{
+              backgroundColor: "#fff",
+              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+              marginTop: "60px",
+              color: "#222F65",
+            }}
+            className="signup-button"
+            onClick={handleNavigateToContact}
+          >
+            Sign up now
+            <RightOutlined />
+          </Button>
+        </Flex>
+      </div>
 
       {/* Feature Overview */}
       <div style={{ padding: "0 15%" }}>

@@ -7,19 +7,6 @@ const { Title, Text } = Typography;
 const FeatureSection: React.FC = () => {
   return (
     <div style={{ padding: "40px 20px" }}>
-      <Row justify="center">
-        <Col span={24}>
-          <Title level={2} style={{ textAlign: "center" }}>
-            If you target everyone, you target no one.
-          </Title>
-          <Text
-            type="secondary"
-            style={{ textAlign: "center", display: "block" }}
-          >
-            Take the guesswork out of understanding your customers
-          </Text>
-        </Col>
-      </Row>
 
       {[
         {
