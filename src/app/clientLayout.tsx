@@ -6,14 +6,14 @@ import HeronLogo from "./components/icons/HeronLogo";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
-  FacebookFilled,
-  LinkedinFilled,
+  // FacebookFilled,
+  // LinkedinFilled,
   MenuOutlined,
-  TwitterCircleFilled,
+  // TwitterCircleFilled,
 } from "@ant-design/icons";
 import { trackPageView } from "../lib/analytics";
 import { usePathname, useSearchParams } from "next/navigation";
-import { motion } from "framer-motion";
+// import { motion } from "framer-motion";
 
 export default function ClientLayout({
   children,
@@ -179,7 +179,7 @@ export default function ClientLayout({
               <div />
             </Flex>
           </Flex>
-          <Flex align="center" gap={"20px"}>
+          {/* <Flex align="center" gap={"20px"}>
             {[
               { icon: <FacebookFilled />, color: "#1877F2" },
               { icon: <LinkedinFilled />, color: "#0077B5" },
@@ -198,7 +198,7 @@ export default function ClientLayout({
                 {social.icon}
               </motion.div>
             ))}
-          </Flex>
+          </Flex> */}
         </Flex>
       </Flex>
     </AntdRegistry>
