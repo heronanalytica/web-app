@@ -20,10 +20,14 @@
     display: inline-block;
     visibility: visible;
   }
-}
-
-@media (max-width: 768px) {
   .signup-button {
-    margin-top: 30px !important; /* Reduce margin on mobile screens */
+    margin-top: 30px !important;
+  }
+  .hero-title {
+    font-size: 2em!important;
+  }
+  .video-container {
+    width: 400px!important;
+    height: 270px!important;
   }
 }

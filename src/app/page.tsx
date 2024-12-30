@@ -26,29 +26,44 @@ const Home: React.FC = () => {
       {/* Hero Section */}
       <div style={{ padding: "0 15%" }}>
         <Flex justify="center" align="center" vertical>
-          <Typography.Title level={1} style={{ textAlign: "center" }}>
-            <span style={{ lineHeight: "80px" }}>
-              Unlock Targeted Marketing,
-            </span>
+          <Typography.Title
+            className="hero-title"
+            level={1}
+            style={{
+              textAlign: "center",
+              fontSize: "3rem",
+              marginTop: "60px",
+            }}
+          >
+            Unlock Targeted Marketing,
             <br />
-            <span>Personalize Customer experience</span>
+            Personalize Customer
+            <br />
+            Experience
           </Typography.Title>
-          <Typography.Text type="secondary">
+          <Typography.Text type="secondary" style={{ textAlign: "center" }}>
             Create survey, generate insights, and build customer personas
             without coding or any technical skills - all in Heron Analytica
           </Typography.Text>
 
-          {/* TODO: Add youtube video */}
           <div
             style={{
-              height: "800px",
-              width: "100%",
-              backgroundImage: "url('/images/monitor.png')",
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "center",
-              backgroundSize: "contain",
+              margin: "40px 0",
+              display: "flex",
+              justifyContent: "center",
+              marginTop: "100px"
             }}
-          />
+          >
+            <iframe
+              width="560"
+              height="315"
+              src="https://www.youtube.com/embed/zZA_js4mHH8"
+              title="YouTube video player"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="video-container"
+            ></iframe>
+          </div>
         </Flex>
       </div>
 
