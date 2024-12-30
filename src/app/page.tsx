@@ -1,13 +1,19 @@
 "use client";
 
 import React from "react";
-import { Button, Col, Divider, Flex, Row, Typography } from "antd";
+import { Button, Col, Flex, Row, Typography } from "antd";
 import { useRouter } from "next/navigation";
 import { howItWorkContent } from "./constants";
 import Link from "next/link";
 import FeatureSection from "./components/FeatureSection";
 import { trackEvent } from "@/lib/analytics";
-import { RightOutlined } from "@ant-design/icons";
+import {
+  FacebookFilled,
+  LinkedinFilled,
+  RightOutlined,
+  TwitterCircleFilled,
+} from "@ant-design/icons";
+import HeronLogo from "./components/icons/HeronLogo";
 
 const Home: React.FC = () => {
   const router = useRouter();
@@ -177,69 +183,75 @@ const Home: React.FC = () => {
         ))}
       </Flex>
 
-      {/* Footer */}
+      {/* Integration Section */}
       <div
         style={{
-          height: "400px",
-          width: "100%",
-          backgroundImage: "url('/images/footer_shading.png')",
+          backgroundImage: "url('/images/integrations_background.png')",
           backgroundRepeat: "no-repeat",
           backgroundPosition: "center",
           backgroundSize: "cover",
-          zIndex: -1,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          marginTop: "100px",
+          padding: "50px 0",
         }}
       >
         <Flex justify="center" align="center" vertical style={{ margin: 30 }}>
+          <Row justify="center">
+            <Col span={24}>
+              <Typography.Title
+                level={1}
+                style={{ textAlign: "center", color: "#fff" }}
+              >
+                Transform Your Marketing Campaigns and <br />
+                Improve Return On Investment
+              </Typography.Title>
+            </Col>
+          </Row>
           <Button
             type="primary"
             size="large"
             style={{
-              backgroundColor: "#222F65",
+              backgroundColor: "#fff",
               boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-              marginTop: "70px",
+              marginTop: "60px",
+              color: "#222F65",
             }}
             className="signup-button"
             onClick={handleNavigateToContact}
           >
             Sign up now
+            <RightOutlined />
           </Button>
         </Flex>
-        <div
-          style={{
-            height: "200px",
-            width: "100%",
-            backgroundColor: "#E7ECFF",
-            padding: "20px 10%",
-          }}
-        >
-          <Flex align="center" style={{ height: "80px" }}>
-            <Typography.Text type="secondary">
-              @2024 Heronalytica
-            </Typography.Text>
-          </Flex>
-          <Divider />
-          <Flex justify="space-between" align="center">
-            <Flex align="center" gap={"40px"}>
-              <Link href={"/"} style={{ color: "#929ECC" }}>
-                Home
-              </Link>
-              <Link href={"/pricing"} style={{ color: "#929ECC" }}>
-                Pricing
-              </Link>
-              <Link href={"/contact"} style={{ color: "#929ECC" }}>
-                Contact
-              </Link>
-            </Flex>
-            <Flex align="center">
-              <div />
-            </Flex>
-          </Flex>
-        </div>
       </div>
+
+      {/* Footer */}
+      <Flex
+        justify="space-between"
+        align="center"
+        style={{ marginTop: "50px", padding: "30px 10%" }}
+      >
+        <HeronLogo />
+        <Flex justify="space-between" align="center">
+          <Flex align="center" gap={"40px"} justify="center">
+            <Link href={"/"} style={{ color: "#929ECC" }}>
+              Home
+            </Link>
+            <Link href={"/pricing"} style={{ color: "#929ECC" }}>
+              Pricing
+            </Link>
+            <Link href={"/contact"} style={{ color: "#929ECC" }}>
+              Contact
+            </Link>
+          </Flex>
+          <Flex align="center">
+            <div />
+          </Flex>
+        </Flex>
+        <Flex align="center" gap={"20px"}>
+          <FacebookFilled style={{ fontSize: "24px", color: "#1877F2" }} />
+          <LinkedinFilled style={{ fontSize: "24px", color: "#0077B5" }} />
+          <TwitterCircleFilled style={{ fontSize: "24px", color: "#1da1f2" }} />
+        </Flex>
+      </Flex>
     </div>
   );
 };
