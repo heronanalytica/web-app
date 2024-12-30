@@ -7,7 +7,6 @@ const { Title, Text } = Typography;
 const FeatureSection: React.FC = () => {
   return (
     <div style={{ padding: "40px 20px" }}>
-
       {[
         {
           image: "/images/progressional_quality.png",
@@ -30,25 +29,47 @@ const FeatureSection: React.FC = () => {
       ].map((feature, index) => (
         <Row
           key={index}
-          gutter={[16, 32]}
+          gutter={[16, 16]}
           align="middle"
+          className="feature-row"
           style={{
-            margin: "40px 0",
             flexDirection: index % 2 === 0 ? "row" : "row-reverse",
+            margin: "50px 0",
           }}
         >
-          <Col xs={24} md={12}>
+          <Col
+            xs={24}
+            md={12}
+            style={{
+              textAlign: "center", // Optional: Align the image if needed
+            }}
+          >
             <Image
               src={feature.image}
               alt={feature.title}
               width={500}
               height={400}
-              style={{ maxWidth: "100%", height: "auto" }}
+              style={{
+                maxWidth: "100%",
+                height: "auto",
+                marginBottom: "10px", // Reduce space below the image
+              }}
             />
           </Col>
-          <Col xs={24} md={12}>
-            <Title level={3}>{feature.title}</Title>
-            <Text type="secondary">{feature.description}</Text>
+          <Col
+            xs={24}
+            md={12}
+            style={{
+              paddingLeft: "10px", // Adjust padding to reduce spacing
+              paddingRight: "10px",
+            }}
+          >
+            <Title level={1} style={{ marginBottom: "10px" }}>
+              {feature.title}
+            </Title>
+            <Text type="secondary" style={{ lineHeight: "1.6" }}>
+              {feature.description}
+            </Text>
           </Col>
         </Row>
       ))}

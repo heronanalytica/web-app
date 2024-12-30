@@ -11,6 +11,9 @@
 .mobile-menu {
   visibility: hidden;
 }
+.feature-row {
+  margin: "20px 8%"
+}
 
 @media (max-width: 768px) {
   .desktop-menu {
@@ -30,4 +33,7 @@
     width: 400px!important;
     height: 270px!important;
   } 
+  .feature-row {
+    margin: "20px 0"!important
+  }
 }
