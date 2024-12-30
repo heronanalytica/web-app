@@ -122,34 +122,40 @@ export default function PricingPage() {
       {contextHolder}
 
       {/* Hero Section */}
-      <Title
-        level={1}
-        style={{
-          color: "#101010",
-          marginBottom: "30px",
-          fontSize: "3rem",
-        }}
-      >
-        Heron Analytica is
-        <br />
-        launching soon
-      </Title>
-      <Paragraph
-        style={{
-          fontSize: "18px",
-          marginBottom: "120px",
-          color: "#4E4E4E",
-          fontWeight: "bold",
-        }}
-      >
-        Complete our quick survey
-        <sup>1</sup> for a chance to win a $100 Amazon gift card
-        <sup>2,3</sup>
-        <br />
-        Or join the waitlist for early access at no cost and receive the latest
-        updates.
-      </Paragraph>
 
+      <div
+        style={{
+          padding: "0 10%",
+        }}
+      >
+        <Title
+          level={1}
+          style={{
+            color: "#101010",
+            marginBottom: "30px",
+            fontSize: "3rem",
+          }}
+        >
+          Heron Analytica is
+          <br />
+          launching soon
+        </Title>
+        <Paragraph
+          style={{
+            fontSize: "18px",
+            marginBottom: "120px",
+            color: "#4E4E4E",
+            fontWeight: "bold",
+          }}
+        >
+          Complete our quick survey
+          <sup>1</sup> for a chance to win a $100 Amazon gift card
+          <sup>2,3</sup>
+          <br />
+          Or join the waitlist for early access at no cost and receive the
+          latest updates.
+        </Paragraph>
+      </div>
       {/* Survey Section */}
       <motion.div
         initial={{ opacity: 0, y: 50 }}
@@ -277,12 +283,13 @@ export default function PricingPage() {
         {/* Waitlist Form */}
         <div
           style={{
-            marginTop: "80px",
+            marginTop: "30px",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
             width: "100%",
+            padding: "20px 10px"
           }}
         >
           <Flex align="center" justify="center" style={{ width: "100%" }}>
@@ -295,7 +302,7 @@ export default function PricingPage() {
                   padding: "0px 20px",
                   fontSize: "16px",
                   display: "inline-block",
-                  width: "300px",
+                  // width: "300px",
                 }}
                 type="email"
               />

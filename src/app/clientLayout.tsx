@@ -5,15 +5,9 @@ import { Drawer, Button, Flex } from "antd";
 import HeronLogo from "./components/icons/HeronLogo";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import {
-  // FacebookFilled,
-  // LinkedinFilled,
-  MenuOutlined,
-  // TwitterCircleFilled,
-} from "@ant-design/icons";
+import { MenuOutlined } from "@ant-design/icons";
 import { trackPageView } from "../lib/analytics";
 import { usePathname, useSearchParams } from "next/navigation";
-// import { motion } from "framer-motion";
 
 export default function ClientLayout({
   children,
@@ -60,7 +54,7 @@ export default function ClientLayout({
               padding: "0 20px",
             }}
           >
-            {/* Dummyy Mobile Hamburger Menu to style */}
+            {/* Dummy Mobile Hamburger Menu to style */}
             <Button type="text" style={{ visibility: "hidden" }} />
 
             {/* Logo */}
@@ -121,7 +115,7 @@ export default function ClientLayout({
 
           {/* Drawer for Mobile Navigation */}
           <Drawer
-            title="Navigation"
+            title=""
             placement="right"
             onClose={toggleDrawer}
             open={isDrawerOpen}
@@ -160,9 +154,20 @@ export default function ClientLayout({
         <Flex
           justify="space-between"
           align="center"
-          style={{ margin: "30px 0", padding: "30px 10%" }}
+          style={{
+            margin: "30px 0",
+            padding: "30px 10%",
+            flexWrap: "wrap",
+          }}
         >
-          <HeronLogo />
+          {/* Footer Logo */}
+          <HeronLogo
+            style={{
+              display: "none", // Default hidden
+            }}
+            className="footer-logo"
+          />
+
           <Flex justify="space-between" align="center">
             <Flex align="center" gap={"40px"} justify="center">
               <Link href={"/"} style={{ color: "#929ECC" }}>
@@ -175,31 +180,22 @@ export default function ClientLayout({
                 Contact
               </Link>
             </Flex>
-            <Flex align="center">
-              <div />
-            </Flex>
           </Flex>
-          {/* <Flex align="center" gap={"20px"}>
-            {[
-              { icon: <FacebookFilled />, color: "#1877F2" },
-              { icon: <LinkedinFilled />, color: "#0077B5" },
-              { icon: <TwitterCircleFilled />, color: "#1da1f2" },
-            ].map((social, index) => (
-              <motion.div
-                key={index}
-                whileHover={{ scale: 1.2, rotate: 10 }}
-                transition={{ duration: 0.3 }}
-                style={{
-                  fontSize: "24px",
-                  color: social.color,
-                  cursor: "pointer",
-                }}
-              >
-                {social.icon}
-              </motion.div>
-            ))}
-          </Flex> */}
         </Flex>
+
+        <style jsx global>{`
+          @media screen and (min-width: 768px) {
+            .footer-logo {
+              display: block !important; /* Show on desktop */
+            }
+          }
+
+          @media screen and (max-width: 768px) {
+            .footer-logo {
+              display: none !important; /* Hide on mobile */
+            }
+          }
+        `}</style>
       </Flex>
     </AntdRegistry>
   );
