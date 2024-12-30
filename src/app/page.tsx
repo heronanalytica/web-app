@@ -3,7 +3,6 @@
 import React from "react";
 import { Button, Col, Divider, Flex, Row, Typography } from "antd";
 import { useRouter } from "next/navigation";
-import HowItWorkIcon from "./components/icons/HowItWorkIcon";
 import { howItWorkContent } from "./constants";
 import Link from "next/link";
 import FeatureSection from "./components/FeatureSection";
@@ -120,23 +119,61 @@ const Home: React.FC = () => {
       </div>
 
       {/* How it works */}
+      <div
+        style={{
+          backgroundImage: "url('/images/how_it_works_background.png')",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+          padding: "50px 0",
+          height: "400px",
+          marginBottom: "50px",
+        }}
+      >
+        <Typography.Title
+          level={1}
+          style={{ textAlign: "center", color: "#fff", paddingTop: "30px" }}
+        >
+          How it works
+        </Typography.Title>
+      </div>
       <Flex
         align="flex-start"
         vertical
         style={{ padding: "0 15%" }}
         gap={"30px"}
       >
-        <Typography.Title level={2}>How it works</Typography.Title>
         {howItWorkContent.map((item, index) => (
-          <Flex key={index} justify="center">
-            <HowItWorkIcon style={{ marginRight: 10, minWidth: "40px" }} />
-            <Flex align="flex-start" vertical>
-              <Typography.Title level={5}>
-                {item.index}.&nbsp;{item.title}
+          <Row
+            key={index}
+            gutter={[20, 20]}
+            align="middle"
+            style={{
+              marginBottom: "50px",
+            }}
+          >
+            {/* Text Section */}
+            <Col xs={24} md={12}>
+              <Typography.Title level={4} style={{ marginBottom: "20px" }}>
+                {item.index}. {item.title}
               </Typography.Title>
-              <Typography.Text>{item.description}</Typography.Text>
-            </Flex>
-          </Flex>
+              <Typography.Text type="secondary">
+                {item.description}
+              </Typography.Text>
+            </Col>
+            {/* Image or GIF Section */}
+            <Col xs={24} md={12} style={{ textAlign: "center" }}>
+              <img
+                src={item.image}
+                alt={item.title}
+                style={{
+                  maxWidth: "100%",
+                  height: "auto",
+                  borderRadius: "10px",
+                }}
+              />
+            </Col>
+          </Row>
         ))}
       </Flex>
 
