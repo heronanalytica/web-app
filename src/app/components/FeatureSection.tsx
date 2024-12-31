@@ -13,7 +13,7 @@ const FeatureSection: React.FC = () => {
           image: "/images/progressional_quality.png",
           title: "Progressional quality",
           description:
-            "Get the same precision and depth of analysis that you’d expect from a market research company. Achieve professional-grade insights powered by an advanced algorithm crafted by market researchers and data scientists from top market research companies.",
+            "Get the same precision and depth of analysis that you’d expect from a market research company. Achieve professional-grade insights powered by an advanced algorithm crafted by professional market researchers and data scientists.",
         },
         {
           image: "/images/save_time_and_cut_costs.png",

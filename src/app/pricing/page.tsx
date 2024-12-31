@@ -280,7 +280,7 @@ export default function PricingPage() {
                 color: "#fff",
               }}
             >
-              • Exclusive Early Access At No Cost:
+              Exclusive Early Access At No Cost:
             </Text>
             &nbsp;
             <Text
@@ -299,7 +299,7 @@ export default function PricingPage() {
                 color: "#fff",
               }}
             >
-              • Priority Support:
+              Priority Support:
             </Text>
             &nbsp;
             <Text

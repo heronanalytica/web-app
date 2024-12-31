@@ -195,8 +195,7 @@ const Home: React.FC = () => {
               gutter={[20, 20]}
               align="middle"
               style={{
-                marginBottom: "50px",
-                minHeight: "300px", // Set a consistent row height
+                minHeight: "600px", // Set a consistent row height
                 width: "100%",
               }}
             >
@@ -213,7 +212,7 @@ const Home: React.FC = () => {
                   justifyContent: "center",
                 }}
               >
-                <Typography.Title level={4} style={{ marginBottom: "20px" }}>
+                <Typography.Title level={1} style={{ marginBottom: "20px" }}>
                   Step&nbsp;{item.index}. {item.title}
                 </Typography.Title>
                 <Typography.Text type="secondary">
@@ -232,29 +231,26 @@ const Home: React.FC = () => {
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
+
+                  maxWidth: "600px", // Set a fixed width for the image/GIF
+                  height: "auto", // Maintain aspect ratio
+                  backgroundImage: `url('/images/step_${index + 1}_cover.png')`,
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "center",
+                  backgroundSize: "cover",
                 }}
               >
-                <div
+                <img
+                  src={item.image}
+                  alt={item.title}
                   style={{
-                    width: "100%",
-                    maxWidth: "400px", // Set a fixed width for the image/GIF
-                    height: "auto", // Maintain aspect ratio
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
+                    maxWidth: "90%",
+                    maxHeight: "90%", // Limit the height for consistency
+                    borderRadius: "10px",
+                    objectFit: "contain", // Maintain aspect ratio without cropping
+                    margin: "70px 20px",
                   }}
-                >
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    style={{
-                      maxWidth: "100%",
-                      maxHeight: "400px", // Limit the height for consistency
-                      borderRadius: "10px",
-                      objectFit: "contain", // Maintain aspect ratio without cropping
-                    }}
-                  />
-                </div>
+                />
               </Col>
             </Row>
           </motion.div>
