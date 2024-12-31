@@ -12,13 +12,13 @@ import { motion } from "framer-motion";
 const Home: React.FC = () => {
   const router = useRouter();
 
-  const handleNavigateToContact = () => {
+  const handleNavigateToPricing = () => {
     trackEvent({
       action: "click",
       category: "Homepage",
       label: "Sign Up Now",
     });
-    router.push("/contact");
+    router.push("/pricing");
   };
 
   return (
@@ -125,7 +125,7 @@ const Home: React.FC = () => {
               borderRadius: "5px",
               cursor: "pointer",
             }}
-            onClick={handleNavigateToContact}
+            onClick={handleNavigateToPricing}
           >
             Sign up now &nbsp;
             <RightOutlined style={{ fontSize: "12px" }} />
@@ -285,7 +285,7 @@ const Home: React.FC = () => {
               borderRadius: "5px",
               cursor: "pointer",
             }}
-            onClick={handleNavigateToContact}
+            onClick={handleNavigateToPricing}
           >
             Sign up now &nbsp;
             <RightOutlined style={{ fontSize: "12px" }} />
