@@ -23,6 +23,19 @@ const Home: React.FC = () => {
 
   return (
     <div>
+      <div
+        style={{
+          height: "1100px",
+          width: "100vw",
+          backgroundImage: "url('/images/background_shading.png')",
+          position: "absolute",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+          zIndex: -1,
+        }}
+      />
+
       {/* Hero Section */}
       <motion.div
         style={{ padding: "0 15%" }}
@@ -63,8 +76,8 @@ const Home: React.FC = () => {
             transition={{ duration: 1 }}
           >
             <iframe
-              width="1000"
-              height="600"
+              width="1100"
+              height="620"
               src="https://www.youtube.com/embed/zZA_js4mHH8"
               title="YouTube video player"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -153,7 +166,12 @@ const Home: React.FC = () => {
       >
         <Typography.Title
           level={1}
-          style={{ textAlign: "center", color: "#fff", paddingTop: "50px", fontSize: "4rem" }}
+          style={{
+            textAlign: "center",
+            color: "#fff",
+            paddingTop: "50px",
+            fontSize: "4rem",
+          }}
         >
           How it works
         </Typography.Title>

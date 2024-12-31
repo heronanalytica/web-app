@@ -32,11 +32,11 @@ export default function Contact() {
       category: "Contact",
       label: "Contact Form",
     });
-  
+
     e.preventDefault();
     setIsSubmitting(true);
     setError("");
-  
+
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
@@ -48,12 +48,12 @@ export default function Contact() {
           subject: formData.subject, // Add subject
         }),
       });
-  
+
       if (!response.ok) {
         const { message } = await response.json();
         throw new Error(message);
       }
-  
+
       setSubmitted(true);
     } catch (err: any) {
       setError(err.message || "Something went wrong.");
@@ -61,8 +61,6 @@ export default function Contact() {
       setIsSubmitting(false);
     }
   };
-  
-  
 
   if (submitted) {
     return (
@@ -78,144 +76,161 @@ export default function Contact() {
   return (
     <div
       style={{
-        padding: "50px 20px",
-        maxWidth: "1200px",
-        margin: "auto",
-        borderRadius: "10px",
+        backgroundImage: "url('/images/pricing_top_background.png')",
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "center",
+        backgroundSize: "cover",
+        height: "calc(100vh - 80px - 160px)",
       }}
     >
-      <Row gutter={[16, 16]} align="middle">
-        {/* Left Section */}
-        <Col xs={24} md={12}>
-          <Title level={1} style={{ color: "#101010", marginBottom: "20px", fontSize: "3rem" }}>
-            Get in touch
-            <br />
-            with us today
-          </Title>
-          <Text style={{ fontSize: "16px", color: "#6F7CB2" }}>
-            Have a question? We have answers.
-          </Text>
-        </Col>
+      <div
+        style={{
+          padding: "50px 5%",
+          maxWidth: "1200px",
+          margin: "auto",
+          borderRadius: "10px",
+        }}
+      >
+        <Row gutter={[16, 16]} align="middle">
+          {/* Left Section */}
+          <Col xs={24} md={12}>
+            <Title
+              level={1}
+              style={{
+                color: "#101010",
+                marginBottom: "20px",
+                fontSize: "3rem",
+              }}
+            >
+              Get in touch
+              <br />
+              with us today
+            </Title>
+            <Text style={{ fontSize: "16px", color: "#6F7CB2" }}>
+              Have a question? We have answers.
+            </Text>
+          </Col>
 
-        {/* Form Section */}
-        <Col xs={24} md={12}>
-          <div
-            style={{
-              backgroundColor: "#FFFFFF",
-              padding: "20px",
-              borderRadius: "10px",
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-            }}
-          >
-            {error && (
-              <Text
-                style={{
-                  color: "red",
-                  textAlign: "center",
-                  marginBottom: "20px",
-                  display: "block",
-                }}
-              >
-                {error}
-              </Text>
-            )}
-            <Form layout="vertical" onSubmitCapture={handleSubmit}>
-              <Row gutter={16}>
-                <Col span={12}>
-                  <Form.Item
-                    label="First name"
-                    required
-                    style={{ marginBottom: "20px" }}
-                  >
-                    <Input
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={handleChange}
-                      placeholder="First name"
-                      required
-                    />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item
-                    label="Last name"
-                    required
-                    style={{ marginBottom: "20px" }}
-                  >
-                    <Input
-                      name="lastName"
-                      value={formData.lastName}
-                      onChange={handleChange}
-                      placeholder="Last name"
-                      required
-                    />
-                  </Form.Item>
-                </Col>
-              </Row>
-              <Form.Item
-                label="Email"
-                required
-                style={{ marginBottom: "20px" }}
-              >
-                <Input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Enter your email"
-                  required
-                />
-              </Form.Item>
-              <Form.Item
-                label="Subject"
-                required
-                style={{ marginBottom: "20px" }}
-              >
-                <Input
-                  name="subject"
-                  value={formData.subject}
-                  onChange={handleChange}
-                  placeholder="Enter your subject"
-                  required
-                />
-              </Form.Item>
-              <Form.Item
-                label="Message"
-                required
-                style={{ marginBottom: "20px" }}
-              >
-                <Input.TextArea
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  placeholder="Type your message"
-                  rows={4}
-                  required
-                />
-              </Form.Item>
-              <Form.Item>
-                <Button
-                  type="primary"
-                  htmlType="submit"
+          {/* Form Section */}
+          <Col xs={24} md={12}>
+            <div
+              style={{
+                backgroundColor: "#FFFFFF",
+                padding: "20px",
+                borderRadius: "10px",
+                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+              }}
+            >
+              {error && (
+                <Text
                   style={{
-                    backgroundColor: "#512C7E",
-                    borderColor: "#512C7E",
-                    color: "#FFFFFF",
-                    // fontSize: "20px",
-                    // padding: "30px 20px",
-                    width: "100%",
+                    color: "red",
+                    textAlign: "center",
+                    marginBottom: "20px",
+                    display: "block",
                   }}
-                  disabled={isSubmitting}
-                  size="large"
                 >
-                  {isSubmitting ? "Sending..." : "Send"}
-                  <RightOutlined />
-                </Button>
-              </Form.Item>
-            </Form>
-          </div>
-        </Col>
-      </Row>
+                  {error}
+                </Text>
+              )}
+              <Form layout="vertical" onSubmitCapture={handleSubmit}>
+                <Row gutter={16}>
+                  <Col span={12}>
+                    <Form.Item
+                      label="First name"
+                      required
+                      style={{ marginBottom: "20px" }}
+                    >
+                      <Input
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleChange}
+                        placeholder="First name"
+                        required
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item
+                      label="Last name"
+                      required
+                      style={{ marginBottom: "20px" }}
+                    >
+                      <Input
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleChange}
+                        placeholder="Last name"
+                        required
+                      />
+                    </Form.Item>
+                  </Col>
+                </Row>
+                <Form.Item
+                  label="Email"
+                  required
+                  style={{ marginBottom: "20px" }}
+                >
+                  <Input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="Enter your email"
+                    required
+                  />
+                </Form.Item>
+                <Form.Item
+                  label="Subject"
+                  required
+                  style={{ marginBottom: "20px" }}
+                >
+                  <Input
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleChange}
+                    placeholder="Enter your subject"
+                    required
+                  />
+                </Form.Item>
+                <Form.Item
+                  label="Message"
+                  required
+                  style={{ marginBottom: "20px" }}
+                >
+                  <Input.TextArea
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    placeholder="Type your message"
+                    rows={4}
+                    required
+                  />
+                </Form.Item>
+                <Form.Item>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    style={{
+                      backgroundColor: "#512C7E",
+                      borderColor: "#512C7E",
+                      color: "#FFFFFF",
+                      // fontSize: "20px",
+                      // padding: "30px 20px",
+                      width: "100%",
+                    }}
+                    disabled={isSubmitting}
+                    size="large"
+                  >
+                    {isSubmitting ? "Sending..." : "Send"}
+                    <RightOutlined />
+                  </Button>
+                </Form.Item>
+              </Form>
+            </div>
+          </Col>
+        </Row>
+      </div>
     </div>
   );
 }

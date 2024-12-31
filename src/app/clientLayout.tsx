@@ -40,19 +40,6 @@ export default function ClientLayout({
         <div>
           <div
             style={{
-              height: "800px",
-              width: "100%",
-              backgroundImage: "url('/images/background_shading.png')",
-              position: "absolute",
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "right bottom",
-              top: 0,
-              right: 0,
-              zIndex: -1,
-            }}
-          />
-          <div
-            style={{
               height: "80px",
               display: "flex",
               justifyContent: "space-between",
@@ -165,6 +152,7 @@ export default function ClientLayout({
             margin: "30px 0",
             padding: "30px 10%",
             flexWrap: "wrap",
+            height: "100px"
           }}
         >
           {/* Footer Logo */}

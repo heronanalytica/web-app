@@ -122,10 +122,18 @@ export default function PricingPage() {
       {contextHolder}
 
       {/* Hero Section */}
-
       <div
         style={{
-          padding: "0 10%",
+          padding: "100px 10%",
+          backgroundImage: "url('/images/pricing_top_background.png')",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+          zIndex: -1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
         <Title
@@ -133,7 +141,7 @@ export default function PricingPage() {
           style={{
             color: "#101010",
             marginBottom: "30px",
-            fontSize: "3rem",
+            fontSize: "4rem",
           }}
         >
           Heron Analytica is
@@ -143,7 +151,6 @@ export default function PricingPage() {
         <Paragraph
           style={{
             fontSize: "18px",
-            marginBottom: "120px",
             color: "#4E4E4E",
           }}
         >
@@ -155,65 +162,89 @@ export default function PricingPage() {
           latest updates.
         </Paragraph>
       </div>
+
       {/* Survey Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
-        style={{ margin: "60px 10%" }}
+      <div
+        style={{
+          padding: "100px 10%",
+          backgroundImage: "url('/images/pricing_top_background.png')",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+          zIndex: -1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
       >
-        <Row justify="center" align="middle" gutter={[32, 32]}>
-          <Col xs={24} sm={24} md={12} style={{ textAlign: "left" }}>
-            <Title level={1} style={{ marginBottom: "20px" }}>
-              Take our survey
-            </Title>
-            <Space direction="vertical" size="small">
-              <Text type="secondary" style={{ color: "#4E4E4E" }}>
-                Complete our quick survey<sup>1</sup> for a chance to win a $100
-                amazon gift card<sup>23</sup>
-              </Text>
-              <Text type="secondary" style={{ color: "#4E4E4E" }}>
-                <sup>1</sup>: The deadline to complete survey is Jan 31, 2025!
-              </Text>
-              <Text type="secondary" style={{ color: "#4E4E4E" }}>
-                <sup>2</sup>: Gift card is applicable to participants in North
-                America only and is issued in USD. If issued in CAD, the value
-                will be converted using exchange rate at the time of issuance.
-              </Text>
-              <Text type="secondary" style={{ color: "#4E4E4E" }}>
-                <sup>3</sup>: Each participant is eligible for 1 entry only.
-              </Text>
-            </Space>
-            <Button
-              type="primary"
-              size="large"
-              style={{
-                backgroundColor: "#512C7E",
-                marginTop: "20px",
-                color: "#fff",
-              }}
-              onClick={handleTakeSurveyClick}
-            >
-              Take the survey now &nbsp;
-              <RightOutlined />
-            </Button>
-          </Col>
-          <Col xs={24} sm={24} md={12}>
-            <Image
-              src={"/images/take_survey_picture.png"}
-              alt={"Survey Picture"}
-              width={500}
-              height={400}
-              style={{
-                maxWidth: "100%",
-                height: "auto",
-                borderRadius: "10px",
-              }}
-            />
-          </Col>
-        </Row>
-      </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          style={{
+            margin: "0 10%",
+          }}
+        >
+          <Row justify="center" align="middle" gutter={[32, 32]}>
+            <Col xs={24} sm={24} md={12} style={{ textAlign: "left" }}>
+              <Title
+                level={1}
+                style={{ marginBottom: "20px", fontSize: "4rem" }}
+              >
+                Take our survey
+              </Title>
+              <Space direction="vertical" size="small">
+                <Text type="secondary" style={{ color: "#4E4E4E" }}>
+                  Complete our quick survey<sup>1</sup> for a chance to win a
+                  $100 amazon gift card<sup>23</sup>
+                </Text>
+                <Text type="secondary" style={{ color: "#4E4E4E" }}>
+                  <sup>1</sup>: The deadline to complete survey is Jan 31, 2025!
+                </Text>
+                <Text type="secondary" style={{ color: "#4E4E4E" }}>
+                  <sup>2</sup>: Gift card is applicable to participants in North
+                  America only and is issued in USD. If issued in CAD, the value
+                  will be converted using exchange rate at the time of issuance.
+                </Text>
+                <Text type="secondary" style={{ color: "#4E4E4E" }}>
+                  <sup>3</sup>: Each participant is eligible for 1 entry only.
+                </Text>
+              </Space>
+              <Button
+                type="primary"
+                size="large"
+                style={{
+                  backgroundColor: "#512C7E",
+                  marginTop: "20px",
+                  color: "#fff",
+                  padding: "25px 30px",
+                }}
+                onClick={handleTakeSurveyClick}
+              >
+                <div>
+                  Take the survey now &nbsp;
+                  <RightOutlined />
+                </div>
+              </Button>
+            </Col>
+            <Col xs={24} sm={24} md={12}>
+              <Image
+                src={"/images/take_survey_picture.png"}
+                alt={"Survey Picture"}
+                width={500}
+                height={400}
+                style={{
+                  maxWidth: "100%",
+                  height: "auto",
+                  borderRadius: "10px",
+                }}
+              />
+            </Col>
+          </Row>
+        </motion.div>
+      </div>
 
       {/* Waitlist Section */}
       <div
@@ -257,7 +288,8 @@ export default function PricingPage() {
                 color: "#cccccc",
               }}
             >
-              Experience professional personas and insights before anyone else at no cost in beta stage.
+              Experience professional personas and insights before anyone else
+              at no cost in beta stage.
             </Text>
           </div>
           <div>
