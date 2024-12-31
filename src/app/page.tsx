@@ -82,7 +82,7 @@ const Home: React.FC = () => {
           backgroundRepeat: "no-repeat",
           backgroundPosition: "center",
           backgroundSize: "cover",
-          padding: "50px 0",
+          padding: "20px 0",
         }}
       >
         <Flex
@@ -95,7 +95,7 @@ const Home: React.FC = () => {
             <Col span={24}>
               <Typography.Title
                 level={1}
-                style={{ textAlign: "center", color: "#fff", fontSize: "3rem" }}
+                style={{ textAlign: "center", color: "#fff", fontSize: "4rem" }}
               >
                 If you target everyone,
                 <br />
@@ -118,12 +118,13 @@ const Home: React.FC = () => {
             style={{
               backgroundColor: "#fff",
               boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-              marginTop: "120px",
+              marginTop: "20px",
               color: "#222F65",
               padding: "10px 20px",
               border: "none",
               borderRadius: "5px",
               cursor: "pointer",
+              fontSize: "1.2rem",
             }}
             onClick={handleNavigateToPricing}
           >
@@ -145,14 +146,14 @@ const Home: React.FC = () => {
           backgroundRepeat: "no-repeat",
           backgroundPosition: "center",
           backgroundSize: "cover",
-          padding: "50px 0",
+          padding: "20px 0",
           height: "500px",
           marginBottom: "50px",
         }}
       >
         <Typography.Title
           level={1}
-          style={{ textAlign: "center", color: "#fff", paddingTop: "30px" }}
+          style={{ textAlign: "center", color: "#fff", paddingTop: "50px", fontSize: "4rem" }}
         >
           How it works
         </Typography.Title>
@@ -195,7 +196,7 @@ const Home: React.FC = () => {
                 }}
               >
                 <Typography.Title level={4} style={{ marginBottom: "20px" }}>
-                  {item.index}. {item.title}
+                  Step&nbsp;{item.index}. {item.title}
                 </Typography.Title>
                 <Typography.Text type="secondary">
                   {item.description}
@@ -218,7 +219,7 @@ const Home: React.FC = () => {
                 <div
                   style={{
                     width: "100%",
-                    maxWidth: "600px", // Set a fixed width for the image/GIF
+                    maxWidth: "400px", // Set a fixed width for the image/GIF
                     height: "auto", // Maintain aspect ratio
                     display: "flex",
                     justifyContent: "center",
@@ -230,7 +231,7 @@ const Home: React.FC = () => {
                     alt={item.title}
                     style={{
                       maxWidth: "100%",
-                      maxHeight: "600px", // Limit the height for consistency
+                      maxHeight: "400px", // Limit the height for consistency
                       borderRadius: "10px",
                       objectFit: "contain", // Maintain aspect ratio without cropping
                     }}
@@ -249,20 +250,20 @@ const Home: React.FC = () => {
           backgroundRepeat: "no-repeat",
           backgroundPosition: "center",
           backgroundSize: "cover",
-          padding: "50px 0",
+          padding: "20px 10px",
         }}
       >
         <Flex
           justify="center"
           align="center"
           vertical
-          style={{ margin: "70px 0" }}
+          style={{ margin: "50px 0" }}
         >
           <Row justify="center">
             <Col span={24}>
               <Typography.Title
                 level={1}
-                style={{ textAlign: "center", color: "#fff" }}
+                style={{ textAlign: "center", color: "#fff", fontSize: "3rem" }}
               >
                 Transform Your Marketing Campaigns and <br />
                 Improve Return On Investment
@@ -278,12 +279,13 @@ const Home: React.FC = () => {
             style={{
               backgroundColor: "#fff",
               boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-              marginTop: "60px",
+              marginTop: "20px",
               color: "#222F65",
               padding: "10px 20px",
               border: "none",
               borderRadius: "5px",
               cursor: "pointer",
+              fontSize: "1.2rem",
             }}
             onClick={handleNavigateToPricing}
           >

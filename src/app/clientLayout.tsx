@@ -5,9 +5,15 @@ import { Drawer, Button, Flex } from "antd";
 import HeronLogo from "./components/icons/HeronLogo";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { MenuOutlined } from "@ant-design/icons";
 import { trackPageView } from "../lib/analytics";
 import { usePathname, useSearchParams } from "next/navigation";
+import {
+  FacebookFilled,
+  LinkedinFilled,
+  MenuOutlined,
+  TwitterCircleFilled,
+} from "@ant-design/icons";
+import { motion } from "framer-motion";
 
 export default function ClientLayout({
   children,
@@ -73,7 +79,7 @@ export default function ClientLayout({
               <Link
                 href={"/"}
                 style={{
-                  color: "#505F98",
+                  color: "#000",
                   margin: "0 15px",
                   textDecoration: "unset",
                 }}
@@ -83,7 +89,7 @@ export default function ClientLayout({
               <Link
                 href={"/pricing"}
                 style={{
-                  color: "#505F98",
+                  color: "#000",
                   margin: "0 15px",
                   textDecoration: "unset",
                 }}
@@ -93,7 +99,7 @@ export default function ClientLayout({
               <Link
                 href={"/contact"}
                 style={{
-                  color: "#505F98",
+                  color: "#000",
                   margin: "0 15px",
                   textDecoration: "unset",
                 }}
@@ -154,6 +160,7 @@ export default function ClientLayout({
         <Flex
           justify="space-between"
           align="center"
+          gap={"20px"}
           style={{
             margin: "30px 0",
             padding: "30px 10%",
@@ -169,17 +176,44 @@ export default function ClientLayout({
           />
 
           <Flex justify="space-between" align="center">
-            <Flex align="center" gap={"40px"} justify="center">
-              <Link href={"/"} style={{ color: "#929ECC" }}>
+            <Flex align="center" gap={"20px"} justify="center">
+              <Link href={"/"} style={{ color: "#000" }}>
                 Home
               </Link>
-              <Link href={"/pricing"} style={{ color: "#929ECC" }}>
+              <Link href={"/pricing"} style={{ color: "#000" }}>
                 Pricing
               </Link>
-              <Link href={"/contact"} style={{ color: "#929ECC" }}>
+              <Link href={"#"} style={{ color: "#000" }}>
+                Company
+              </Link>
+              <Link href={"#"} style={{ color: "#000" }}>
+                Resources
+              </Link>
+              <Link href={"/contact"} style={{ color: "#000" }}>
                 Contact
               </Link>
             </Flex>
+          </Flex>
+
+          <Flex align="center" gap={"20px"}>
+            {[
+              { icon: <FacebookFilled />, color: "#1877F2" },
+              { icon: <LinkedinFilled />, color: "#0077B5" },
+              { icon: <TwitterCircleFilled />, color: "#1da1f2" },
+            ].map((social, index) => (
+              <motion.div
+                key={index}
+                whileHover={{ scale: 1.2, rotate: 10 }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  fontSize: "24px",
+                  color: social.color,
+                  cursor: "pointer",
+                }}
+              >
+                {social.icon}
+              </motion.div>
+            ))}
           </Flex>
         </Flex>
 

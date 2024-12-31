@@ -145,7 +145,6 @@ export default function PricingPage() {
             fontSize: "18px",
             marginBottom: "120px",
             color: "#4E4E4E",
-            fontWeight: "bold",
           }}
         >
           Complete our quick survey
@@ -171,17 +170,19 @@ export default function PricingPage() {
             </Title>
             <Space direction="vertical" size="small">
               <Text type="secondary" style={{ color: "#4E4E4E" }}>
-                <sup>1</sup> The deadline to complete the survey is Jan 31,
-                2025.
+                Complete our quick survey<sup>1</sup> for a chance to win a $100
+                amazon gift card<sup>23</sup>
               </Text>
               <Text type="secondary" style={{ color: "#4E4E4E" }}>
-                <sup>2</sup> Gift card is applicable to participants in North
+                <sup>1</sup>: The deadline to complete survey is Jan 31, 2025!
+              </Text>
+              <Text type="secondary" style={{ color: "#4E4E4E" }}>
+                <sup>2</sup>: Gift card is applicable to participants in North
                 America only and is issued in USD. If issued in CAD, the value
-                will be converted using the exchange rate at the time of
-                issuance.
+                will be converted using exchange rate at the time of issuance.
               </Text>
               <Text type="secondary" style={{ color: "#4E4E4E" }}>
-                <sup>3</sup> Each participant is eligible for 1 entry only.
+                <sup>3</sup>: Each participant is eligible for 1 entry only.
               </Text>
             </Space>
             <Button
@@ -256,8 +257,7 @@ export default function PricingPage() {
                 color: "#cccccc",
               }}
             >
-              Experience psychographic and demographic personas and insights
-              before anyone else at no cost.
+              Experience professional personas and insights before anyone else at no cost in beta stage.
             </Text>
           </div>
           <div>
@@ -289,7 +289,7 @@ export default function PricingPage() {
             alignItems: "center",
             justifyContent: "center",
             width: "100%",
-            padding: "20px 10px"
+            padding: "20px 10px",
           }}
         >
           <Flex align="center" justify="center" style={{ width: "100%" }}>
@@ -302,7 +302,6 @@ export default function PricingPage() {
                   padding: "0px 20px",
                   fontSize: "16px",
                   display: "inline-block",
-                  // width: "300px",
                 }}
                 type="email"
               />
@@ -313,7 +312,6 @@ export default function PricingPage() {
                 onClick={handleJoinWaitlist}
                 style={{
                   backgroundColor: "#512C7E",
-                  borderColor: "#001F54",
                   color: "#FFFFFF",
                   fontSize: "16px",
                   padding: "0px 20px",
