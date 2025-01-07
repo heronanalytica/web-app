@@ -23,8 +23,8 @@ export async function POST(req: Request) {
 
     // Check if email configuration is available
     if (
-      !process.env.EMAIL_SERVICE_USER ||
-      !process.env.EMAIL_SERVICE_PASSWORD
+      !process.env.NEXT_PUBLIC_EMAIL_SERVICE_USER ||
+      !process.env.NEXT_PUBLIC_EMAIL_SERVICE_PASSWORD
     ) {
       console.error("Email configuration is missing.");
       return NextResponse.json(
@@ -42,14 +42,14 @@ export async function POST(req: Request) {
       port: 465,
       secure: true, // Use SSL
       auth: {
-        user: process.env.EMAIL_SERVICE_USER,
-        pass: process.env.EMAIL_SERVICE_PASSWORD,
+        user: process.env.NEXT_PUBLIC_EMAIL_SERVICE_USER,
+        pass: process.env.NEXT_PUBLIC_EMAIL_SERVICE_PASSWORD,
       },
     });
 
     const mailOptions = {
-      from: process.env.EMAIL_SERVICE_USER,
-      to: process.env.EMAIL_SERVICE_USER, // Your email to receive inquiries
+      from: process.env.NEXT_PUBLIC_EMAIL_SERVICE_USER,
+      to: process.env.NEXT_PUBLIC_EMAIL_SERVICE_USER, // Your email to receive inquiries
       subject: `New Contact Inquiry: ${subject}`,
       text: `You have received a new inquiry from your contact form:
         Name: ${name}
@@ -68,7 +68,7 @@ export async function POST(req: Request) {
     try {
       await transporter.sendMail(mailOptions);
       console.log(
-        `Contact inquiry email sent successfully to ${process.env.EMAIL_SERVICE_USER}`
+        `Contact inquiry email sent successfully to ${process.env.NEXT_PUBLIC_EMAIL_SERVICE_USER}`
       );
     } catch (emailError) {
       console.error("Error sending inquiry email:", emailError);

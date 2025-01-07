@@ -45,8 +45,8 @@ export async function POST(req: Request) {
 
     // Check for email configuration
     if (
-      !process.env.EMAIL_SERVICE_USER ||
-      !process.env.EMAIL_SERVICE_PASSWORD
+      !process.env.NEXT_PUBLIC_EMAIL_SERVICE_USER ||
+      !process.env.NEXT_PUBLIC_EMAIL_SERVICE_PASSWORD
     ) {
       console.error("Missing email configuration in environment variables.");
       return NextResponse.json(
@@ -64,13 +64,13 @@ export async function POST(req: Request) {
       port: 465,
       secure: true, // Use SSL
       auth: {
-        user: process.env.EMAIL_SERVICE_USER,
-        pass: process.env.EMAIL_SERVICE_PASSWORD,
+        user: process.env.NEXT_PUBLIC_EMAIL_SERVICE_USER,
+        pass: process.env.NEXT_PUBLIC_EMAIL_SERVICE_PASSWORD,
       },
     });
 
     const mailOptions = {
-      from: process.env.EMAIL_SERVICE_USER,
+      from: process.env.NEXT_PUBLIC_EMAIL_SERVICE_USER,
       to: email,
       subject: "Welcome to the Waitlist!",
       text: `Hi there!
