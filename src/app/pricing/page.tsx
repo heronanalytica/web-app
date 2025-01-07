@@ -204,7 +204,7 @@ export default function PricingPage() {
                 </Text>
                 <Text type="secondary" style={{ color: "#4E4E4E" }}>
                   <sup>2</sup>: Gift card is applicable to participants in North
-                  America only and is issued in USD. If issued in CAD, the value
+                  America only and is issued in CAD. If issued in USD, the value
                   will be converted using exchange rate at the time of issuance.
                 </Text>
                 <Text type="secondary" style={{ color: "#4E4E4E" }}>
