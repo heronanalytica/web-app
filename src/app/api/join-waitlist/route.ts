@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabaseClient";
+import nodemailer from "nodemailer";
 
 export async function POST(req: Request) {
   try {
@@ -42,8 +43,60 @@ export async function POST(req: Request) {
       );
     }
 
+    // Check for email configuration
+    if (
+      !process.env.EMAIL_SERVICE_USER ||
+      !process.env.EMAIL_SERVICE_PASSWORD
+    ) {
+      console.error("Missing email configuration in environment variables.");
+      return NextResponse.json(
+        {
+          message: "Successfully joined the waitlist, but no email was sent.",
+          data,
+        },
+        { status: 200 }
+      );
+    }
+
+    // Send confirmation email
+    const transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true, // Use SSL
+      auth: {
+        user: process.env.EMAIL_SERVICE_USER,
+        pass: process.env.EMAIL_SERVICE_PASSWORD,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_SERVICE_USER,
+      to: email,
+      subject: "Welcome to the Waitlist!",
+      text: `Hi there!
+
+        Thank you for joining the waitlist. We'll keep you updated with the latest news and developments.
+
+        Best regards,
+        The Heronanalytica Team`,
+      html: `<p>Hi there!</p>
+        <p>Thank you for joining the waitlist. We'll keep you updated with the latest news and developments.</p>
+        <p>Best regards,<br>The <strong>Heronanalytica Team</strong></p>`,
+    };
+
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log(`Confirmation email sent to ${email}`);
+    } catch (emailError) {
+      console.error("Error sending confirmation email:", emailError);
+      return NextResponse.json(
+        { error: "Failed to send confirmation email." },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
-      { message: "Successfully joined the waitlist!", data },
+      { message: "Successfully joined the waitlist and email sent!", data },
       { status: 200 }
     );
   } catch (error) {
