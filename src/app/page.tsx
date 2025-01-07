@@ -25,7 +25,7 @@ const Home: React.FC = () => {
     <div>
       <div
         style={{
-          height: "1100px",
+          height: "1300px",
           width: "100vw",
           backgroundImage: "url('/images/background_shading.png')",
           position: "absolute",
@@ -33,6 +33,8 @@ const Home: React.FC = () => {
           backgroundPosition: "center",
           backgroundSize: "cover",
           zIndex: -1,
+          top: 0,
+          left: 0,
         }}
       />
 

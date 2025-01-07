@@ -45,6 +45,7 @@ export default function ClientLayout({
               justifyContent: "space-between",
               alignItems: "center",
               padding: "0 20px",
+              backgroundColor: "transparent"
             }}
           >
             {/* Dummy Mobile Hamburger Menu to style */}

@@ -80,7 +80,12 @@ export default function Contact() {
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center",
         backgroundSize: "cover",
-        height: "calc(100vh - 80px - 160px)",
+        height: "100vh",
+        top: 0,
+        position: "absolute",
+        width: "100vw",
+        zIndex: -1,
+        padding: "100px 0 0 0",
       }}
     >
       <div
