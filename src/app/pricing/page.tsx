@@ -200,7 +200,7 @@ export default function PricingPage() {
                   $100 amazon gift card<sup>23</sup>
                 </Text>
                 <Text type="secondary" style={{ color: "#4E4E4E" }}>
-                  <sup>1</sup>: The deadline to complete survey is Jan 31, 2025!
+                  <sup>1</sup>: The deadline to complete survey is Feb 28, 2025!
                 </Text>
                 <Text type="secondary" style={{ color: "#4E4E4E" }}>
                   <sup>2</sup>: Gift card is applicable to participants in North

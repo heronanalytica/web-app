@@ -55,15 +55,14 @@ const Home: React.FC = () => {
               marginTop: "60px",
             }}
           >
-            Unlock Targeted Marketing,
+            Unlock AI-Powered
             <br />
-            Personalize Customer
+            Psychographic
             <br />
-            Experience
+            Segmentation
           </Typography.Title>
           <Typography.Text type="secondary" style={{ textAlign: "center" }}>
-            Create survey, generate insights, and build customer personas
-            without coding or any technical skills - all in Heron Analytica
+            Move beyond basic DIY market research and customer segmentation
           </Typography.Text>
 
           <motion.div
@@ -112,9 +111,7 @@ const Home: React.FC = () => {
                 level={1}
                 style={{ textAlign: "center", color: "#fff", fontSize: "4rem" }}
               >
-                If you target everyone,
-                <br />
-                you target no one.
+                Psychographics drive customer behavior
               </Typography.Title>
               <Typography.Text
                 type="secondary"

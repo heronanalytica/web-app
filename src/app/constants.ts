@@ -3,7 +3,7 @@ export const howItWorkContent = [
     index: 1,
     title: "Define",
     description:
-      "Decide what customer behaviors, interests, or psychographics you want to analyze—whether it’s buying patterns, brand loyalty, or values. Heron Analytica generates a customized questionnaire tailored to your needs.",
+      "Decide what customer behaviors, interests, or psychographics you want to learn more—whether it’s psychological behavior, brand related behavior, or purchase related behavior. Heron Analytica generates a customized questionnaire tailored to your needs.",
     image: "/gifs/step_1.gif",
     imageCover: "/images/step_1_cover.png",
   },
@@ -35,7 +35,7 @@ export const howItWorkContent = [
     index: 5,
     title: "Act",
     description:
-      "Dive into AI-powered customer personas, and interactive visualizations to craft targeted marketing strategies that resonate with your personas and drive return on investment.",
+      "Dive into AI-powered customer personas, and interactive visualizations to learn more about factors that make them tick. Discovery opportunity to  improve targeted marketing campaign and drive business growth.",
     image: "/images/step_5.png",
     imageCover: "/images/step_5_cover.png",
   },

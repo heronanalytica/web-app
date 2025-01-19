@@ -14,7 +14,7 @@ const roboto = Roboto({
 
 export const metadata: Metadata = {
   title: "Heron Analytica",
-  description: "Unlock Targeted Marketing, Personalize Customer Experience",
+  description: "Unlock AI-Powered Psychographic Segmentation",
 };
 
 export default function RootLayout({
