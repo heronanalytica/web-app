@@ -37,7 +37,7 @@ export default function ClientLayout({
   return (
     <AntdRegistry>
       <Flex justify="space-between" vertical style={{ minHeight: "100vh" }}>
-        <div>
+        <div style={{ zIndex: 100 }}>
           <div
             style={{
               height: "80px",
@@ -45,7 +45,7 @@ export default function ClientLayout({
               justifyContent: "space-between",
               alignItems: "center",
               padding: "0 20px",
-              backgroundColor: "transparent"
+              backgroundColor: "transparent",
             }}
           >
             {/* Dummy Mobile Hamburger Menu to style */}
@@ -153,7 +153,8 @@ export default function ClientLayout({
             margin: "30px 0",
             padding: "30px 10%",
             flexWrap: "wrap",
-            height: "100px"
+            height: "100px",
+            zIndex: 100,
           }}
         >
           {/* Footer Logo */}

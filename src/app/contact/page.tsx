@@ -64,11 +64,25 @@ export default function Contact() {
 
   if (submitted) {
     return (
-      <div style={{ textAlign: "center", marginTop: "50px" }}>
-        <Title level={2} style={{ color: "#101010" }}>
-          Thank you for getting in touch!
-        </Title>
-        <Text>We&apos;ll respond to your inquiry soon.</Text>
+      <div
+        style={{
+          backgroundImage: "url('/images/pricing_top_background.png')",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+          height: "100vh",
+          top: 0,
+          position: "absolute",
+          width: "100vw",
+          padding: "100px 0 0 0",
+        }}
+      >
+        <div style={{ textAlign: "center", marginTop: "50px" }}>
+          <Title level={2} style={{ color: "#101010" }}>
+            Thank you for getting in touch!
+          </Title>
+          <Text>We&apos;ll respond to your inquiry soon.</Text>
+        </div>
       </div>
     );
   }
@@ -84,7 +98,6 @@ export default function Contact() {
         top: 0,
         position: "absolute",
         width: "100vw",
-        zIndex: -1,
         padding: "100px 0 0 0",
       }}
     >
