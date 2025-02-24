@@ -1,7 +1,8 @@
 export const GA_TRACKING_ID = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID || "";
 
 // Check if the tracking ID exists to prevent errors in development or testing environments
-const isGAEnabled = GA_TRACKING_ID !== "" && typeof window !== "undefined";
+const isDev = process.env.NEXT_PUBLIC_APP_ENV !== "production";
+const isGAEnabled = GA_TRACKING_ID !== "" && !isDev && typeof window !== "undefined";
 
 // Track a page view
 export const trackPageView = (url: string) => {

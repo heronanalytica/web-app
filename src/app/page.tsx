@@ -107,10 +107,7 @@ const Home: React.FC = () => {
         >
           <Row justify="center">
             <Col span={24}>
-              <Typography.Title
-                level={1}
-                style={{ textAlign: "center", color: "#fff", fontSize: "4rem" }}
-              >
+              <Typography.Title level={1} className="cta-title">
                 Psychographics drive customer behavior
               </Typography.Title>
               <Typography.Text

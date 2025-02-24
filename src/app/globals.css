@@ -14,6 +14,11 @@
 .feature-row {
   margin: "20px 8%";
 }
+.cta-title {
+  text-align: center;
+  color: #fff !important;
+  font-size: 4rem !important;
+}
 
 @media (max-width: 1200px) {
   .video-container {
@@ -42,5 +47,8 @@
   }
   .feature-row {
     margin: "20px 0" !important;
+  }
+  .cta-title {
+    font-size: 2rem !important;
   }
 }
