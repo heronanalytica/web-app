@@ -5,7 +5,7 @@ import remarkGfm from "remark-gfm";
 import { formatDate } from "@/lib";
 
 type BlogPostProps = {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 };
 
 export async function generateStaticParams() {
