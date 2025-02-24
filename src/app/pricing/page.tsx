@@ -9,13 +9,8 @@ import {
   Space,
   message,
   Flex,
-  Row,
-  Col,
 } from "antd";
 import { trackEvent } from "@/lib/analytics";
-import Image from "next/image";
-import { RightOutlined } from "@ant-design/icons";
-import { motion } from "framer-motion";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -98,19 +93,6 @@ export default function PricingPage() {
     fetchWaitlistCount();
   }, []);
 
-  const handleTakeSurveyClick = () => {
-    trackEvent({
-      action: "click",
-      category: "Pricing",
-      label: "Take Survey",
-    });
-
-    window.open(
-      "https://qualtricsxmxgbgmdqqg.yul1.qualtrics.com/jfe/preview/previewId/9a3bd3c9-6a32-47e1-b439-ed6c4949e81b/SV_1RkAzL1J9jsIUjY?Q_CHL=preview&Q_SurveyVersionID=current",
-      "_blank"
-    );
-  };
-
   return (
     <div
       style={{
@@ -160,89 +142,6 @@ export default function PricingPage() {
           Or join the waitlist for early access at no cost and receive the
           latest updates.
         </Paragraph>
-      </div>
-
-      {/* Survey Section */}
-      <div
-        style={{
-          padding: "100px 10%",
-          backgroundImage: "url('/images/pricing_top_background.png')",
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "center",
-          backgroundSize: "cover",
-          zIndex: -1,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-          style={{
-            margin: "0 10%",
-          }}
-        >
-          <Row justify="center" align="middle" gutter={[32, 32]}>
-            <Col xs={24} sm={24} md={12} style={{ textAlign: "left" }}>
-              <Title
-                level={1}
-                style={{ marginBottom: "20px", fontSize: "4rem" }}
-              >
-                Take our survey
-              </Title>
-              <Space direction="vertical" size="small">
-                <Text type="secondary" style={{ color: "#4E4E4E" }}>
-                  Complete our quick survey<sup>1</sup> for a chance to win a
-                  $100 amazon gift card<sup>23</sup>
-                </Text>
-                <Text type="secondary" style={{ color: "#4E4E4E" }}>
-                  <sup>1</sup>: The deadline to complete survey is Feb 28, 2025!
-                </Text>
-                <Text type="secondary" style={{ color: "#4E4E4E" }}>
-                  <sup>2</sup>: Gift card is applicable to participants in North
-                  America only and is issued in CAD. If issued in USD, the value
-                  will be converted using exchange rate at the time of issuance.
-                </Text>
-                <Text type="secondary" style={{ color: "#4E4E4E" }}>
-                  <sup>3</sup>: Each participant is eligible for 1 entry only.
-                </Text>
-              </Space>
-              <Button
-                type="primary"
-                size="large"
-                style={{
-                  backgroundColor: "#512C7E",
-                  marginTop: "20px",
-                  color: "#fff",
-                  padding: "25px 30px",
-                }}
-                onClick={handleTakeSurveyClick}
-              >
-                <div>
-                  Take the survey now &nbsp;
-                  <RightOutlined />
-                </div>
-              </Button>
-            </Col>
-            <Col xs={24} sm={24} md={12}>
-              <Image
-                src={"/images/take_survey_picture.png"}
-                alt={"Survey Picture"}
-                width={500}
-                height={400}
-                style={{
-                  maxWidth: "100%",
-                  height: "auto",
-                  borderRadius: "10px",
-                }}
-              />
-            </Col>
-          </Row>
-        </motion.div>
       </div>
 
       {/* Waitlist Section */}
