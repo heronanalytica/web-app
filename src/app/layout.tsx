@@ -9,7 +9,7 @@ import ClientLayout from "./clientLayout";
 const roboto = Roboto({
   variable: "--font-roboto",
   subsets: ["latin"],
-  weight: "400",
+  weight: ["100", "400", "500"],
 });
 
 export const metadata: Metadata = {
