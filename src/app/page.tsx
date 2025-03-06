@@ -79,7 +79,7 @@ const Home: React.FC = () => {
             <iframe
               width="1100"
               height="620"
-              src="https://www.youtube.com/embed/zZA_js4mHH8"
+              src="https://www.youtube.com/embed/bx3xf9BKX6Q"
               title="YouTube video player"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
@@ -114,7 +114,7 @@ const Home: React.FC = () => {
                 type="secondary"
                 style={{ textAlign: "center", display: "block", color: "#fff" }}
               >
-                Take the guesswork out of understanding your customers
+                Start to understand why customers think and act the way they do
               </Typography.Text>
             </Col>
           </Row>
@@ -133,7 +133,7 @@ const Home: React.FC = () => {
               border: "none",
               borderRadius: "5px",
               cursor: "pointer",
-              fontSize: "1.2rem",
+              fontSize: "1rem",
             }}
             onClick={handleNavigateToPricing}
           >
@@ -295,7 +295,7 @@ const Home: React.FC = () => {
               border: "none",
               borderRadius: "5px",
               cursor: "pointer",
-              fontSize: "1.2rem",
+              fontSize: "1rem",
             }}
             onClick={handleNavigateToPricing}
           >

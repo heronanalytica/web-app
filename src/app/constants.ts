@@ -33,9 +33,9 @@ export const howItWorkContent = [
   },
   {
     index: 5,
-    title: "Act",
+    title: "Scale And Act",
     description:
-      "Dive into AI-powered customer personas, and interactive visualizations to learn more about factors that make them tick. Discovery opportunity to  improve targeted marketing campaign and drive business growth.",
+      "Heron Analytica seamlessly integrates with your customer database, enabling our software to intelligently assign each customer to their distinct persona. Additionally, it recommends tailored marketing strategies for each segment, allowing you to concentrate on delivering impactful campaigns that retain and excite your customers, eliminating the burden of managing these tasks manually.",
     image: "/images/step_5.png",
     imageCover: "/images/step_5_cover.png",
   },

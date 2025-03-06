@@ -135,12 +135,7 @@ export default function PricingPage() {
             color: "#4E4E4E",
           }}
         >
-          Complete our quick survey
-          <sup>1</sup> for a chance to win a $100 Amazon gift card
-          <sup>2,3</sup>
-          <br />
-          Or join the waitlist for early access at no cost and receive the
-          latest updates.
+          Join waitlist for early access at no cost and receive latest update
         </Paragraph>
       </div>
 
@@ -156,7 +151,7 @@ export default function PricingPage() {
         }}
       >
         <Title level={1} style={{ color: "#fff", margin: "20px 0" }}>
-          Or Join Waitlist
+          Join Waitlist
         </Title>
         <Title level={4} style={{ marginBottom: "20px", color: "#fff" }}>
           WHY JOIN?
