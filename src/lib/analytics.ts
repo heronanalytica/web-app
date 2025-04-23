@@ -7,7 +7,6 @@ const isGAEnabled = GA_TRACKING_ID !== "" && !isDev && typeof window !== "undefi
 // Track a page view
 export const trackPageView = (url: string) => {
   if (!isGAEnabled) return;
-  console.log("trackPageView", url);
   (window as any).gtag?.("config", GA_TRACKING_ID, {
     page_path: url,
   });
@@ -26,7 +25,6 @@ export const trackEvent = ({
   value?: number;
 }) => {
   if (!isGAEnabled) return;
-  console.log("trackEvent", action, category, label, value);
   (window as any).gtag?.("event", action, {
     event_category: category,
     event_label: label,
