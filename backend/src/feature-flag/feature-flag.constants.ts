@@ -1,0 +1,3 @@
+export enum EFeatureFlag {
+  AUTHENTICATION_ENABLED = 'AUTHENTICATION_ENABLED',
+}

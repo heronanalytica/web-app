@@ -1,18 +1,36 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { DatabaseService } from 'src/database/database.service';
+import { FeatureFlagService } from 'src/feature-flag/feature-flag.service';
+import { EFeatureFlag } from 'src/feature-flag/feature-flag.constants';
 
 @Injectable()
 export class AuthService {
   constructor(
     private dbService: DatabaseService,
     private jwt: JwtService,
+    private featureFlagService: FeatureFlagService,
   ) {}
 
+  private async checkFF() {
+    const isAuthEnabled = await this.featureFlagService.isEnabled(
+      EFeatureFlag.AUTHENTICATION_ENABLED,
+    );
+    if (!isAuthEnabled) {
+      throw new ForbiddenException('Authentication is currently disabled.');
+    }
+  }
+
   async signup(dto: SignupDto) {
+    await this.checkFF();
+
     const existingUser = await this.dbService.user.findUnique({
       where: { email: dto.email },
     });
@@ -36,6 +54,8 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
+    await this.checkFF();
+
     const user = await this.dbService.user.findUnique({
       where: { email: dto.email },
     });
