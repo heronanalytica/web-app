@@ -26,5 +26,11 @@ model User {
   id        String   @id @default(uuid())
   email     String   @unique
   password  String
+  role      UserRole @default(CLIENT)
   createdAt DateTime @default(now())
+}
+
+enum UserRole {
+  ADMIN
+  CLIENT
 }
