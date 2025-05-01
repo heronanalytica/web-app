@@ -1,6 +1,7 @@
 import {
   ForbiddenException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { SignupDto } from './dto/signup.dto';
@@ -10,6 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 import { DatabaseService } from 'src/database/database.service';
 import { FeatureFlagService } from 'src/feature-flag/feature-flag.service';
 import { EFeatureFlag } from 'src/feature-flag/feature-flag.constants';
+import { AdminResetPasswordDto } from './dto/admin-reset-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -18,6 +20,10 @@ export class AuthService {
     private jwt: JwtService,
     private featureFlagService: FeatureFlagService,
   ) {}
+
+  private signToken(userId: string, email: string) {
+    return this.jwt.sign({ sub: userId, email });
+  }
 
   private async checkFF() {
     const isAuthEnabled = await this.featureFlagService.isEnabled(
@@ -73,7 +79,28 @@ export class AuthService {
     };
   }
 
-  private signToken(userId: string, email: string) {
-    return this.jwt.sign({ sub: userId, email });
+  async adminResetPassword(
+    currentUser: { id: string; email: string; role: string },
+    dto: AdminResetPasswordDto,
+  ) {
+    if (currentUser?.role !== 'ADMIN') {
+      throw new ForbiddenException('Only admins can reset passwords');
+    }
+
+    const user = await this.dbService.user.findUnique({
+      where: { id: dto.userId },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const hashed = await bcrypt.hash(dto.newPassword, 10);
+
+    await this.dbService.user.update({
+      where: { id: dto.userId },
+      data: { password: hashed },
+    });
+
+    return { message: 'Password reset successfully' };
   }
 }
