@@ -26,13 +26,16 @@ export default function Login() {
     setError("");
 
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/auth/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+          credentials: "include",
+        }
+      );
 
-      // Token is stored in cookie by the API route — nothing to store here
       const data: AuthApiResponse = await res.json();
 
       if (!res.ok) {
@@ -40,7 +43,8 @@ export default function Login() {
         return;
       }
 
-      // TODO: Redirect to any other route
+      // You can now redirect user or fetch their profile
+      // router.push('/dashboard'); (optional)
     } catch (err) {
       console.error("Login error", err);
       setError("Unexpected error occurred");
