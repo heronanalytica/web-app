@@ -6,7 +6,7 @@ import HeronLogo from "./components/icons/HeronLogo";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { trackPageView } from "../lib/analytics";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   FacebookFilled,
   LinkedinFilled,
@@ -20,6 +20,7 @@ export default function ClientLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -95,6 +96,19 @@ export default function ClientLayout({
                 Contact
               </Link>
             </div>
+
+            {/* Login Button Desktop */}
+            <Button
+              className="desktop-login-btn"
+              color="default"
+              variant="solid"
+              size="large"
+              onClick={() => {
+                router.push("/login");
+              }}
+            >
+              Login
+            </Button>
 
             {/* Mobile Hamburger Menu */}
             <Button

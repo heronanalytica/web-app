@@ -8,8 +8,12 @@
 .desktop-menu {
   display: flex;
 }
+.desktop-login-btn {
+  display: inline-block !important;
+  padding: 0px 30px !important;
+}
 .mobile-menu {
-  visibility: hidden;
+  display: none !important;
 }
 .feature-row {
   margin: "20px 8%";
@@ -24,10 +28,10 @@
 }
 
 .blog-container ol {
-  padding-inline-start: 40px!important;
+  padding-inline-start: 40px !important;
 }
 .blog-container ul {
-  padding-inline-start: 40px!important;
+  padding-inline-start: 40px !important;
 }
 
 @media (max-width: 1200px) {
@@ -87,8 +91,11 @@
   .desktop-menu {
     display: none;
   }
+  .desktop-login-btn {
+    display: none !important;
+  }
   .mobile-menu {
-    display: inline-block;
+    display: inline-block !important;
     visibility: visible;
   }
   .signup-button {
