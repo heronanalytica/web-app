@@ -4,17 +4,18 @@ import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { DatabaseModule } from '../database/database.module';
 import { FeatureFlagModule } from 'src/feature-flag/feature-flag.module';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
     JwtModule.register({
-      secret: 'super-secret', // TODO: move this to env later
+      secret: process.env.JWT_SECRET || 'super_secret',
       signOptions: { expiresIn: '1h' },
     }),
     DatabaseModule,
     FeatureFlagModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, JwtStrategy],
 })
 export class AuthModule {}
