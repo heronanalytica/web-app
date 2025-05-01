@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Form, Input, Button, Typography, Row, Col } from "antd";
 import Image from "next/image";
+import type { AuthApiResponse } from "@/types/auth";
 
 const { Title, Text } = Typography;
 
@@ -20,7 +21,31 @@ export default function Login() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {};
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      // Token is stored in cookie by the API route — nothing to store here
+      const data: AuthApiResponse = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Login failed");
+        return;
+      }
+
+      // TODO: Redirect to any other route
+    } catch (err) {
+      console.error("Login error", err);
+      setError("Unexpected error occurred");
+    }
+  };
 
   return (
     <div
@@ -65,18 +90,6 @@ export default function Login() {
                 boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
               }}
             >
-              {error && (
-                <Text
-                  style={{
-                    color: "red",
-                    textAlign: "center",
-                    marginBottom: "20px",
-                    display: "block",
-                  }}
-                >
-                  {error}
-                </Text>
-              )}
               <Form
                 layout="vertical"
                 onSubmitCapture={handleSubmit}
@@ -102,7 +115,7 @@ export default function Login() {
                   required
                   style={{ marginBottom: "20px" }}
                 >
-                  <Input
+                  <Input.Password
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
@@ -120,6 +133,7 @@ export default function Login() {
                       borderColor: "#512C7E",
                       color: "#FFFFFF",
                       width: "100%",
+                      marginTop: "30px",
                     }}
                     size="large"
                   >
@@ -127,6 +141,19 @@ export default function Login() {
                   </Button>
                 </Form.Item>
               </Form>
+
+              {error && (
+                <Text
+                  style={{
+                    color: "red",
+                    textAlign: "center",
+                    marginBottom: "20px",
+                    display: "block",
+                  }}
+                >
+                  {error}
+                </Text>
+              )}
             </div>
           </Col>
         </Row>
