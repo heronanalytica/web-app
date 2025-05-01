@@ -45,6 +45,16 @@ export class AuthController {
     };
   }
 
+  @Post('logout')
+  logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('login_token', {
+      path: '/',
+    });
+    return {
+      message: 'Logout successful',
+    };
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('me')
   getMe(@Req() req: Request) {
