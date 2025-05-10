@@ -1,7 +1,7 @@
 "use client";
 
 import { Modal, Button, Typography } from "antd";
-import { FontPoppins } from "@/app/fonts/poppins";
+import { FontPoppins } from "@/assets/fonts/poppins";
 
 const { Text } = Typography;
 

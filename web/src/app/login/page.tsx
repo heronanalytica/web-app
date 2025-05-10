@@ -4,8 +4,9 @@ import { useState } from "react";
 import { Form, Input, Button, Typography, Row, Col } from "antd";
 import Image from "next/image";
 import type { AuthApiResponse } from "@/types/auth";
-import { FontPoppins } from "../fonts/poppins";
+import { FontPoppins } from "../../assets/fonts/poppins";
 import RegisterModal from "./RegisterModal";
+import styles from "./styles.module.scss";
 
 const { Title, Text, Link } = Typography;
 
@@ -82,12 +83,7 @@ export default function Login() {
           <Col xs={24} md={12}>
             <Row align="top">
               <Col xs={24} md={12}>
-                <div
-                  style={{
-                    marginTop: "80px",
-                    paddingLeft: "12%",
-                  }}
-                >
+                <div className={styles.leftTextWrapper}>
                   <Text
                     className={`${FontPoppins.className}`}
                     style={{ fontSize: "22px" }}
@@ -110,7 +106,8 @@ export default function Login() {
                   </Text>
                 </div>
               </Col>
-              <Col xs={24} md={12}>
+              <Col xs={0} md={12}>
+                {/* Login illustration Image */}
                 <Image
                   src={"/images/login_image.png"}
                   width={400}
@@ -136,7 +133,7 @@ export default function Login() {
               <Form
                 layout="vertical"
                 onSubmitCapture={handleSubmit}
-                style={{ padding: "30px" }}
+                style={{ padding: "50px" }}
               >
                 <Title level={3}>Sign In</Title>
                 <Form.Item
