@@ -43,6 +43,8 @@ export default function Login() {
         return;
       }
 
+      window.alert("Login successfully");
+
       // You can now redirect user or fetch their profile
       // router.push('/dashboard'); (optional)
     } catch (err) {
