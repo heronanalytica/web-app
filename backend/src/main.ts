@@ -7,7 +7,7 @@ async function bootstrap() {
   app.setGlobalPrefix('/api');
   const allowedOrigins =
     process.env.NODE_ENV === 'production'
-      ? ['https://www.heronanalytica.com/', 'https://heronanalytica.com/']
+      ? ['https://www.heronanalytica.com', 'https://heronanalytica.com']
       : ['http://localhost:3000'];
 
   app.enableCors({
@@ -15,6 +15,8 @@ async function bootstrap() {
       origin: string,
       callback: (err: Error | null, allow?: boolean) => void,
     ) => {
+      console.log('CORS origin:', origin);
+      console.log('allowedOriginsn:', allowedOrigins);
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
