@@ -4,8 +4,9 @@ import { useState } from "react";
 import { Form, Input, Button, Typography, Row, Col } from "antd";
 import Image from "next/image";
 import type { AuthApiResponse } from "@/types/auth";
+import { FontPoppins } from "../fonts/poppins";
 
-const { Title, Text } = Typography;
+const { Title, Text, Link } = Typography;
 
 export default function Login() {
   const [formData, setFormData] = useState({
@@ -70,7 +71,6 @@ export default function Login() {
       <div
         style={{
           padding: "50px 5%",
-          maxWidth: "1200px",
           margin: "auto",
           borderRadius: "10px",
         }}
@@ -78,12 +78,44 @@ export default function Login() {
         <Row gutter={[16, 16]} align="middle">
           {/* Left Section */}
           <Col xs={24} md={12}>
-            <Image
-              src={"/images/login_image.png"}
-              width={500}
-              height={800}
-              alt="Login illustration"
-            />
+            <Row align="top">
+              <Col xs={24} md={12}>
+                <div
+                  style={{
+                    marginTop: "80px",
+                    paddingLeft: "12%",
+                  }}
+                >
+                  <Text
+                    className={`${FontPoppins.className}`}
+                    style={{ fontSize: "22px" }}
+                  >
+                    If you dont have an account register
+                  </Text>
+                  <br />
+                  <Text
+                    className={`${FontPoppins.className}`}
+                    style={{ fontSize: "22px" }}
+                  >
+                    You can{" "}
+                    <Link
+                      className={`${FontPoppins.className}`}
+                      style={{ fontSize: "22px" }}
+                    >
+                      Register here !
+                    </Link>
+                  </Text>
+                </div>
+              </Col>
+              <Col xs={24} md={12}>
+                <Image
+                  src={"/images/login_image.png"}
+                  width={400}
+                  height={700}
+                  alt="Login illustration"
+                />
+              </Col>
+            </Row>
           </Col>
 
           {/* Form Section */}
@@ -94,12 +126,14 @@ export default function Login() {
                 padding: "20px",
                 borderRadius: "10px",
                 boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+
+                maxWidth: "600px",
               }}
             >
               <Form
                 layout="vertical"
                 onSubmitCapture={handleSubmit}
-                style={{ padding: "30px 20px" }}
+                style={{ padding: "30px" }}
               >
                 <Title level={3}>Sign In</Title>
                 <Form.Item
