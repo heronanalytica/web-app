@@ -5,6 +5,7 @@ import { Form, Input, Button, Typography, Row, Col } from "antd";
 import Image from "next/image";
 import type { AuthApiResponse } from "@/types/auth";
 import { FontPoppins } from "../fonts/poppins";
+import RegisterModal from "./RegisterModal";
 
 const { Title, Text, Link } = Typography;
 
@@ -14,6 +15,7 @@ export default function Login() {
     password: "",
   });
   const [error, setError] = useState("");
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -97,10 +99,11 @@ export default function Login() {
                     className={`${FontPoppins.className}`}
                     style={{ fontSize: "22px" }}
                   >
-                    You can{" "}
+                    You can&nbsp;
                     <Link
                       className={`${FontPoppins.className}`}
-                      style={{ fontSize: "22px" }}
+                      style={{ fontSize: "22px", cursor: "pointer" }}
+                      onClick={() => setIsRegisterModalOpen(true)}
                     >
                       Register here !
                     </Link>
@@ -194,6 +197,12 @@ export default function Login() {
                   {error}
                 </Text>
               )}
+
+              {/* Register Modal */}
+              <RegisterModal
+                open={isRegisterModalOpen}
+                onClose={() => setIsRegisterModalOpen(false)}
+              />
             </div>
           </Col>
         </Row>
