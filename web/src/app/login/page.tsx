@@ -16,6 +16,7 @@ export default function Login() {
     email: "",
     password: "",
   });
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] =
@@ -31,6 +32,7 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     try {
       const res = await fetch(
@@ -51,36 +53,18 @@ export default function Login() {
       }
 
       window.alert("Login successfully");
-
-      // You can now redirect user or fetch their profile
-      // router.push('/dashboard'); (optional)
+      // router.push("/dashboard");
     } catch (err) {
       console.error("Login error", err);
       setError("Unexpected error occurred");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div
-      style={{
-        backgroundImage: "url('/images/pricing_top_background.png')",
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "center",
-        backgroundSize: "cover",
-        height: "100vh",
-        top: 0,
-        position: "absolute",
-        width: "100vw",
-        padding: "100px 0 0 0",
-      }}
-    >
-      <div
-        style={{
-          padding: "50px 5%",
-          margin: "auto",
-          borderRadius: "10px",
-        }}
-      >
+    <div className={styles.container}>
+      <div className={styles.wrapper}>
         <Row gutter={[16, 16]} align="middle">
           {/* Left Section */}
           <Col xs={24} md={12}>
@@ -116,6 +100,7 @@ export default function Login() {
                   width={400}
                   height={700}
                   alt="Login illustration"
+                  className={styles.loginIllustration}
                 />
               </Col>
             </Row>
@@ -123,20 +108,10 @@ export default function Login() {
 
           {/* Form Section */}
           <Col xs={24} md={12}>
-            <div
-              style={{
-                backgroundColor: "#FFFFFF",
-                padding: "20px",
-                borderRadius: "10px",
-                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-
-                maxWidth: "600px",
-              }}
-            >
+            <div className={styles.formCard}>
               <Form
                 layout="vertical"
                 onSubmitCapture={handleSubmit}
-                style={{ padding: "50px" }}
               >
                 <Title level={3}>Sign In</Title>
                 <Form.Item
@@ -189,6 +164,7 @@ export default function Login() {
                       marginTop: "30px",
                     }}
                     size="large"
+                    loading={loading}
                   >
                     Login
                   </Button>

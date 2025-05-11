@@ -1,9 +1,19 @@
-.loginIllustration {
-  display: block;
+.container {
+  background-image: url("/images/pricing_top_background.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  height: 100vh;
+  top: 0;
+  position: absolute;
+  width: 100vw;
+  padding: 100px 0 0 0;
+}
 
-  @media (max-width: 768px) {
-    display: none;
-  }
+.wrapper {
+  padding: 50px 5%;
+  margin: auto;
+  border-radius: 10px;
 }
 
 .leftTextWrapper {
@@ -16,6 +26,22 @@
   @media (min-width: 769px) {
     margin-top: 80px;
   }
+}
+
+.loginIllustration {
+  display: block;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.formCard {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  padding: 50px;
 }
 
 .forgotPasswordBtnWrapper {
