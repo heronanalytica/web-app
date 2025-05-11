@@ -59,6 +59,7 @@ export default function ClientLayout({
                 top: "0px",
                 left: "10px",
               }}
+              onClick={() => router.push("/")}
             >
               <HeronLogo />
             </div>
@@ -151,6 +152,14 @@ export default function ClientLayout({
                 style={{ color: "#505F98" }}
               >
                 Contact
+              </Link>
+
+              <Link
+                href={"/login"}
+                onClick={toggleDrawer}
+                style={{ color: "#505F98" }}
+              >
+                Login
               </Link>
             </div>
           </Drawer>
