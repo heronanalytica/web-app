@@ -7,6 +7,7 @@ import type { AuthApiResponse } from "@/types/auth";
 import { FontPoppins } from "../../assets/fonts/poppins";
 import RegisterModal from "./RegisterModal";
 import styles from "./styles.module.scss";
+import ForgotPasswordModal from "./ForgotPasswordModal";
 
 const { Title, Text, Link } = Typography;
 
@@ -17,6 +18,8 @@ export default function Login() {
   });
   const [error, setError] = useState("");
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] =
+    useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -164,6 +167,16 @@ export default function Login() {
                   />
                 </Form.Item>
 
+                <div className={styles.forgotPasswordBtnWrapper}>
+                  <Text
+                    type="secondary"
+                    className={styles.forgotPasswordBtn}
+                    onClick={() => setIsForgotPasswordModalOpen(true)}
+                  >
+                    Forgot Password?
+                  </Text>
+                </div>
+
                 <Form.Item>
                   <Button
                     type="primary"
@@ -199,6 +212,11 @@ export default function Login() {
               <RegisterModal
                 open={isRegisterModalOpen}
                 onClose={() => setIsRegisterModalOpen(false)}
+              />
+              {/* Forgot Password Modal */}
+              <ForgotPasswordModal
+                open={isForgotPasswordModalOpen}
+                onClose={() => setIsForgotPasswordModalOpen(false)}
               />
             </div>
           </Col>
