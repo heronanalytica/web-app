@@ -14,6 +14,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Feature Flag
 model FeatureFlag {
   id        String   @id @default(uuid())
   name      String   @unique
@@ -22,6 +23,7 @@ model FeatureFlag {
   updatedAt DateTime @updatedAt
 }
 
+// User
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
@@ -33,4 +35,30 @@ model User {
 enum UserRole {
   ADMIN
   CLIENT
+}
+
+// Survey
+model SurveyIntakeQuestions {
+  id        String             @id @default(uuid())
+  code      String             @unique
+  question  String
+  type      IntakeQuestionType
+  options   Json? // Only for SINGLE or MULTIPLE
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+}
+
+enum IntakeQuestionType {
+  SINGLE
+  TEXT
+  MULTIPLE
+}
+
+model SurveyIntakeQuestionSet {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  questionIds String[] // Stores UUIDs of SurveyIntakeQuestion
+  isActive    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
