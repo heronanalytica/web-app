@@ -22,7 +22,8 @@ export class AuthService {
   ) {}
 
   private signToken(userId: string, email: string) {
-    return this.jwt.sign({ sub: userId, email });
+    const secret = process.env.JWT_SECRET || 'super_secret';
+    return this.jwt.sign({ sub: userId, email }, { secret });
   }
 
   private async checkFF() {
