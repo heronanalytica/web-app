@@ -15,8 +15,6 @@ async function bootstrap() {
       origin: string,
       callback: (err: Error | null, allow?: boolean) => void,
     ) => {
-      console.log('CORS origin:', origin);
-      console.log('allowedOriginsn:', allowedOrigins);
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {

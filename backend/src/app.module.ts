@@ -2,9 +2,10 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
 import { FeatureFlagModule } from './feature-flag/feature-flag.module';
+import { SurveyModule } from './survey/survey.module';
 
 @Module({
-  imports: [AuthModule, DatabaseModule, FeatureFlagModule],
+  imports: [AuthModule, DatabaseModule, FeatureFlagModule, SurveyModule],
   controllers: [],
   providers: [],
 })
