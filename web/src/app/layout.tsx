@@ -2,9 +2,10 @@
 /* eslint-disable @next/next/no-sync-scripts */
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
-import { Suspense } from "react"; // Import Suspense
+import { PropsWithChildren, Suspense } from "react"; // Import Suspense
 import "./globals.css";
 import ClientLayout from "./clientLayout";
+import { AuthProvider } from "@/context/AuthContext";
 
 const roboto = Roboto({
   variable: "--font-roboto",
@@ -49,9 +50,15 @@ export default function RootLayout({
       <body className={`${roboto.variable}`}>
         {/* Wrap the client layout in Suspense */}
         <Suspense fallback={<div>Loading...</div>}>
-          <ClientLayout>{children}</ClientLayout>
+          <ClientLayout>
+            <ChildrenWithProviders>{children}</ChildrenWithProviders>
+          </ClientLayout>
         </Suspense>
       </body>
     </html>
   );
 }
+
+const ChildrenWithProviders: React.FC<PropsWithChildren> = ({ children }) => {
+  return <AuthProvider>{children}</AuthProvider>;
+};

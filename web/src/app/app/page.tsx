@@ -1,8 +1,22 @@
+"use client";
+
+import { ROUTES } from "@/constants/routes";
+import useAuth from "@/hooks/useAuth";
+import { Spin } from "antd";
+import { useRouter } from "next/navigation";
 import React from "react";
 
-type Props = {};
+const App = () => {
+  const router = useRouter();
+  const { isAuthenticated, loading } = useAuth();
 
-const App = (props: Props) => {
+  if (loading) {
+    return <Spin fullscreen />;
+  }
+  if (!isAuthenticated) {
+    router.push(ROUTES.LOGIN);
+    return;
+  }
   return <div>App</div>;
 };
 

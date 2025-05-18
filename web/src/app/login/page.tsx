@@ -138,6 +138,7 @@ export default function Login() {
                     onChange={handleChange}
                     placeholder="Enter your password"
                     required
+                    autoComplete="current-password"
                   />
                 </Form.Item>
 
