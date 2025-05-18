@@ -94,12 +94,7 @@ export default function PricingPage() {
   }, []);
 
   return (
-    <div
-      style={{
-        textAlign: "center",
-        margin: "auto",
-      }}
-    >
+    <div style={{ textAlign: "center" }}>
       {contextHolder}
 
       {/* Hero Section */}

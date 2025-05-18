@@ -14,6 +14,7 @@ import {
   TwitterCircleFilled,
 } from "@ant-design/icons";
 import { motion } from "framer-motion";
+import { ROUTES } from "@/constants/routes";
 
 export default function ClientLayout({
   children,
@@ -59,7 +60,7 @@ export default function ClientLayout({
                 top: "0px",
                 left: "10px",
               }}
-              onClick={() => router.push("/")}
+              onClick={() => router.push(ROUTES.HOMEPAGE)}
             >
               <HeronLogo />
             </div>
@@ -67,7 +68,7 @@ export default function ClientLayout({
             {/* Desktop Navigation */}
             <div className="desktop-menu">
               <Link
-                href={"/"}
+                href={ROUTES.HOMEPAGE}
                 style={{
                   color: "#000",
                   margin: "0 15px",
@@ -77,7 +78,7 @@ export default function ClientLayout({
                 Home
               </Link>
               <Link
-                href={"/pricing"}
+                href={ROUTES.PRICING}
                 style={{
                   color: "#000",
                   margin: "0 15px",
@@ -87,7 +88,7 @@ export default function ClientLayout({
                 Pricing
               </Link>
               <Link
-                href={"/contact"}
+                href={ROUTES.CONTACT}
                 style={{
                   color: "#000",
                   margin: "0 15px",
@@ -105,7 +106,7 @@ export default function ClientLayout({
               variant="solid"
               size="large"
               onClick={() => {
-                router.push("/login");
+                router.push(ROUTES.LOGIN);
               }}
             >
               Login
@@ -133,21 +134,21 @@ export default function ClientLayout({
               style={{ display: "flex", flexDirection: "column", gap: "20px" }}
             >
               <Link
-                href={"/"}
+                href={ROUTES.HOMEPAGE}
                 onClick={toggleDrawer}
                 style={{ color: "#505F98" }}
               >
                 Home
               </Link>
               <Link
-                href={"/pricing"}
+                href={ROUTES.PRICING}
                 onClick={toggleDrawer}
                 style={{ color: "#505F98" }}
               >
                 Pricing
               </Link>
               <Link
-                href={"/contact"}
+                href={ROUTES.CONTACT}
                 onClick={toggleDrawer}
                 style={{ color: "#505F98" }}
               >
@@ -155,7 +156,7 @@ export default function ClientLayout({
               </Link>
 
               <Link
-                href={"/login"}
+                href={ROUTES.LOGIN}
                 onClick={toggleDrawer}
                 style={{ color: "#505F98" }}
               >
@@ -165,7 +166,9 @@ export default function ClientLayout({
           </Drawer>
         </div>
 
-        <div style={{ flex: 1 }}>{children}</div>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+          {children}
+        </div>
 
         {/* Footer */}
         <Flex
@@ -190,10 +193,10 @@ export default function ClientLayout({
 
           <Flex justify="space-between" align="center">
             <Flex align="center" gap={"20px"} justify="center">
-              <Link href={"/"} style={{ color: "#000" }}>
+              <Link href={ROUTES.HOMEPAGE} style={{ color: "#000" }}>
                 Home
               </Link>
-              <Link href={"/pricing"} style={{ color: "#000" }}>
+              <Link href={ROUTES.PRICING} style={{ color: "#000" }}>
                 Pricing
               </Link>
               <Link href={"#"} style={{ color: "#000" }}>
@@ -202,7 +205,7 @@ export default function ClientLayout({
               <Link href={"#"} style={{ color: "#000" }}>
                 Resources
               </Link>
-              <Link href={"/contact"} style={{ color: "#000" }}>
+              <Link href={ROUTES.CONTACT} style={{ color: "#000" }}>
                 Contact
               </Link>
             </Flex>

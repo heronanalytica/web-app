@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { trackEvent } from "@/lib/analytics";
 import { RightOutlined } from "@ant-design/icons";
+import { ROUTES } from "@/constants/routes";
 
 const SignUpButton = () => {
   const router = useRouter();
@@ -13,7 +14,7 @@ const SignUpButton = () => {
       category: "Homepage",
       label: "Sign Up Now",
     });
-    router.push("/pricing");
+    router.push(ROUTES.PRICING);
   };
 
   return (
