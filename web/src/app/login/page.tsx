@@ -11,6 +11,7 @@ import ForgotPasswordModal from "./ForgotPasswordModal";
 import { ROUTES } from "@/constants/routes";
 import { useRouter } from "next/navigation";
 import useAuth from "@/hooks/useAuth";
+import { fetcher } from "@/lib/fetcher";
 
 const { Title, Text, Link } = Typography;
 
@@ -40,28 +41,11 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/auth/login`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-          credentials: "include",
-        }
-      );
-
-      const data: AuthApiResponse = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || "Login failed");
-        return;
-      }
-
+      await fetcher.post<AuthApiResponse>("/api/auth/login", formData);
       await refresh();
       router.push(ROUTES.APP_HOMEPAGE);
-    } catch (err) {
-      console.error("Login error", err);
-      setError("Unexpected error occurred");
+    } catch (err: any) {
+      setError(err.message ?? "Login failed");
     } finally {
       setLoading(false);
     }
