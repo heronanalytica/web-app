@@ -3,13 +3,3 @@ export interface AuthUser {
   email: string;
   role: string;
 }
-
-export interface AuthResponseData {
-  accessToken: string;
-  user: AuthUser;
-}
-
-export interface AuthApiResponse {
-  message: string;
-  data: AuthResponseData;
-}

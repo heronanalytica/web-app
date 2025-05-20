@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Form, Input, Button, Typography, Row, Col } from "antd";
 import Image from "next/image";
-import type { AuthApiResponse } from "@/types/auth";
 import { FontPoppins } from "../../assets/fonts/poppins";
 import RegisterModal from "./RegisterModal";
 import styles from "./styles.module.scss";
@@ -12,6 +11,7 @@ import { ROUTES } from "@/constants/routes";
 import { useRouter } from "next/navigation";
 import useAuth from "@/hooks/useAuth";
 import { fetcher } from "@/lib/fetcher";
+import { AuthUser } from "@supabase/supabase-js";
 
 const { Title, Text, Link } = Typography;
 
@@ -41,7 +41,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      await fetcher.post<AuthApiResponse>("/api/auth/login", formData);
+      await fetcher.post<AuthUser>("/api/auth/login", formData);
       await refresh();
       router.push(ROUTES.APP_HOMEPAGE);
     } catch (err: any) {

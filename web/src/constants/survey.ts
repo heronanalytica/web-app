@@ -1,0 +1,5 @@
+export const enum SURVEY_INTAKE_QUESTION_TYPE {
+  SINGLE = "SINGLE",
+  MULTIPLE = "MULTIPLE",
+  TEXT = "TEXT",
+}
