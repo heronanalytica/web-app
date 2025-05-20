@@ -1,9 +1,7 @@
 import React, { PropsWithChildren } from "react";
 import styles from "./styles.module.scss";
 
-type Props = {};
-
-const AppLayout: React.FC<PropsWithChildren<Props>> = ({ children }) => {
+const AppLayout: React.FC<PropsWithChildren> = ({ children }) => {
   return <div className={styles.layoutContainer}>{children}</div>;
 };
 

@@ -5,6 +5,8 @@ import useAuth from "@/hooks/useAuth";
 import { Spin } from "antd";
 import { useRouter } from "next/navigation";
 import React from "react";
+import styles from "./styles.module.scss";
+import Steps from "./components/Steps";
 
 const App = () => {
   const router = useRouter();
@@ -17,7 +19,12 @@ const App = () => {
     router.push(ROUTES.LOGIN);
     return;
   }
-  return <div>App</div>;
+
+  return (
+    <div className={styles.appContainer}>
+      <Steps totalSteps={4} active={0} />
+    </div>
+  );
 };
 
 export default App;

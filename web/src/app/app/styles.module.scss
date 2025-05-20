@@ -1,4 +1,13 @@
 .layoutContainer {
   flex: 1;
   background-color: #fceaf8;
+  display: flex;
+}
+
+.appContainer {
+  background-color: white;
+  margin: 30px;
+  border-radius: 20px;
+  padding: 20px;
+  width: 100%;
 }

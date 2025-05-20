@@ -1,0 +1,17 @@
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.stepContainer {
+  width: 100%;
+  height: 10px;
+  background-color: #dbd9e6;
+  border-radius: 20px;
+}
+
+.stepActive {
+  background-color: #7a6def !important;
+}
