@@ -10,11 +10,13 @@ import styles from "./styles.module.scss";
 import ForgotPasswordModal from "./ForgotPasswordModal";
 import { ROUTES } from "@/constants/routes";
 import { useRouter } from "next/navigation";
+import useAuth from "@/hooks/useAuth";
 
 const { Title, Text, Link } = Typography;
 
 export default function Login() {
   const router = useRouter();
+  const { refresh } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -55,6 +57,7 @@ export default function Login() {
         return;
       }
 
+      await refresh();
       router.push(ROUTES.APP_HOMEPAGE);
     } catch (err) {
       console.error("Login error", err);
