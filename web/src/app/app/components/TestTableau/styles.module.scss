@@ -1,0 +1,22 @@
+.tableauWrapper {
+  width: 100%;
+  height: calc(100vh - 250px);
+  position: relative;
+  background: white;
+  overflow-y: hidden;
+
+  display: flex;
+  justify-content: center;
+}
+
+.inputWrapper {
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.fullscreenViz {
+  width: 1300px;
+  height: calc(100vh - 250px);
+  zoom: 1.2;
+}
