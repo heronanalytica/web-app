@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { DEFAULT_SURVEY_INTAKE_NAME } from './survey.constants';
+import { IntakeQuestionAnswerDto } from './dto/intake-question-answer.dto';
 
 @Injectable()
 export class SurveyService {
@@ -29,5 +30,16 @@ export class SurveyService {
       return questions;
     }
     return [];
+  }
+
+  async saveSurveyIntakeAnswer(userId: string, dto: IntakeQuestionAnswerDto) {
+    await this.dbService.surveyIntakeQuestionAnswer.create({
+      data: {
+        userId,
+        response: JSON.stringify(dto.response),
+      },
+    });
+
+    return { message: 'Survey answers submitted' };
   }
 }
