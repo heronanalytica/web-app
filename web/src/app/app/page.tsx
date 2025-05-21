@@ -25,7 +25,11 @@ const App = () => {
   const renderStepComponent = () => {
     switch (currentStep) {
       default:
-        return <IntakeQuestionStep />;
+        return (
+          <IntakeQuestionStep
+            onSuccess={() => setCurrentStep((value) => value + 1)}
+          />
+        );
     }
   };
 

@@ -6,15 +6,22 @@ import clsx from "clsx";
 import { FontInter } from "@/assets/fonts/inter";
 import { fetcher } from "@/lib/fetcher";
 import { SurveyIntakeQuestion } from "@/types/survey";
-import { Button, Typography, Radio, Input } from "antd";
+import { Button, Typography, Radio, Input, notification, Spin } from "antd";
 import { SURVEY_INTAKE_QUESTION_TYPE } from "@/constants/survey";
 import { ArrowRightOutlined } from "@ant-design/icons";
 
 const { TextArea } = Input;
 
-const IntakeQuestionStep = () => {
+type Props = {
+  onSuccess: () => void;
+};
+
+const IntakeQuestionStep: React.FC<Props> = ({ onSuccess }) => {
   const [questions, setQuestions] = useState<SurveyIntakeQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<string, string[] | string>>({});
+  const [loading, setLoading] = useState(false);
+  const [errorFields, setErrorFields] = useState<string[]>([]);
+  const [api, contextHolder] = notification.useNotification();
 
   useEffect(() => {
     const fetchIntakeQuestion = async () => {
@@ -95,18 +102,57 @@ const IntakeQuestionStep = () => {
   };
 
   const handleSubmit = async () => {
-    console.log("Submitting answers:", answers);
-    // try {
-    //   await fetcher.post("/api/survey/generate-questionnaire", answers); // Placeholder
-    //   message.success("Questionnaire generated successfully!");
-    // } catch (err: any) {
-    //   message.error(err.message || "Submission failed");
-    // }
+    const unanswered = questions.filter((q) => {
+      const answer = answers[q.id];
+      return (
+        answer === undefined ||
+        (Array.isArray(answer) && answer.length === 0) ||
+        (typeof answer === "string" && answer.trim() === "")
+      );
+    });
+
+    if (unanswered.length > 0) {
+      setErrorFields(unanswered.map((q) => q.id));
+      api.error({
+        message: "Please answer all the questions",
+        description: "",
+        placement: "bottom",
+      });
+      return;
+    }
+
+    setErrorFields([]);
+    setLoading(true);
+
+    const payload = {
+      response: questions.map((q) => ({
+        question: q.question,
+        answer: answers[q.id],
+      })),
+    };
+
+    try {
+      await fetcher.post("/api/survey/intake-questions/answer", payload);
+      onSuccess();
+    } catch {
+      api.error({
+        message: "Submission failed",
+        description: "",
+        placement: "bottom",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const renderQuestions = () => {
     return questions.map((question, index) => (
-      <div key={question.id} className={styles.questionCard}>
+      <div
+        key={question.id}
+        className={clsx(styles.questionCard, {
+          [styles.questionCardError]: errorFields.includes(question.id),
+        })}
+      >
         <Typography.Text strong>
           {index + 1}. {question.question}
         </Typography.Text>
@@ -123,34 +169,39 @@ const IntakeQuestionStep = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={clsx(styles.intro, FontInter.className)}>
-        Surveys are crucial for building customer personas because they provide
-        direct, self-reported insights into consumer behavior, attitudes, and
-        motivations.
-        <br />
-        Please select options that best describe your goals and let us generate
-        a customized questionnaire tailored to your needs.
-        <br />
-        Demographic question is included by default.
-      </div>
-
-      {renderQuestions()}
-
-      {questions.length > 0 && (
-        <div className={styles.submitButtonWrapper}>
-          <Button
-            type="primary"
-            onClick={handleSubmit}
-            className={styles.submitButton}
-            iconPosition="end"
-            icon={<ArrowRightOutlined style={{ fontSize: "20px" }} />}
-          >
-            Generate Questionnaire
-          </Button>
+    <>
+      {contextHolder}
+      <div className={styles.container}>
+        {loading && <Spin fullscreen />}
+        <div className={clsx(styles.intro, FontInter.className)}>
+          Surveys are crucial for building customer personas because they
+          provide direct, self-reported insights into consumer behavior,
+          attitudes, and motivations.
+          <br />
+          Please select options that best describe your goals and let us
+          generate a customized questionnaire tailored to your needs.
+          <br />
+          Demographic question is included by default.
         </div>
-      )}
-    </div>
+
+        {renderQuestions()}
+
+        {questions.length > 0 && (
+          <div className={styles.submitButtonWrapper}>
+            <Button
+              type="primary"
+              onClick={handleSubmit}
+              className={styles.submitButton}
+              iconPosition="end"
+              icon={<ArrowRightOutlined style={{ fontSize: "20px" }} />}
+              loading={loading}
+            >
+              Generate Questionnaire
+            </Button>
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 
