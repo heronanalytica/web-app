@@ -11,11 +11,25 @@ const TableauEmbedder = () => {
   const [scriptInput, setScriptInput] = useState("");
   const [rendered, setRendered] = useState(false);
   const vizContainerRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState("100%");
+  const [height, setHeight] = useState("calc(100vh - 250px)");
 
   const handleRender = () => {
     const divRegex =
       /<div[^>]*class=['"]tableauPlaceholder['"][\s\S]*?<\/div>/i;
     const objectHtml = scriptInput.match(divRegex)?.[0];
+
+    const widthMatch = scriptInput.match(
+      /vizElement\.style\.width\s*=\s*['"](.+?)['"]/
+    );
+    const heightMatch = scriptInput.match(
+      /vizElement\.style\.height\s*=\s*['"](.+?)['"]/
+    );
+
+    const parsedWidth = widthMatch?.[1] ?? "100%";
+    const parsedHeight = heightMatch?.[1] ?? "100vh";
+    setWidth(parsedWidth);
+    setHeight(parsedHeight);
 
     if (!objectHtml || !vizContainerRef.current) {
       alert("Invalid Tableau embed code.");
@@ -59,7 +73,11 @@ const TableauEmbedder = () => {
         </div>
       )}
 
-      <div ref={vizContainerRef} className={styles.fullscreenViz}></div>
+      <div
+        ref={vizContainerRef}
+        className={styles.fullscreenViz}
+        style={{ width, height }}
+      ></div>
     </div>
   );
 };
