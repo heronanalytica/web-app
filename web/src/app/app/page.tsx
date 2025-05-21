@@ -8,6 +8,7 @@ import React, { useState } from "react";
 import styles from "./styles.module.scss";
 import Steps from "./components/Steps";
 import IntakeQuestionStep from "./components/IntakeQuestionStep";
+import SurveyPreview from "./components/SurveyPreview";
 
 const App = () => {
   const router = useRouter();
@@ -24,6 +25,8 @@ const App = () => {
 
   const renderStepComponent = () => {
     switch (currentStep) {
+      case 1:
+        return <SurveyPreview />;
       default:
         return (
           <IntakeQuestionStep
