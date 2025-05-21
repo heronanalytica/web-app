@@ -24,8 +24,9 @@ export default function ClientLayout({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  const showFooter = !pathname.startsWith("/app");
 
   useEffect(() => {
     const url = `${pathname}${searchParams ? `?${searchParams}` : ""}`;
@@ -171,67 +172,69 @@ export default function ClientLayout({
         </div>
 
         {/* Footer */}
-        <Flex
-          justify="space-between"
-          align="center"
-          gap={"20px"}
-          style={{
-            margin: "30px 0",
-            padding: "30px 10%",
-            flexWrap: "wrap",
-            height: "100px",
-            zIndex: 100,
-          }}
-        >
-          {/* Footer Logo */}
-          <HeronLogo
+        {showFooter && (
+          <Flex
+            justify="space-between"
+            align="center"
+            gap={"20px"}
             style={{
-              display: "none", // Default hidden
+              margin: "30px 0",
+              padding: "30px 10%",
+              flexWrap: "wrap",
+              height: "100px",
+              zIndex: 100,
             }}
-            className="footer-logo"
-          />
+          >
+            {/* Footer Logo */}
+            <HeronLogo
+              style={{
+                display: "none", // Default hidden
+              }}
+              className="footer-logo"
+            />
 
-          <Flex justify="space-between" align="center">
-            <Flex align="center" gap={"20px"} justify="center">
-              <Link href={ROUTES.HOMEPAGE} style={{ color: "#000" }}>
-                Home
-              </Link>
-              <Link href={ROUTES.PRICING} style={{ color: "#000" }}>
-                Pricing
-              </Link>
-              <Link href={"#"} style={{ color: "#000" }}>
-                Company
-              </Link>
-              <Link href={"#"} style={{ color: "#000" }}>
-                Resources
-              </Link>
-              <Link href={ROUTES.CONTACT} style={{ color: "#000" }}>
-                Contact
-              </Link>
+            <Flex justify="space-between" align="center">
+              <Flex align="center" gap={"20px"} justify="center">
+                <Link href={ROUTES.HOMEPAGE} style={{ color: "#000" }}>
+                  Home
+                </Link>
+                <Link href={ROUTES.PRICING} style={{ color: "#000" }}>
+                  Pricing
+                </Link>
+                <Link href={"#"} style={{ color: "#000" }}>
+                  Company
+                </Link>
+                <Link href={"#"} style={{ color: "#000" }}>
+                  Resources
+                </Link>
+                <Link href={ROUTES.CONTACT} style={{ color: "#000" }}>
+                  Contact
+                </Link>
+              </Flex>
+            </Flex>
+
+            <Flex align="center" gap={"20px"}>
+              {[
+                { icon: <FacebookFilled />, color: "#1877F2" },
+                { icon: <LinkedinFilled />, color: "#0077B5" },
+                { icon: <TwitterCircleFilled />, color: "#1da1f2" },
+              ].map((social, index) => (
+                <motion.div
+                  key={index}
+                  whileHover={{ scale: 1.2, rotate: 10 }}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    fontSize: "24px",
+                    color: social.color,
+                    cursor: "pointer",
+                  }}
+                >
+                  {social.icon}
+                </motion.div>
+              ))}
             </Flex>
           </Flex>
-
-          <Flex align="center" gap={"20px"}>
-            {[
-              { icon: <FacebookFilled />, color: "#1877F2" },
-              { icon: <LinkedinFilled />, color: "#0077B5" },
-              { icon: <TwitterCircleFilled />, color: "#1da1f2" },
-            ].map((social, index) => (
-              <motion.div
-                key={index}
-                whileHover={{ scale: 1.2, rotate: 10 }}
-                transition={{ duration: 0.3 }}
-                style={{
-                  fontSize: "24px",
-                  color: social.color,
-                  cursor: "pointer",
-                }}
-              >
-                {social.icon}
-              </motion.div>
-            ))}
-          </Flex>
-        </Flex>
+        )}
 
         <style jsx global>{`
           @media screen and (min-width: 768px) {
