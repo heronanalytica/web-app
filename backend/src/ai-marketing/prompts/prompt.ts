@@ -24,17 +24,30 @@ export function buildPersonaPrompt(segment: string, index: number): string {
 }
 
 export function buildCompanyPrompt(companyUrl: string): string {
-  return `You are a brand analyst. Given the domain "${companyUrl}", infer and return this exact JSON structure:
-        {
-          "brand_positioning": "...",
-          "values": ["..."],
-          "tone_of_voice": "...",
-          "typical_customer_profile": {
-            "age_range": "...",
-            "interests": ["..."],
-            "lifestyle": "...",
-            "income_level": "..."
-          }
-        }
-        Respond with only valid JSON.`;
+  return `You are a brand analyst. Analyze the company at the domain "${companyUrl}" and return only a valid JSON object in the following format:
+
+    {
+      "brand_positioning": "string",
+      "values": ["string"],
+      "tone_of_voice": "string",
+      "typical_customer_profile": {
+        "age_range": "string",
+        "interests": ["string"],
+        "lifestyle": "string",
+        "income_level": "string"
+      },
+      "products": ["string"]
+    }
+
+    Guidelines:
+    - "brand_positioning": Describe how the brand is perceived in the market.
+    - "values": List core values or principles the company promotes.
+    - "tone_of_voice": Describe the communication style used in branding or marketing.
+    - "typical_customer_profile": Describe the main customer demographic in terms of age, interests, lifestyle, and income.
+    - "products": Provide 3–6 representative products or services offered by the company. Use general categories or specific examples based on available information.
+
+    Rules:
+    - Respond with **only** valid JSON (no markdown, no code block).
+    - If a field is uncertain, infer based on industry and website content — **do not leave any field empty**.
+    - Keep the response concise and factual.`;
 }
