@@ -6,14 +6,20 @@ import {
   CompanyProfile,
   MarketingAnalysisResult,
   MarketingStrategy,
+  EmailTemplate,
+  AdsTemplate,
 } from './types/ai-marketing.types';
 import {
+  buildAdTemplatesPrompt,
   buildCompanyPrompt,
+  buildEmailTemplatePrompt,
   buildPersonaPrompt,
   buildStrategyPrompt,
 } from './prompts/prompt';
 import {
+  AdsTemplateSchema,
   CompanyProfileSchema,
+  EmailTemplateSchema,
   MarketingStrategySchema,
   PersonaSegmentSchema,
 } from './validation/ai-marketing.schema';
@@ -138,6 +144,72 @@ export class AiMarketingService {
       );
       console.error(err);
       throw new Error('AI response was not valid JSON');
+    }
+  }
+
+  async generateCampaignTemplates(dto: SegmentAnalysisDto) {
+    const personaSegments = await Promise.all(
+      dto.segments.map((segment, idx) => this.parseSegment(segment, idx + 1)),
+    );
+
+    const companyProfile = await this.parseCompany(dto.companyUrl);
+
+    const templates = await Promise.all(
+      personaSegments.map(async (segment) => {
+        const email = await this.generateEmailTemplate(segment, companyProfile);
+        const ads = await this.generateAdTemplates(segment, companyProfile);
+        return { segment: segment.segment_name, email, ads };
+      }),
+    );
+
+    return { templates };
+  }
+
+  private async generateEmailTemplate(
+    segment: PersonaSegment,
+    company: CompanyProfile,
+  ): Promise<EmailTemplate> {
+    const prompt = buildEmailTemplatePrompt(segment, company);
+    const res = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [{ role: 'user', content: prompt }],
+      user: 'email-template',
+      temperature: 0.5,
+      max_tokens: 800,
+    });
+    const content = res.choices[0].message.content || '{}';
+
+    try {
+      const json = this.extractJsonFromMarkdown(content);
+      const parsed = EmailTemplateSchema.parse(JSON.parse(json));
+      return parsed;
+    } catch (err) {
+      console.error('Email template validation failed:', err);
+      throw new Error('Invalid email template JSON returned from AI');
+    }
+  }
+
+  private async generateAdTemplates(
+    segment: PersonaSegment,
+    company: CompanyProfile,
+  ): Promise<AdsTemplate> {
+    const prompt = buildAdTemplatesPrompt(segment, company);
+    const res = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [{ role: 'user', content: prompt }],
+      user: 'ad-templates',
+      temperature: 0.5,
+      max_tokens: 800,
+    });
+    const content = res.choices[0].message.content || '{}';
+
+    try {
+      const json = this.extractJsonFromMarkdown(content);
+      const parsed = AdsTemplateSchema.parse(JSON.parse(json));
+      return parsed;
+    } catch (err) {
+      console.error('Ad template validation failed:', err);
+      throw new Error('Invalid Ad template JSON returned from AI');
     }
   }
 }

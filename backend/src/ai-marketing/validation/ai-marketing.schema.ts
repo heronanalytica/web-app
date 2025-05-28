@@ -68,3 +68,17 @@ export const MarketingStrategySchema = z.object({
   team_roles: z.array(z.string()).optional(), // NEW - from "Team Roles and Responsibilities"
   crisis_plan_notes: z.string().optional(), // NEW - optional crisis response handling
 });
+
+export const AdTemplateSchema = z.object({
+  platform: z.string(),
+  headline: z.string(),
+  primary_text: z.string(),
+  call_to_action: z.string(),
+  media_suggestion: z.string(),
+});
+export const AdsTemplateSchema = z.array(AdTemplateSchema);
+
+export const EmailTemplateSchema = z.object({
+  Subject: z.string(),
+  Body: z.string(),
+});

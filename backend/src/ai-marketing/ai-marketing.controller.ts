@@ -10,4 +10,9 @@ export class AiMarketingController {
   async analyzeSegmentsAndCompany(@Body() dto: SegmentAnalysisDto) {
     return this.aiMarketingService.analyze(dto);
   }
+
+  @Post('generate-campaign-templates')
+  async generateCampaignTemplates(@Body() dto: SegmentAnalysisDto) {
+    return this.aiMarketingService.generateCampaignTemplates(dto);
+  }
 }

@@ -103,3 +103,66 @@ export function buildStrategyPrompt(
     - Use clear and concise business language. Avoid placeholders.
     - Return only valid JSON (no markdown, no code block, no explanations).`;
 }
+
+export function buildEmailTemplatePrompt(
+  segment: PersonaSegment,
+  company: CompanyProfile,
+): string {
+  return `You are an expert marketing copywriter.
+
+    Using the following customer persona:
+    ${JSON.stringify(segment, null, 2)}
+
+    And company profile:
+    ${JSON.stringify(company, null, 2)}
+
+    Create a personalized email campaign using this format:
+
+    Subject: string
+    Body (HTML-ready): string with placeholders like {{firstname}}, {{lastname}}, {{product}}
+
+    Rules:
+    - Tone should align with company’s tone_of_voice
+    - Content should appeal to persona’s behavior and psychographics
+    - HTML body should be short, skimmable, and contain 1 clear CTA
+
+    Respond with ONLY valid JSON.`;
+}
+
+export function buildAdTemplatesPrompt(
+  segment: PersonaSegment,
+  company: CompanyProfile,
+): string {
+  return `You are a performance ad specialist.
+
+  Given this persona:
+  ${JSON.stringify(segment, null, 2)}
+
+  And this company:
+  ${JSON.stringify(company, null, 2)}
+
+  Create 1 ad creatives for Facebook and Instagram using this array format:
+
+  [
+    {
+      "platform": "facebook",
+      "headline": "string",
+      "primary_text": "string",
+      "call_to_action": "string",
+      "media_suggestion": "string"
+    },
+    {
+      "platform": "instagram",
+      "headline": "string",
+      "primary_text": "string",
+      "call_to_action": "string",
+      "media_suggestion": "string"
+    }
+  ]
+
+  Guidelines:
+  - Each ad must be distinct and testable
+  - Platform should be "facebook_instagram"
+  - Use concise and engaging marketing language
+  - Use JSON array only, no markdown, no explanations`;
+}
