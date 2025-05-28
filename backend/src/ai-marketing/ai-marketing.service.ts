@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { SegmentAnalysisDto } from './dto/segment-analysis.dto';
-import { OpenAI } from 'openai';
 import {
   PersonaSegment,
   CompanyProfile,
@@ -24,17 +23,10 @@ import {
   PersonaSegmentSchema,
 } from './validation/ai-marketing.schema';
 import { SYSTEM_PROMPTS } from './prompts/system-prompts';
-
-let openai: OpenAI;
+import { callOpenAiAndParse } from './helpers/openai.helper';
 
 @Injectable()
 export class AiMarketingService {
-  constructor() {
-    openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-  }
-
   private extractJsonFromMarkdown(content: string): string {
     return content
       .replace(/^```(?:json)?\s*/i, '')
@@ -66,85 +58,35 @@ export class AiMarketingService {
     segment: string,
     index: number,
   ): Promise<PersonaSegment> {
-    const prompt = buildPersonaPrompt(segment, index);
-    const res = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPTS.persona },
-        { role: 'user', content: prompt },
-      ],
+    return callOpenAiAndParse({
       user: `persona-segment`,
+      prompt: buildPersonaPrompt(segment, index),
+      schema: PersonaSegmentSchema,
+      systemPrompt: SYSTEM_PROMPTS.persona,
       temperature: 0.3,
-      max_tokens: 800,
     });
-
-    const content = res.choices[0].message.content || '{}';
-
-    try {
-      const json = this.extractJsonFromMarkdown(content);
-      const parsed = PersonaSegmentSchema.parse(JSON.parse(json));
-      return parsed;
-    } catch (err) {
-      console.error(`[parseSegment:${index}] Invalid AI output:\n`, content);
-      console.error(err);
-      throw new Error('Failed to validate persona segment schema');
-    }
   }
+
   private async parseCompany(companyUrl: string): Promise<CompanyProfile> {
-    const prompt = buildCompanyPrompt(companyUrl);
-    const res = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPTS.company },
-        { role: 'user', content: prompt },
-      ],
-      user: `company-segment`,
+    return callOpenAiAndParse({
+      user: `company-profile`,
+      prompt: buildCompanyPrompt(companyUrl),
+      schema: CompanyProfileSchema,
+      systemPrompt: SYSTEM_PROMPTS.company,
       temperature: 0.3,
-      max_tokens: 800,
     });
-
-    const content = res.choices[0].message.content || '{}';
-
-    try {
-      const json = this.extractJsonFromMarkdown(content);
-      const parsed = CompanyProfileSchema.parse(JSON.parse(json));
-      return parsed;
-    } catch (err) {
-      console.error('[parseCompany] Failed to parse AI output:', content);
-      console.error(err);
-      throw new Error('AI response was not valid JSON');
-    }
   }
 
   private async generateStrategy(
     segment: PersonaSegment,
     company: CompanyProfile,
   ): Promise<MarketingStrategy> {
-    const prompt = buildStrategyPrompt(segment, company);
-    const res = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPTS.strategy },
-        { role: 'user', content: prompt },
-      ],
-      user: `strategy-segment`,
-      temperature: 0.5,
-      max_tokens: 800,
+    return callOpenAiAndParse({
+      user: `strategy-${segment.segment_name}`,
+      prompt: buildStrategyPrompt(segment, company),
+      schema: MarketingStrategySchema,
+      systemPrompt: SYSTEM_PROMPTS.strategy,
     });
-    const content = res.choices[0].message.content || '{}';
-
-    try {
-      const json = this.extractJsonFromMarkdown(content);
-      const parsed = MarketingStrategySchema.parse(JSON.parse(json));
-      return parsed;
-    } catch (err) {
-      console.error(
-        `[generateStrategy:${segment.segment_name}] Failed to parse AI output:\n`,
-        content,
-      );
-      console.error(err);
-      throw new Error('AI response was not valid JSON');
-    }
   }
 
   async generateCampaignTemplates(dto: SegmentAnalysisDto) {
@@ -169,47 +111,21 @@ export class AiMarketingService {
     segment: PersonaSegment,
     company: CompanyProfile,
   ): Promise<EmailTemplate> {
-    const prompt = buildEmailTemplatePrompt(segment, company);
-    const res = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [{ role: 'user', content: prompt }],
-      user: 'email-template',
-      temperature: 0.5,
-      max_tokens: 800,
+    return callOpenAiAndParse({
+      user: `email-${segment.segment_name}`,
+      prompt: buildEmailTemplatePrompt(segment, company),
+      schema: EmailTemplateSchema,
     });
-    const content = res.choices[0].message.content || '{}';
-
-    try {
-      const json = this.extractJsonFromMarkdown(content);
-      const parsed = EmailTemplateSchema.parse(JSON.parse(json));
-      return parsed;
-    } catch (err) {
-      console.error('Email template validation failed:', err);
-      throw new Error('Invalid email template JSON returned from AI');
-    }
   }
 
   private async generateAdTemplates(
     segment: PersonaSegment,
     company: CompanyProfile,
   ): Promise<AdsTemplate> {
-    const prompt = buildAdTemplatesPrompt(segment, company);
-    const res = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [{ role: 'user', content: prompt }],
-      user: 'ad-templates',
-      temperature: 0.5,
-      max_tokens: 800,
+    return callOpenAiAndParse({
+      user: `ads-${segment.segment_name}`,
+      prompt: buildAdTemplatesPrompt(segment, company),
+      schema: AdsTemplateSchema,
     });
-    const content = res.choices[0].message.content || '{}';
-
-    try {
-      const json = this.extractJsonFromMarkdown(content);
-      const parsed = AdsTemplateSchema.parse(JSON.parse(json));
-      return parsed;
-    } catch (err) {
-      console.error('Ad template validation failed:', err);
-      throw new Error('Invalid Ad template JSON returned from AI');
-    }
   }
 }
