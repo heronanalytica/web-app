@@ -1,3 +1,5 @@
+import { CompanyProfile, PersonaSegment } from '../types/ai-marketing.types';
+
 export function buildPersonaPrompt(segment: string, index: number): string {
   return `Parse and format the following customer persona (Segment ${index}) into this exact JSON structure:
     {
@@ -50,4 +52,54 @@ export function buildCompanyPrompt(companyUrl: string): string {
     - Respond with **only** valid JSON (no markdown, no code block).
     - If a field is uncertain, infer based on industry and website content — **do not leave any field empty**.
     - Keep the response concise and factual.`;
+}
+
+export function buildStrategyPrompt(
+  segment: PersonaSegment,
+  company: CompanyProfile,
+): string {
+  return `You are a marketing strategist.
+
+    Given the following customer persona:
+    ${JSON.stringify(segment, null, 2)}
+
+    And the company profile:
+    ${JSON.stringify(company, null, 2)}
+
+    Create a detailed marketing strategy tailored to this persona. Your response must strictly follow this JSON structure:
+
+    {
+      "segment_name": "string",
+      "campaign_objective": "string",
+      "key_message": "string",
+      "value_proposition": "string",
+      "tone_alignment": "string",
+      "call_to_action": "string",
+      "recommended_channels": ["string"],
+      "tactical_plan": [
+        {
+          "channel": "email" | "social_media" | "ads" | "sms" | "push",
+          "platform": "string",
+          "content_format": "image" | "video" | "text" | "carousel" | "email_template",
+          "audience_targeting": {
+            "interests": ["string"],
+            "age_range": "string",
+            "behaviors": ["string"],
+            "demographics": "string"
+          },
+          "schedule": "string"
+        }
+      ],
+      "tracking_and_kpis": ["string"],
+      "content_calendar_notes": "string",
+      "team_roles": ["string"],
+      "crisis_plan_notes": "string"
+    }
+
+    Instructions:
+    - Align "tone_alignment" with the company’s tone_of_voice.
+    - Tailor the strategy to match both the persona’s psychographics and behaviors, and the company’s positioning and products.
+    - Each "tactical_plan" item should be realistic, platform-specific, and actionable.
+    - Use clear and concise business language. Avoid placeholders.
+    - Return only valid JSON (no markdown, no code block, no explanations).`;
 }

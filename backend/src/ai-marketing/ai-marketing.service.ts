@@ -5,10 +5,16 @@ import {
   PersonaSegment,
   CompanyProfile,
   MarketingAnalysisResult,
+  MarketingStrategy,
 } from './types/ai-marketing.types';
-import { buildCompanyPrompt, buildPersonaPrompt } from './prompts/prompt';
+import {
+  buildCompanyPrompt,
+  buildPersonaPrompt,
+  buildStrategyPrompt,
+} from './prompts/prompt';
 import {
   CompanyProfileSchema,
+  MarketingStrategySchema,
   PersonaSegmentSchema,
 } from './validation/ai-marketing.schema';
 
@@ -36,9 +42,16 @@ export class AiMarketingService {
 
     const parsedCompany = await this.parseCompany(dto.companyUrl);
 
+    const strategies = await Promise.all(
+      parsedSegments.map((segment) =>
+        this.generateStrategy(segment, parsedCompany),
+      ),
+    );
+
     return {
       parsedSegments,
       parsedCompany,
+      strategies,
     };
   }
 
@@ -86,6 +99,35 @@ export class AiMarketingService {
       return parsed;
     } catch (err) {
       console.error('[parseCompany] Failed to parse AI output:', content);
+      console.error(err);
+      throw new Error('AI response was not valid JSON');
+    }
+  }
+
+  private async generateStrategy(
+    segment: PersonaSegment,
+    company: CompanyProfile,
+  ): Promise<MarketingStrategy> {
+    const prompt = buildStrategyPrompt(segment, company);
+
+    const res = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [{ role: 'user', content: prompt }],
+      user: `strategy-segment`,
+      temperature: 0.5,
+      max_tokens: 800,
+    });
+    const content = res.choices[0].message.content || '{}';
+
+    try {
+      const json = this.extractJsonFromMarkdown(content);
+      const parsed = MarketingStrategySchema.parse(JSON.parse(json));
+      return parsed;
+    } catch (err) {
+      console.error(
+        `[generateStrategy:${segment.segment_name}] Failed to parse AI output:\n`,
+        content,
+      );
       console.error(err);
       throw new Error('AI response was not valid JSON');
     }
