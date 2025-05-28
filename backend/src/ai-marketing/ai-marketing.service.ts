@@ -17,6 +17,7 @@ import {
   MarketingStrategySchema,
   PersonaSegmentSchema,
 } from './validation/ai-marketing.schema';
+import { SYSTEM_PROMPTS } from './prompts/system-prompts';
 
 let openai: OpenAI;
 
@@ -60,10 +61,12 @@ export class AiMarketingService {
     index: number,
   ): Promise<PersonaSegment> {
     const prompt = buildPersonaPrompt(segment, index);
-
     const res = await openai.chat.completions.create({
       model: 'gpt-4o',
-      messages: [{ role: 'user', content: prompt }],
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPTS.persona },
+        { role: 'user', content: prompt },
+      ],
       user: `persona-segment`,
       temperature: 0.3,
       max_tokens: 800,
@@ -85,7 +88,10 @@ export class AiMarketingService {
     const prompt = buildCompanyPrompt(companyUrl);
     const res = await openai.chat.completions.create({
       model: 'gpt-4o',
-      messages: [{ role: 'user', content: prompt }],
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPTS.company },
+        { role: 'user', content: prompt },
+      ],
       user: `company-segment`,
       temperature: 0.3,
       max_tokens: 800,
@@ -109,10 +115,12 @@ export class AiMarketingService {
     company: CompanyProfile,
   ): Promise<MarketingStrategy> {
     const prompt = buildStrategyPrompt(segment, company);
-
     const res = await openai.chat.completions.create({
       model: 'gpt-4o',
-      messages: [{ role: 'user', content: prompt }],
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPTS.strategy },
+        { role: 'user', content: prompt },
+      ],
       user: `strategy-segment`,
       temperature: 0.5,
       max_tokens: 800,
