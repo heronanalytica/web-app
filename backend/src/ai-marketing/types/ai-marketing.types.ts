@@ -10,7 +10,7 @@ export type CompanyProfile = z.infer<typeof CompanyProfileSchema>;
 export type MarketingStrategy = z.infer<typeof MarketingStrategySchema>;
 
 export interface MarketingAnalysisResult {
-  parsedSegments: PersonaSegment[];
-  parsedCompany: CompanyProfile;
+  personaSegments: PersonaSegment[];
+  companyProfile: CompanyProfile;
   strategies: MarketingStrategy[];
 }

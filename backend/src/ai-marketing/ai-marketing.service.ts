@@ -36,21 +36,21 @@ export class AiMarketingService {
   }
 
   async analyze(dto: SegmentAnalysisDto): Promise<MarketingAnalysisResult> {
-    const parsedSegments = await Promise.all(
+    const personaSegments = await Promise.all(
       dto.segments.map((segment, idx) => this.parseSegment(segment, idx + 1)),
     );
 
-    const parsedCompany = await this.parseCompany(dto.companyUrl);
+    const companyProfile = await this.parseCompany(dto.companyUrl);
 
     const strategies = await Promise.all(
-      parsedSegments.map((segment) =>
-        this.generateStrategy(segment, parsedCompany),
+      personaSegments.map((segment) =>
+        this.generateStrategy(segment, companyProfile),
       ),
     );
 
     return {
-      parsedSegments,
-      parsedCompany,
+      personaSegments,
+      companyProfile,
       strategies,
     };
   }
