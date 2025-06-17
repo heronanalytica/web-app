@@ -6,6 +6,7 @@ import { PropsWithChildren, Suspense } from "react"; // Import Suspense
 import "./globals.css";
 import ClientLayout from "./clientLayout";
 import { AuthProvider } from "@/context/AuthContext";
+import ComeBackSoonPage from "./components/ComeBackSoonPage";
 
 const roboto = Roboto({
   variable: "--font-roboto",
@@ -17,6 +18,8 @@ export const metadata: Metadata = {
   title: "Heron Analytica",
   description: "Unlock AI-Powered Psychographic Segmentation",
 };
+
+const displayComebackSoon = true;
 
 export default function RootLayout({
   children,
@@ -50,9 +53,13 @@ export default function RootLayout({
       <body className={`${roboto.variable}`}>
         {/* Wrap the client layout in Suspense */}
         <Suspense fallback={<div>Loading...</div>}>
-          <ClientLayout>
-            <ChildrenWithProviders>{children}</ChildrenWithProviders>
-          </ClientLayout>
+          {displayComebackSoon ? (
+            <ComeBackSoonPage />
+          ) : (
+            <ClientLayout>
+              <ChildrenWithProviders>{children}</ChildrenWithProviders>
+            </ClientLayout>
+          )}
         </Suspense>
       </body>
     </html>
