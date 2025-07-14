@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   description: "Unlock AI-Powered Psychographic Segmentation",
 };
 
-const displayComebackSoon = true;
+const displayComebackSoon = process.env.NEXT_PUBLIC_OFFLINE === 'true';
 
 export default function RootLayout({
   children,
