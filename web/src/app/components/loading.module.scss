@@ -1,0 +1,34 @@
+.modernLoadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #fceaf8 0%, #e4d9fb 100%);
+}
+
+.modernSpinner {
+  width: 56px;
+  height: 56px;
+  border: 6px solid #e4d9fb;
+  border-top: 6px solid #7469F9;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 18px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingText {
+  font-size: 1.2rem;
+  color: #7469F9;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}

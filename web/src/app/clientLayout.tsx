@@ -15,6 +15,8 @@ import {
 } from "@ant-design/icons";
 import { motion } from "framer-motion";
 import { ROUTES } from "@/constants/routes";
+import useAuth from "@/hooks/useAuth";
+import LoadingSession from "./components/LoadingSession";
 
 export default function ClientLayout({
   children,
@@ -25,13 +27,17 @@ export default function ClientLayout({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
+  const { isAuthenticated, loading } = useAuth();
   const showFooter = !pathname.startsWith("/app");
 
   useEffect(() => {
     const url = `${pathname}${searchParams ? `?${searchParams}` : ""}`;
     trackPageView(url); // Track the current page view
   }, [pathname, searchParams]);
+
+  if (loading) {
+    return <LoadingSession />;
+  }
 
   const toggleDrawer = () => {
     setIsDrawerOpen(!isDrawerOpen);
@@ -101,17 +107,21 @@ export default function ClientLayout({
             </div>
 
             {/* Login Button Desktop */}
-            <Button
-              className="desktop-login-btn"
-              color="default"
-              variant="solid"
-              size="large"
-              onClick={() => {
-                router.push(ROUTES.LOGIN);
-              }}
-            >
-              Login
-            </Button>
+            {!isAuthenticated ? (
+              <Button
+                className="desktop-login-btn"
+                color="default"
+                variant="solid"
+                size="large"
+                onClick={() => {
+                  router.push(ROUTES.LOGIN);
+                }}
+              >
+                Login
+              </Button>
+            ) : (
+              <div />
+            )}
 
             {/* Mobile Hamburger Menu */}
             <Button
@@ -156,13 +166,15 @@ export default function ClientLayout({
                 Contact
               </Link>
 
-              <Link
-                href={ROUTES.LOGIN}
-                onClick={toggleDrawer}
-                style={{ color: "#505F98" }}
-              >
-                Login
-              </Link>
+              {!isAuthenticated && (
+                <Link
+                  href={ROUTES.LOGIN}
+                  onClick={toggleDrawer}
+                  style={{ color: "#505F98" }}
+                >
+                  Login
+                </Link>
+              )}
             </div>
           </Drawer>
         </div>

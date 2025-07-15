@@ -2,11 +2,12 @@
 /* eslint-disable @next/next/no-sync-scripts */
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
-import { PropsWithChildren, Suspense } from "react"; // Import Suspense
+import { Suspense } from "react"; // Import Suspense
 import "./globals.css";
 import ClientLayout from "./clientLayout";
 import { AuthProvider } from "@/context/AuthContext";
 import ComeBackSoonPage from "./components/ComeBackSoonPage";
+import LoadingSession from "./components/LoadingSession";
 
 const roboto = Roboto({
   variable: "--font-roboto",
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
   description: "Unlock AI-Powered Psychographic Segmentation",
 };
 
-const displayComebackSoon = process.env.NEXT_PUBLIC_OFFLINE === 'true';
+const displayComebackSoon = process.env.NEXT_PUBLIC_OFFLINE === "true";
 
 export default function RootLayout({
   children,
@@ -52,20 +53,16 @@ export default function RootLayout({
       </head>
       <body className={`${roboto.variable}`}>
         {/* Wrap the client layout in Suspense */}
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<LoadingSession />}>
           {displayComebackSoon ? (
             <ComeBackSoonPage />
           ) : (
-            <ClientLayout>
-              <ChildrenWithProviders>{children}</ChildrenWithProviders>
-            </ClientLayout>
+            <AuthProvider>
+              <ClientLayout>{children}</ClientLayout>
+            </AuthProvider>
           )}
         </Suspense>
       </body>
     </html>
   );
 }
-
-const ChildrenWithProviders: React.FC<PropsWithChildren> = ({ children }) => {
-  return <AuthProvider>{children}</AuthProvider>;
-};

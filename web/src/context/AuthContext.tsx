@@ -40,12 +40,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       const data = await res.json();
       setUser(data.data);
+      console.log("Set User data:", data.data)
     } catch {
       setUser(null);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    console.log("User changed:", user);
+    console.log("isAuthenticated:", !!user);
+  }, [user]);
 
   useEffect(() => {
     fetchUser();
