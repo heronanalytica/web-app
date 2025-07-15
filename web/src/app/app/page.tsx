@@ -21,13 +21,13 @@ const App = () => {
     }
   }, [fetchCampaigns, isAuthenticated]);
 
+  if (loading || campaignLoading) {
+    return <Spin fullscreen />;
+  }
+
   if (!isAuthenticated) {
     router.push(ROUTES.LOGIN);
     return;
-  }
-
-  if (loading || campaignLoading) {
-    return <Spin fullscreen />;
   }
 
   return (

@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { Campaign } from "@/types/campaign";
-import { mockCampaigns } from "@/mock/campaigns";
+// import { mockCampaigns } from "@/mock/campaigns";
 
 export function useCampaign() {
   const [campaigns, setCampaigns] = useState<Campaign[] | null>(null);
@@ -11,16 +11,16 @@ export function useCampaign() {
     setLoading(true);
     setError(null);
     try {
-      // const res = await fetch("/api/campaigns", {
-      //   credentials: "include",
-      // });
-      // if (!res.ok) throw new Error("Failed to fetch campaigns");
-      // const data = await res.json();
-      // setCampaigns(data);
+      const res = await fetch("/api/campaigns", {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to fetch campaigns");
+      const data = await res.json();
+      setCampaigns(data);
       
       // MOCK: Simulate API delay and use mock data
-      await new Promise(res => setTimeout(res, 400));
-      setCampaigns(mockCampaigns);
+      // await new Promise(res => setTimeout(res, 400));
+      // setCampaigns(mockCampaigns);
     } catch (err: any) {
       setCampaigns([]);
       setError(err?.message || "Failed to fetch campaigns");
