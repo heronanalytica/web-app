@@ -20,10 +20,12 @@ const statusColor: Record<string, string> = {
 const CampaignList: React.FC<CampaignListProps> = ({ campaigns }) => {
   if (!campaigns.length) {
     return (
-      <Empty
-        description="No campaigns found."
-        image={Empty.PRESENTED_IMAGE_SIMPLE}
-      />
+      <div className={styles.emptyState}>
+        <Empty
+          description="No campaigns found."
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+        />
+      </div>
     );
   }
 
