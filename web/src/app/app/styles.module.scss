@@ -8,10 +8,27 @@
   background-color: white;
   margin: 30px;
   border-radius: 20px;
-  padding: 20px;
+  padding: 30px;
   width: 100%;
 }
 
 .componentContainer {
   margin-top: 20px;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.headerTitle {
+  margin: 0;
+}
+
+.newCampaignButton {
+  background: #7469F9 !important;
+  border-color: #7469F9 !important;
+  color: #fff !important;
 }

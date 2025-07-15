@@ -5,4 +5,5 @@ export const enum ROUTES {
   LOGIN = "/login",
 
   APP_HOMEPAGE = "/app",
+  APP_CAMPAIGN_NEW = "/app/campaign/new",
 }

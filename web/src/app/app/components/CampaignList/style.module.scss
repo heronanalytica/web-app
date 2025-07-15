@@ -1,0 +1,44 @@
+.campaignList {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.campaignCard {
+  border-radius: 16px !important;
+  box-shadow: 0 2px 16px 0 rgba(116, 105, 249, 0.08);
+  border: none !important;
+  background: #fafaff;
+  transition: box-shadow 0.2s;
+  padding: 18px 28px;
+  &:hover {
+    box-shadow: 0 4px 24px 0 rgba(116, 105, 249, 0.18);
+    background: #f5f3ff;
+  }
+  cursor: pointer;
+}
+
+.campaignHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.campaignName {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #312e81;
+}
+
+.campaignMeta {
+  font-size: 0.95rem;
+  color: #7c7c8a;
+  margin-top: 6px;
+}
+
+.statusTag {
+  font-size: 0.95rem;
+  border-radius: 6px;
+  padding: 2px 12px;
+  font-weight: 500;
+}
