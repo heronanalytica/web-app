@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { fetcher } from "@/lib/fetcher";
 import styles from "./CustomerFileStep.module.scss";
-import { Upload, message } from "antd";
+import { Upload, message, Spin } from "antd";
 import type { UploadProps } from "antd";
 import { InboxOutlined } from "@ant-design/icons";
 
@@ -19,12 +19,19 @@ interface Props {
 const CustomerFileStep: React.FC<Props> = ({ onFileSelected }) => {
   const [files, setFiles] = useState<CustomerFile[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [fetching, setFetching] = useState(true);
 
   useEffect(() => {
-    // Fetch previously uploaded files from your NestJS backend
-    fetcher.get<CustomerFile[]>("/api/file").then((data) => {
-      setFiles(Array.isArray(data) ? data : []);
-    });
+    setFetching(true);
+    fetcher
+      .get<CustomerFile[]>("/api/file")
+      .then((data) => {
+        setFiles(Array.isArray(data) ? data : []);
+        setFetching(false);
+      })
+      .catch(() => {
+        setFetching(false);
+      });
   }, []);
 
   const customUpload: UploadProps["customRequest"] = async (options) => {
@@ -79,27 +86,38 @@ const CustomerFileStep: React.FC<Props> = ({ onFileSelected }) => {
 
   return (
     <div className={styles.container}>
-      <label className={styles.uploadLabel}>Upload a new Customer list CSV file</label>
-      <Upload.Dragger
-        name="file"
-        accept=".csv"
-        customRequest={customUpload}
-        showUploadList={false}
-        multiple={false}
-        disabled={uploading}
-        className={styles.fileInput}
-        style={{ width: "100%" }}
-      >
-        <p className="ant-upload-drag-icon">
-          <InboxOutlined style={{ color: "#7b2ff2" }} />
-        </p>
-        <p className="ant-upload-text">
-          Click or drag CSV file to this area to upload
-        </p>
-        <p className="ant-upload-hint">Only .csv files are supported</p>
-      </Upload.Dragger>
-      {uploading && <div className={styles.uploading}>Uploading...</div>}
-      <div className={styles.sectionTitle}>Or select a previous upload:</div>
+      <label className={styles.uploadLabel}>
+        Upload a new Customer list CSV file
+      </label>
+      <div className={styles.uploadWrapper}>
+        <Upload.Dragger
+          name="file"
+          accept=".csv"
+          customRequest={customUpload}
+          showUploadList={false}
+          multiple={false}
+          disabled={uploading}
+          className={styles.fileInput}
+          style={{ width: "100%" }}
+        >
+          <p className="ant-upload-drag-icon">
+            <InboxOutlined style={{ color: "#7b2ff2" }} />
+          </p>
+          <p className="ant-upload-text">
+            Click or drag CSV file to this area to upload
+          </p>
+          <p className="ant-upload-hint">Only .csv files are supported</p>
+        </Upload.Dragger>
+        {uploading && (
+          <div className={styles.uploadOverlay}>
+            <Spin tip="Uploading..." size="large" />
+          </div>
+        )} 
+      </div>
+      <div className={styles.sectionTitleFlex}>
+        Or select a previous upload:
+        {fetching && <Spin size="small" className={styles.sectionSpinner} />}
+      </div>
       <ul className={styles.fileList}>
         {files.length === 0 && (
           <li className={styles.fileItem} style={{ color: "#aaa" }}>

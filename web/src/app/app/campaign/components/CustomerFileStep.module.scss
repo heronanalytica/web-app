@@ -80,3 +80,36 @@
 .fileButton:hover {
   background: #e0d2ff;
 }
+
+.uploadWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.uploadOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255,255,255,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  border-radius: 12px;
+}
+
+.sectionTitleFlex {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 1.5rem 0 0.5rem 0;
+  color: #333;
+}
+
+.sectionSpinner {
+  margin-left: 8px;
+}
