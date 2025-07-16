@@ -43,7 +43,10 @@ const NewCampaignPage = () => {
         <Steps totalSteps={5} active={currentStep} />
         <div className={styles.componentContainer}>{renderStepComponent()}</div>
         <div className={styles.appFooter}>
-          <Button danger onClick={handleDiscard}>
+          <Button onClick={() => setCurrentStep(currentStep - 1)}>
+            Back
+          </Button>
+          <Button type="primary" danger onClick={handleDiscard}>
             Discard
           </Button>
         </div>
