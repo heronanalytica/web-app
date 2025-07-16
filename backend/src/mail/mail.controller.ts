@@ -95,7 +95,10 @@ export class MailController {
       throw new UnauthorizedException();
     }
     // Return connected providers for the user
-    return this.mailService.getStatus(userId);
+    return {
+      error: 0,
+      data: await this.mailService.getStatus(userId),
+    };
   }
 
   @Post('disconnect/:provider')
