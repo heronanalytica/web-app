@@ -25,7 +25,7 @@ export class FileService {
   ) {
     const file = await this.database.userUploadFile.create({
       data: {
-        id: uuidv4(),
+        id: dto.key.split('/').pop() || '',
         userId,
         fileName: dto.fileName,
         storageUrl: `s3://${bucket}/${dto.key}`,

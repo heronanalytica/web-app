@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { fetcher } from "@/lib/fetcher";
-import styles from "./CustomerFileStep.module.scss";
+import styles from "./style.module.scss";
 import { Upload, message, Spin, Modal } from "antd";
 import type { UploadProps } from "antd";
 import {
@@ -121,7 +121,19 @@ const CustomerFileStep: React.FC<Props> = ({ onFileSelected }) => {
 
       setUploading(false);
       if (metaRes) {
-        onFileSelected(key);
+        // Optimistically add new file to previous uploads
+        const uploadedFile: CustomerFile = {
+          id: key.split("/").pop() || "",
+          fileName: (file as File).name,
+          uploadedAt: new Date().toISOString(),
+          storageUrl: `s3://${key}`,
+        };
+        setFiles((prev) => [
+          uploadedFile,
+          ...prev.filter((f) => f.id !== uploadedFile.id),
+        ]);
+        // Show preview modal for the newly uploaded file before proceeding
+        await handlePreviewCsv(uploadedFile);
         if (onSuccess) {
           onSuccess(metaRes);
         }
@@ -166,7 +178,7 @@ const CustomerFileStep: React.FC<Props> = ({ onFileSelected }) => {
         </Upload.Dragger>
         {uploading && (
           <div className={styles.uploadOverlay}>
-            <Spin tip="Uploading..." size="large" />
+            <Spin size="large" />
           </div>
         )}
       </div>
@@ -279,6 +291,7 @@ const CustomerFileStep: React.FC<Props> = ({ onFileSelected }) => {
         title={
           csvPreviewFile ? `Preview: ${csvPreviewFile.fileName}` : "Preview CSV"
         }
+        width={800}
         onOk={handleCsvConfirm}
         onCancel={handleCsvCancel}
         okText="Confirm and Continue"
@@ -286,19 +299,19 @@ const CustomerFileStep: React.FC<Props> = ({ onFileSelected }) => {
         confirmLoading={csvLoading}
       >
         {csvPreview?.length && (
-          <div style={{ marginTop: 12, fontSize: 12, color: "#888" }}>
+          <div className={styles.csvPreviewInfo}>
             Showing first {csvPreview.length} rows. Please confirm the data
             looks correct before continuing.
           </div>
         )}
         {csvLoading ? (
-          <div style={{ textAlign: "center", padding: 24 }}>
+          <div className={styles.csvPreviewLoading}>
             <span>Loading preview...</span>
           </div>
         ) : csvError ? (
-          <div style={{ color: "red" }}>{csvError}</div>
+          <div className={styles.csvPreviewError}>{csvError}</div>
         ) : csvPreview && csvPreview.length > 0 ? (
-          <div style={{ maxHeight: 300, overflow: "auto" }}>
+          <div className={styles.csvPreviewTableWrapper}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr>
