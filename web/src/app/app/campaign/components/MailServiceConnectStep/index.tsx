@@ -19,6 +19,17 @@ const PROVIDERS = [
     homepage: "https://mailchimp.com/",
     icon: <MailOutlined style={{ fontSize: 32, color: "#ffe01b" }} />,
     connectUrl: `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/mail/connect/mailchimp`,
+    headerBg: "linear-gradient(90deg, #ffe01b 0%, #ffe99f 100%)",
+  },
+  {
+    key: "hubspot",
+    name: "HubSpot",
+    description:
+      "HubSpot integration is coming soon. You'll be able to connect your HubSpot account to send campaigns from HeronAnalytica.",
+    logo: "/images/hubspot_logo.png",
+    homepage: "https://www.hubspot.com/",
+    comingSoon: true,
+    headerBg: "linear-gradient(90deg, #ff7a59 0%, #ffb199 100%)",
   },
   // Add more providers here (e.g. HubSpot)
 ];
@@ -114,6 +125,56 @@ export const MailServiceConnectStep: React.FC = () => {
         }}
       >
         {PROVIDERS.map((p) => {
+          if (p.comingSoon) {
+            return (
+              <div key={p.key} className={styles.glassCard}>
+                <div className={styles.mailchimpHeader} style={{ background: p.headerBg }}>
+                  <div className={styles.mailchimpLogo}>
+                    <Image
+                      src={p.logo}
+                      alt={p.name + " logo"}
+                      width={48}
+                      height={48}
+                      style={{ objectFit: "contain" }}
+                    />
+                  </div>
+                  <div className={styles.mailchimpName}>{p.name}</div>
+                  <span
+                    className={styles.mailchimpStatusPill}
+                    style={{ background: "#ffe9b3", color: "#c28800" }}
+                  >
+                    <span style={{ marginRight: 6, fontSize: 15 }}>⏳</span>{" "}
+                    Coming soon
+                  </span>
+                </div>
+                <div className={styles.mailchimpBody}>
+                  <div style={{ flex: 1 }}></div>
+                  <div style={{ flex: 2, minWidth: 0 }}>
+                    <div className={styles.mailchimpDesc}>{p.description}</div>
+                    <div className={styles.mailchimpActions}>
+                      <a
+                        href={p.homepage}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.providerLink}
+                        style={{ marginRight: 8 }}
+                      >
+                        Learn more
+                      </a>
+                      <Button
+                        type="primary"
+                        disabled
+                        style={{ opacity: 0.6, pointerEvents: "none" }}
+                      >
+                        Connect
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
           const lastSynced = status[p.key]?.lastSynced || "Just now";
           return (
             <div key={p.key} className={styles.glassCard}>
