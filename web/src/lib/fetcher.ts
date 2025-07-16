@@ -92,4 +92,14 @@ export const fetcher = {
 
     return json.data;
   },
+
+  /**
+   * Returns the raw fetch Response (for file downloads, etc)
+   */
+  raw: async (path: string, options: RequestInit = {}) => {
+    return fetch(`${BASE_URL}${path}`, {
+      credentials: "include",
+      ...options,
+    });
+  },
 };

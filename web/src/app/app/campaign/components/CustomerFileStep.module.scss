@@ -77,11 +77,28 @@
   cursor: pointer;
   transition: background 0.2s;
   font-size: 1rem;
+  margin-right: 12px;
 }
 
 .fileButton:hover {
   background: #e0d2ff;
 }
+
+.fullWidth {
+  width: 100%;
+}
+
+.inboxIcon {
+  color: #7b2ff2;
+}
+
+.downloadIcon {
+  margin-right: 12px;
+  color: #1890ff;
+  cursor: pointer;
+  font-size: 18px;
+}
+
 
 .uploadWrapper {
   position: relative;

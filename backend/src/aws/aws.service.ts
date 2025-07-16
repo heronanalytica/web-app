@@ -2,8 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { S3Client } from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
-import { PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import {
+  PutObjectCommand,
+  DeleteObjectCommand,
+  GetObjectCommand,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { Readable } from 'stream';
 
 @Injectable()
 export class AwsService {
@@ -75,5 +80,18 @@ export class AwsService {
       Key: key,
     });
     await this.s3Service.send(command);
+  }
+
+  /**
+   * Get a readable stream for an object from S3 by key
+   */
+  async getObjectStreamFromS3(key: string): Promise<Readable> {
+    const command = new GetObjectCommand({
+      Bucket: this.s3Bucket,
+      Key: key,
+    });
+    const response = await this.s3Service.send(command);
+    // response.Body is a Readable stream
+    return response.Body as Readable;
   }
 }

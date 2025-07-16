@@ -8,7 +8,7 @@ import CustomerFileStep from "../components/CustomerFileStep";
 
 const NewCampaignPage = () => {
   const [currentStep, setCurrentStep] = useState<number>(0);
-  const [selectedCustomerFile, setSelectedCustomerFile] = useState<
+  const [, setSelectedCustomerFile] = useState<
     string | null
   >(null);
 

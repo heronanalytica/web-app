@@ -51,4 +51,13 @@ export class FileService {
     await this.database.userUploadFile.delete({ where: { id: fileId } });
     return true;
   }
+
+  // Get file metadata if file belongs to user, else null
+  async getFileByIdAndUser(fileId: string, userId: string) {
+    const file = await this.database.userUploadFile.findUnique({
+      where: { id: fileId },
+    });
+    if (!file || file.userId !== userId) return null;
+    return file;
+  }
 }
