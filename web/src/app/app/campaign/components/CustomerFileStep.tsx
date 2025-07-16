@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { fetcher } from "@/lib/fetcher";
+import styles from "./CustomerFileStep.module.scss";
+import { Upload, message } from "antd";
+import type { UploadProps } from "antd";
+import { InboxOutlined } from "@ant-design/icons";
 
 interface CustomerFile {
   id: string;
-  file_name: string;
-  uploaded_at: string;
-  storage_url: string;
-  columns: string[];
+  fileName: string;
+  uploadedAt: string;
+  storageUrl: string;
 }
 
 interface Props {
@@ -24,60 +27,110 @@ const CustomerFileStep: React.FC<Props> = ({ onFileSelected }) => {
     });
   }, []);
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const customUpload: UploadProps["customRequest"] = async (options) => {
+    const { file, onSuccess, onError } = options;
     setUploading(true);
+    try {
+      // 1. Get pre-signed S3 URL from backend
+      const { url, key } = await fetcher.post<{ url: string; key: string }>(
+        "/api/file/upload",
+        {
+          filename: (file as File).name,
+          fileType: "customer",
+          contentType: (file as File).type,
+        }
+      );
 
-    // 1. Get pre-signed S3 URL from backend
-    const { url, key } = await fetcher.post<{ url: string; key: string }>(
-      "/api/file/upload",
-      {
-        filename: file.name,
-        fileType: "customer",
-        contentType: file.type,
+      // 2. Upload file to S3
+      await fetch(url, {
+        method: "PUT",
+        body: file,
+        headers: { "Content-Type": (file as File).type },
+      });
+
+      // 3. Send metadata to backend
+      const metaRes = await fetcher.post<unknown>("/api/file", {
+        key,
+        fileName: (file as File).name,
+        type: "customer",
+      });
+
+      setUploading(false);
+      if (metaRes) {
+        onFileSelected(key);
+        if (onSuccess) {
+          onSuccess(metaRes);
+        }
+        message.success("File uploaded successfully");
+      } else {
+        message.error("Upload failed");
+        if (onError) {
+          onError(new Error("Upload failed"));
+        }
       }
-    );
-
-    // 2. Upload file to S3
-    await fetch(url, {
-      method: "PUT",
-      body: file,
-      headers: { "Content-Type": file.type },
-    });
-
-    // 4. Send metadata to backend
-    const metaRes = await fetcher.post<unknown>("/api/file", {
-      key,
-      fileName: file.name,
-      type: "customer",
-    });
-
-    setUploading(false);
-    if (metaRes) {
-      // Optionally refetch files or call onFileSelected
-      onFileSelected(key);
-    } else {
-      alert("Upload failed");
+    } catch (err) {
+      setUploading(false);
+      message.error("Upload failed");
+      if (onError) {
+        onError(err as any);
+      }
     }
   };
 
   return (
-    <div>
-      <input
-        type="file"
+    <div className={styles.container}>
+      <label className={styles.uploadLabel}>Upload a new Customer list CSV file</label>
+      <Upload.Dragger
+        name="file"
         accept=".csv"
-        onChange={handleUpload}
+        customRequest={customUpload}
+        showUploadList={false}
+        multiple={false}
         disabled={uploading}
-      />
-      {uploading && <div>Uploading...</div>}
-      <h4>Or select a previous upload:</h4>
-      <ul>
+        className={styles.fileInput}
+        style={{ width: "100%" }}
+      >
+        <p className="ant-upload-drag-icon">
+          <InboxOutlined style={{ color: "#7b2ff2" }} />
+        </p>
+        <p className="ant-upload-text">
+          Click or drag CSV file to this area to upload
+        </p>
+        <p className="ant-upload-hint">Only .csv files are supported</p>
+      </Upload.Dragger>
+      {uploading && <div className={styles.uploading}>Uploading...</div>}
+      <div className={styles.sectionTitle}>Or select a previous upload:</div>
+      <ul className={styles.fileList}>
+        {files.length === 0 && (
+          <li className={styles.fileItem} style={{ color: "#aaa" }}>
+            No previous uploads
+          </li>
+        )}
         {files.map((f) => (
-          <li key={f.id}>
-            <button type="button" onClick={() => onFileSelected(f.id)}>
-              {f.file_name}
+          <li
+            key={f.id}
+            className={styles.fileItem}
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <button
+              type="button"
+              className={styles.fileButton}
+              onClick={() => onFileSelected(f.id)}
+            >
+              <span className={styles.fileName}>{f.fileName}</span>
             </button>
+            <span className={styles.fileMeta} style={{ fontStyle: "italic" }}>
+              Uploaded at:&nbsp;
+              {new Intl.DateTimeFormat("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              }).format(new Date(f.uploadedAt))}
+            </span>
           </li>
         ))}
       </ul>
