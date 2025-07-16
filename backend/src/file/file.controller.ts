@@ -6,6 +6,8 @@ import {
   Req,
   UnauthorizedException,
   UseGuards,
+  Param,
+  Delete,
 } from '@nestjs/common';
 import { AwsService } from 'src/aws/aws.service';
 import { CreateUserUploadFileDto } from './dto/create-user-upload-file.dto';
@@ -71,5 +73,16 @@ export class FileController {
     const bucket = this.awsService.getS3BucketName();
     const file = await this.fileService.saveFileMetadata(userId, dto, bucket);
     return { error: 0, data: { id: file.id } };
+  }
+
+  // DELETE /file/:id - Delete a file for the current user
+  @Delete(':id')
+  async deleteFile(@Param('id') fileId: string, @Req() req: Request) {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new UnauthorizedException('User not authenticated');
+    }
+    await this.fileService.deleteFile(userId, fileId);
+    return { error: 0, message: 'File deleted' };
   }
 }
