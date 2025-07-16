@@ -1,5 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
+import { CampaignStatus } from './campaign-status.enum';
+import {
+  CreateDraftCampaignDto,
+  UpdateDraftCampaignDto,
+  DeleteDraftCampaignDto,
+  GetDraftCampaignDto,
+} from './dto/campaign-draft.dto';
 
 @Injectable()
 export class CampaignService {
@@ -17,8 +24,56 @@ export class CampaignService {
       data: {
         name,
         userId,
-        status: 'DRAFT',
+        status: CampaignStatus.DRAFT,
       },
+    });
+  }
+
+  async getUserDraftCampaigns(userId: string) {
+    return this.dbService.campaign.findMany({
+      where: { userId, status: CampaignStatus.DRAFT },
+      orderBy: { lastSavedAt: 'desc' },
+    });
+  }
+
+  async getDraftCampaign(userId: string, dto: GetDraftCampaignDto) {
+    return this.dbService.campaign.findFirst({
+      where: { id: dto.id, userId, status: CampaignStatus.DRAFT },
+    });
+  }
+
+  async createDraftCampaign(userId: string, dto: CreateDraftCampaignDto) {
+    return this.dbService.campaign.create({
+      data: {
+        name: dto.name,
+        userId,
+        status: CampaignStatus.DRAFT,
+        currentStep: dto.currentStep ?? 1,
+        lastSavedAt: new Date(),
+      },
+    });
+  }
+
+  async updateDraftCampaign(userId: string, dto: UpdateDraftCampaignDto) {
+    // Only allow updating allowed fields
+    const { id, name, currentStep, status } = dto;
+    return this.dbService.campaign.update({
+      where: { id, userId },
+      data: {
+        ...(name !== undefined ? { name } : {}),
+        ...(currentStep !== undefined ? { currentStep } : {}),
+        ...(status !== undefined &&
+        Object.values(CampaignStatus).includes(status as CampaignStatus)
+          ? { status: status as CampaignStatus }
+          : {}),
+        lastSavedAt: new Date(),
+      },
+    });
+  }
+
+  async deleteDraftCampaign(userId: string, dto: DeleteDraftCampaignDto) {
+    return this.dbService.campaign.delete({
+      where: { id: dto.id, userId },
     });
   }
 }
