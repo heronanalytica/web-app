@@ -21,7 +21,14 @@
   cursor: pointer;
 }
 
-.mailchimpHeader {
+.dimmedCard {
+  opacity: 0.64;
+  filter: grayscale(0.45);
+  pointer-events: auto;
+  position: relative;
+}
+
+.providerHeader {
   background: linear-gradient(90deg, #ffe01b 0%, #ffe99f 100%);
   padding: 28px 0 16px 0;
   display: flex;
@@ -29,7 +36,7 @@
   align-items: center;
   justify-content: center;
 }
-.mailchimpLogo {
+.providerLogo {
   background: #fffbe6;
   border-radius: 14px;
   box-shadow: 0 2px 8px 0 rgba(255, 224, 27, 0.15);
@@ -39,14 +46,14 @@
   align-items: center;
   justify-content: center;
 }
-.mailchimpName {
+.providerName {
   font-size: 1.22rem;
   font-weight: 700;
   color: #2d2b1e;
   letter-spacing: 0.01em;
   margin-bottom: 2px;
 }
-.mailchimpStatusPill {
+.providerStatusPill {
   display: inline-flex;
   align-items: center;
   background: #dcffe4;
@@ -74,26 +81,26 @@
   50% { transform: scale(1.16); }
   100% { transform: scale(1); }
 }
-.mailchimpBody {
+.providerBody {
   display: flex;
   flex-direction: row;
   padding: 24px 30px 20px 30px;
   align-items: flex-start;
   gap: 18px;
 }
-.mailchimpDesc {
+.providerDesc {
   color: #3d3d29;
   font-size: 1rem;
   margin-bottom: 10px;
   text-align: left;
   font-weight: 400;
 }
-.mailchimpMeta {
+.providerMeta {
   color: #b6b6a6;
   font-size: 0.97rem;
   margin-bottom: 4px;
 }
-.mailchimpActions {
+.providerActions {
   display: flex;
   gap: 12px;
   margin-top: 18px;
@@ -106,7 +113,7 @@
     max-width: 98vw;
     padding: 0;
   }
-  .mailchimpBody {
+  .providerBody {
     flex-direction: column;
     align-items: stretch;
     padding: 18px 6vw 18px 6vw;
@@ -145,6 +152,22 @@
   letter-spacing: 0.01em;
   text-align: center;
 }
+
+.providerStepTitle {
+  text-align: center;
+  font-weight: 700;
+  font-size: 28px;
+  margin: 32px 0 24px 0;
+  letter-spacing: 0.2px;
+}
+
+.providerCardsRow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+}
+
 
 .providerDescription {
   color: #444;

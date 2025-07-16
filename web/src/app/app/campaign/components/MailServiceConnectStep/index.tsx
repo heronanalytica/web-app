@@ -28,8 +28,20 @@ const PROVIDERS = [
       "HubSpot integration is coming soon. You'll be able to connect your HubSpot account to send campaigns from HeronAnalytica.",
     logo: "/images/hubspot_logo.png",
     homepage: "https://www.hubspot.com/",
+    connectUrl: "",
     comingSoon: true,
     headerBg: "linear-gradient(90deg, #ff7a59 0%, #ffb199 100%)",
+  },
+  {
+    key: "klaviyo",
+    name: "Klaviyo",
+    description:
+      "Klaviyo integration is coming soon. You'll be able to connect your Klaviyo account to send campaigns from HeronAnalytica.",
+    logo: "/images/klaviyo_logo.png",
+    homepage: "https://www.klaviyo.com/",
+    connectUrl: "",
+    comingSoon: true,
+    headerBg: "linear-gradient(90deg, #00c569 0%, #b1ffe7 100%)",
   },
   // Add more providers here (e.g. HubSpot)
 ];
@@ -116,20 +128,22 @@ export const MailServiceConnectStep: React.FC = () => {
   return (
     <>
       {contextHolder}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "60vh",
-        }}
-      >
+      <h2 className={styles.providerStepTitle}>
+        Connect Your Email Service
+      </h2>
+      <div className={styles.providerCardsRow} >
         {PROVIDERS.map((p) => {
           if (p.comingSoon) {
             return (
-              <div key={p.key} className={styles.glassCard}>
-                <div className={styles.mailchimpHeader} style={{ background: p.headerBg }}>
-                  <div className={styles.mailchimpLogo}>
+              <div
+                key={p.key}
+                className={`${styles.glassCard} ${styles.dimmedCard}`}
+              >
+                <div
+                  className={styles.providerHeader}
+                  style={{ background: p.headerBg }}
+                >
+                  <div className={styles.providerLogo}>
                     <Image
                       src={p.logo}
                       alt={p.name + " logo"}
@@ -138,20 +152,20 @@ export const MailServiceConnectStep: React.FC = () => {
                       style={{ objectFit: "contain" }}
                     />
                   </div>
-                  <div className={styles.mailchimpName}>{p.name}</div>
+                  <div className={styles.providerName}>{p.name}</div>
                   <span
-                    className={styles.mailchimpStatusPill}
+                    className={styles.providerStatusPill}
                     style={{ background: "#ffe9b3", color: "#c28800" }}
                   >
                     <span style={{ marginRight: 6, fontSize: 15 }}>⏳</span>{" "}
                     Coming soon
                   </span>
                 </div>
-                <div className={styles.mailchimpBody}>
+                <div className={styles.providerBody}>
                   <div style={{ flex: 1 }}></div>
                   <div style={{ flex: 2, minWidth: 0 }}>
-                    <div className={styles.mailchimpDesc}>{p.description}</div>
-                    <div className={styles.mailchimpActions}>
+                    <div className={styles.providerDesc}>{p.description}</div>
+                    <div className={styles.providerActions}>
                       <a
                         href={p.homepage}
                         target="_blank"
@@ -178,8 +192,8 @@ export const MailServiceConnectStep: React.FC = () => {
           const lastSynced = status[p.key]?.lastSynced || "Just now";
           return (
             <div key={p.key} className={styles.glassCard}>
-              <div className={styles.mailchimpHeader}>
-                <div className={styles.mailchimpLogo}>
+              <div className={styles.providerHeader}>
+                <div className={styles.providerLogo}>
                   <Image
                     src={p.logo}
                     alt={p.name + " logo"}
@@ -188,9 +202,9 @@ export const MailServiceConnectStep: React.FC = () => {
                     style={{ objectFit: "contain" }}
                   />
                 </div>
-                <div className={styles.mailchimpName}>{p.name}</div>
+                <div className={styles.providerName}>{p.name}</div>
                 {status[p.key]?.connected && (
-                  <span className={styles.mailchimpStatusPill}>
+                  <span className={styles.providerStatusPill}>
                     <span className={styles.pulsingCheck}>
                       <CheckCircleTwoTone twoToneColor="#52c41a" />
                     </span>
@@ -199,7 +213,7 @@ export const MailServiceConnectStep: React.FC = () => {
                 )}
               </div>
               <Spin spinning={loading && !status[p.key]?.connected}>
-                <div className={styles.mailchimpBody}>
+                <div className={styles.providerBody}>
                   {/* Left column: status/meta */}
                   <div
                     style={{
@@ -213,11 +227,11 @@ export const MailServiceConnectStep: React.FC = () => {
                     {status[p.key]?.connected && (
                       <>
                         {status[p.key]?.meta?.login && (
-                          <div className={styles.mailchimpMeta}>
+                          <div className={styles.providerMeta}>
                             as <b>{status[p.key].meta.login}</b>
                           </div>
                         )}
-                        <div className={styles.mailchimpMeta}>
+                        <div className={styles.providerMeta}>
                           Last synced: {lastSynced}
                         </div>
                       </>
@@ -225,8 +239,8 @@ export const MailServiceConnectStep: React.FC = () => {
                   </div>
                   {/* Right column: desc, actions, link */}
                   <div style={{ flex: 2, minWidth: 0 }}>
-                    <div className={styles.mailchimpDesc}>{p.description}</div>
-                    <div className={styles.mailchimpActions}>
+                    <div className={styles.providerDesc}>{p.description}</div>
+                    <div className={styles.providerActions}>
                       <a
                         href={p.homepage}
                         target="_blank"
