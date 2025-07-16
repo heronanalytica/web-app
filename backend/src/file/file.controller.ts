@@ -28,7 +28,10 @@ export class FileController {
     if (!userId) {
       throw new UnauthorizedException('User not authenticated');
     }
-    return this.fileService.listFiles(userId);
+    return {
+      error: 0,
+      data: await this.fileService.listFiles(userId),
+    };
   }
 
   // POST /file/upload - Get presigned S3 upload URL
@@ -45,7 +48,14 @@ export class FileController {
     if (!fileType) {
       throw new Error('fileType is required');
     }
-    return this.awsService.getPresignedUploadUrl(userId, fileType, contentType);
+    return {
+      error: 0,
+      data: await this.awsService.getPresignedUploadUrl(
+        userId,
+        fileType,
+        contentType,
+      ),
+    };
   }
 
   // POST /file - Save file metadata after upload
@@ -60,6 +70,6 @@ export class FileController {
     }
     const bucket = this.awsService.getS3BucketName();
     const file = await this.fileService.saveFileMetadata(userId, dto, bucket);
-    return { success: true, id: file.id };
+    return { error: 0, data: { id: file.id } };
   }
 }

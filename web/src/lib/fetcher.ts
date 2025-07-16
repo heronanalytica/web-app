@@ -23,14 +23,15 @@ export const fetcher = {
       );
     }
 
+    const { headers, ...rest } = options;
     const res = await fetch(url.toString(), {
       method: "GET",
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        ...(options.headers || {}),
+        ...(headers || {}),
       },
-      ...options,
+      ...rest,
     });
 
     const json: BackendResponse<T> = await res.json();
@@ -47,15 +48,16 @@ export const fetcher = {
     body: any,
     options: RequestOptions = {}
   ): Promise<T> => {
+    const { headers, ...rest } = options;
     const res = await fetch(`${BASE_URL}${path}`, {
       method: "POST",
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        ...(options.headers || {}),
+        ...(headers || {}),
       },
       body: JSON.stringify(body),
-      ...options,
+      ...rest,
     });
 
     const json: BackendResponse<T> = await res.json();

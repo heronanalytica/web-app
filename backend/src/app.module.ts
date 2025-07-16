@@ -6,6 +6,7 @@ import { SurveyModule } from './survey/survey.module';
 import { AiMarketingModule } from './ai-marketing/ai-marketing.module';
 import { CampaignModule } from './campaign/campaign.module';
 import { ConfigModule } from '@nestjs/config';
+import { FileModule } from './file/file.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { ConfigModule } from '@nestjs/config';
     SurveyModule,
     AiMarketingModule,
     CampaignModule,
+    FileModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),

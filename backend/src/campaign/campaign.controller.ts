@@ -22,7 +22,10 @@ export class CampaignController {
     if (!userId) {
       throw new UnauthorizedException();
     }
-    return await this.campaignService.getUserCampaigns(userId);
+    return {
+      error: 0,
+      data: await this.campaignService.getUserCampaigns(userId),
+    };
   }
 
   @Post()
@@ -31,6 +34,9 @@ export class CampaignController {
     if (!userId) {
       throw new UnauthorizedException();
     }
-    return await this.campaignService.createCampaign(userId, dto.name);
+    return {
+      error: 0,
+      data: await this.campaignService.createCampaign(userId, dto.name),
+    };
   }
 }

@@ -75,7 +75,6 @@ model UserUploadFile {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   fileName   String
   storageUrl String
-  columns    String[]
   type       String
   uploadedAt DateTime @default(now())
 }

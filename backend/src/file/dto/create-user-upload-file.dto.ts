@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsArray } from 'class-validator';
+import { IsString, IsNotEmpty } from 'class-validator';
 
 export class CreateUserUploadFileDto {
   @IsString()
@@ -8,10 +8,6 @@ export class CreateUserUploadFileDto {
   @IsString()
   @IsNotEmpty()
   storageUrl: string;
-
-  @IsArray()
-  @IsString({ each: true })
-  columns: string[];
 
   @IsString()
   @IsNotEmpty()

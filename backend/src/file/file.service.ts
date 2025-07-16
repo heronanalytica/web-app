@@ -25,7 +25,6 @@ export class FileService {
         userId,
         fileName: dto.fileName,
         storageUrl: `s3://${bucket}/${dto.key}`,
-        columns: dto.columns,
         type: dto.type,
         uploadedAt: new Date(),
       },
