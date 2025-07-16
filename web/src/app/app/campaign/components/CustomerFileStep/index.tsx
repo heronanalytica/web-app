@@ -3,22 +3,11 @@ import { fetcher } from "@/lib/fetcher";
 import styles from "./style.module.scss";
 import { Upload, message, Spin, Modal } from "antd";
 import type { UploadProps } from "antd";
-import {
-  InboxOutlined,
-  DeleteOutlined,
-  DownloadOutlined,
-} from "@ant-design/icons";
+import { InboxOutlined } from "@ant-design/icons";
+import FileList from "./FileList";
+import CsvPreviewModal from "./CsvPreviewModal";
 
-interface CustomerFile {
-  id: string;
-  fileName: string;
-  uploadedAt: string;
-  storageUrl: string;
-}
-
-interface Props {
-  onFileSelected: (fileId: string) => void;
-}
+import type { CustomerFile, Props } from "./types";
 
 const CustomerFileStep: React.FC<Props> = ({ onFileSelected }) => {
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
@@ -186,70 +175,33 @@ const CustomerFileStep: React.FC<Props> = ({ onFileSelected }) => {
         Or select a previous upload:
         {fetching && <Spin size="small" className={styles.sectionSpinner} />}
       </div>
-      <ul className={styles.fileList}>
-        {files.length === 0 && (
-          <li className={styles.fileItem}>No previous uploads</li>
-        )}
-        {files.map((f) => (
-          <li key={f.id} className={styles.fileItem}>
-            <div className={styles.fileMetaWrapper}>
-              <button
-                type="button"
-                className={styles.fileButton}
-                onClick={() => handlePreviewCsv(f)}
-                disabled={deletingId === f.id}
-              >
-                <span className={styles.fileName}>{f.fileName}</span>
-              </button>
-              <DownloadOutlined
-                className={styles.downloadIcon}
-                title="Download"
-                onClick={async (e) => {
-                  e.stopPropagation();
-                  const response = await fetcher.raw(
-                    `/api/file/download/${encodeURIComponent(f.id)}`
-                  );
-                  if (!response.ok) {
-                    message.error("Failed to download file");
-                    return;
-                  }
-                  const blob = await response.blob();
-                  const url = window.URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = f.fileName;
-                  document.body.appendChild(a);
-                  a.click();
-                  a.remove();
-                  window.URL.revokeObjectURL(url);
-                }}
-                disabled={deletingId === f.id}
-              />
-              <DeleteOutlined
-                className={
-                  deletingId === f.id
-                    ? `${styles.deleteIcon} ${styles.deleteIconDisabled}`
-                    : styles.deleteIcon
-                }
-                onClick={() => {
-                  if (deletingId === f.id) return;
-                  setDeleteTarget(f);
-                  setDeleteModalVisible(true);
-                }}
-                spin={deletingId === f.id}
-              />
-            </div>
-            <span className={styles.fileMeta}>
-              Uploaded at:&nbsp;
-              {new Intl.DateTimeFormat("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              }).format(new Date(f.uploadedAt))}
-            </span>
-          </li>
-        ))}
-      </ul>
+      <FileList
+        files={files}
+        deletingId={deletingId}
+        onPreview={handlePreviewCsv}
+        onDownload={async (file: CustomerFile) => {
+          const response = await fetcher.raw(
+            `/api/file/download/${encodeURIComponent(file.id)}`
+          );
+          if (!response.ok) {
+            message.error("Failed to download file");
+            return;
+          }
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = file.fileName;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(url);
+        }}
+        onDelete={(file: CustomerFile) => {
+          setDeleteTarget(file);
+          setDeleteModalVisible(true);
+        }}
+      />
       <Modal
         open={deleteModalVisible}
         title="Delete this file?"
@@ -284,72 +236,15 @@ const CustomerFileStep: React.FC<Props> = ({ onFileSelected }) => {
           <b>{deleteTarget?.fileName}</b>
         </p>
       </Modal>
-
-      {/* CSV Preview Modal */}
-      <Modal
+      <CsvPreviewModal
         open={csvModalVisible}
-        title={
-          csvPreviewFile ? `Preview: ${csvPreviewFile.fileName}` : "Preview CSV"
-        }
-        width={800}
+        file={csvPreviewFile}
+        preview={csvPreview}
+        loading={csvLoading}
+        error={csvError}
         onOk={handleCsvConfirm}
         onCancel={handleCsvCancel}
-        okText="Confirm and Continue"
-        cancelText="Cancel"
-        confirmLoading={csvLoading}
-      >
-        {csvPreview?.length && (
-          <div className={styles.csvPreviewInfo}>
-            Showing first {csvPreview.length} rows. Please confirm the data
-            looks correct before continuing.
-          </div>
-        )}
-        {csvLoading ? (
-          <div className={styles.csvPreviewLoading}>
-            <span>Loading preview...</span>
-          </div>
-        ) : csvError ? (
-          <div className={styles.csvPreviewError}>{csvError}</div>
-        ) : csvPreview && csvPreview.length > 0 ? (
-          <div className={styles.csvPreviewTableWrapper}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr>
-                  {csvPreview[0].map((cell: any, idx: number) => (
-                    <th
-                      key={idx}
-                      style={{
-                        border: "1px solid #eee",
-                        padding: 4,
-                        background: "#fafafa",
-                        fontWeight: 600,
-                      }}
-                    >
-                      {cell}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {csvPreview.slice(1).map((row: any[], ridx: number) => (
-                  <tr key={ridx}>
-                    {row.map((cell, cidx) => (
-                      <td
-                        key={cidx}
-                        style={{ border: "1px solid #eee", padding: 4 }}
-                      >
-                        {cell}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div>No data to preview.</div>
-        )}
-      </Modal>
+      />
     </div>
   );
 };

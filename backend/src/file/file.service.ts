@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { CreateUserUploadFileDto } from './dto/create-user-upload-file.dto';
-import { v4 as uuidv4 } from 'uuid';
 import { AwsService } from 'src/aws/aws.service';
 
 @Injectable()
