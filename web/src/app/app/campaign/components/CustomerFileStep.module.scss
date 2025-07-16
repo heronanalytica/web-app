@@ -63,6 +63,8 @@
 
 .fileItem {
   margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: space-between;
 }
 
 .fileButton {
@@ -112,4 +114,29 @@
 
 .sectionSpinner {
   margin-left: 8px;
+}
+
+.fileMeta {
+  font-style: italic;
+  margin-right: 8px;
+}
+
+.fileMetaWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.deleteIcon {
+  color: #ff4d4f;
+  cursor: pointer;
+  font-size: 18px;
+  vertical-align: middle;
+  opacity: 1;
+  transition: opacity 0.2s;
+}
+
+.deleteIconDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

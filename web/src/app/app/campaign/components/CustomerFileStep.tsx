@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { fetcher } from "@/lib/fetcher";
 import styles from "./CustomerFileStep.module.scss";
-import { Upload, message, Spin } from "antd";
+import { Upload, message, Spin, Modal } from "antd";
 import type { UploadProps } from "antd";
-import { InboxOutlined } from "@ant-design/icons";
+import { InboxOutlined, DeleteOutlined } from "@ant-design/icons";
 
 interface CustomerFile {
   id: string;
@@ -17,9 +17,12 @@ interface Props {
 }
 
 const CustomerFileStep: React.FC<Props> = ({ onFileSelected }) => {
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<CustomerFile | null>(null);
   const [files, setFiles] = useState<CustomerFile[]>([]);
   const [uploading, setUploading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     setFetching(true);
@@ -75,11 +78,11 @@ const CustomerFileStep: React.FC<Props> = ({ onFileSelected }) => {
           onError(new Error("Upload failed"));
         }
       }
-    } catch (err) {
+    } catch {
       setUploading(false);
       message.error("Upload failed");
       if (onError) {
-        onError(err as any);
+        onError(new Error("Upload failed"));
       }
     }
   };
@@ -112,7 +115,7 @@ const CustomerFileStep: React.FC<Props> = ({ onFileSelected }) => {
           <div className={styles.uploadOverlay}>
             <Spin tip="Uploading..." size="large" />
           </div>
-        )} 
+        )}
       </div>
       <div className={styles.sectionTitleFlex}>
         Or select a previous upload:
@@ -125,33 +128,77 @@ const CustomerFileStep: React.FC<Props> = ({ onFileSelected }) => {
           </li>
         )}
         {files.map((f) => (
-          <li
-            key={f.id}
-            className={styles.fileItem}
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
+          <li key={f.id} className={styles.fileItem}>
             <button
               type="button"
               className={styles.fileButton}
               onClick={() => onFileSelected(f.id)}
+              disabled={deletingId === f.id}
             >
               <span className={styles.fileName}>{f.fileName}</span>
             </button>
-            <span className={styles.fileMeta} style={{ fontStyle: "italic" }}>
-              Uploaded at:&nbsp;
-              {new Intl.DateTimeFormat("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              }).format(new Date(f.uploadedAt))}
-            </span>
+            <div className={styles.fileMetaWrapper}>
+              <span
+                className={styles.fileMeta}
+              >
+                Uploaded at:&nbsp;
+                {new Intl.DateTimeFormat("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                }).format(new Date(f.uploadedAt))}
+              </span>
+              <DeleteOutlined
+                className={
+                  deletingId === f.id
+                    ? `${styles.deleteIcon} ${styles.deleteIconDisabled}`
+                    : styles.deleteIcon
+                }
+                onClick={() => {
+                  if (deletingId === f.id) return;
+                  setDeleteTarget(f);
+                  setDeleteModalVisible(true);
+                }}
+                spin={deletingId === f.id}
+              />
+            </div>
           </li>
         ))}
       </ul>
+      <Modal
+        open={deleteModalVisible}
+        title="Delete this file?"
+        onOk={async () => {
+          if (!deleteTarget) return;
+          setDeletingId(deleteTarget.id);
+          try {
+            await fetcher.delete(`/api/file/${deleteTarget.id}`);
+            setFiles((prev) =>
+              prev.filter((file) => file.id !== deleteTarget.id)
+            );
+            message.success("File deleted");
+          } catch {
+            message.error("Failed to delete file");
+          } finally {
+            setDeletingId(null);
+            setDeleteModalVisible(false);
+            setDeleteTarget(null);
+          }
+        }}
+        onCancel={() => {
+          setDeleteModalVisible(false);
+          setDeleteTarget(null);
+        }}
+        okText="Delete"
+        okButtonProps={{ danger: true, loading: !!deletingId }}
+        cancelText="Cancel"
+        confirmLoading={!!deletingId}
+      >
+        <p>This action cannot be undone.</p>
+        <p>
+          <b>{deleteTarget?.fileName}</b>
+        </p>
+      </Modal>
     </div>
   );
 };
