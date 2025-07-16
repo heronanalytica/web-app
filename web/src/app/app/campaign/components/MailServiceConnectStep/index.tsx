@@ -131,6 +131,11 @@ export const MailServiceConnectStep: React.FC = () => {
       <h2 className={styles.providerStepTitle}>
         Connect Your Email Service
       </h2>
+      {PROVIDERS.every(p => !status[p.key]?.connected) && (
+        <div className={styles.providerStepNotice}>
+          You must connect at least one email service before continuing.
+        </div>
+      )}
       <div className={styles.providerCardsRow} >
         {PROVIDERS.map((p) => {
           if (p.comingSoon) {
