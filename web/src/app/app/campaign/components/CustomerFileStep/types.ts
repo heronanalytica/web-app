@@ -6,5 +6,6 @@ export interface CustomerFile {
 }
 
 export interface Props {
-  onFileSelected: (fileId: string) => void;
+  setStepComplete?: (complete: boolean) => void;
+  onFileSelected?: (fileId: string) => void;
 }

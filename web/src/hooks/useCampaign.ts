@@ -25,5 +25,12 @@ export function useCampaign() {
     }
   }, []);
 
-  return { campaigns, loading, error, fetchCampaigns, setCampaigns };
+  const createCampaign = useCallback(async ({ name }: { name: string }) => {
+    const newCampaign = await fetcher.post<Campaign>("/api/campaigns", { name });
+    setCampaigns(prev => (prev ? [newCampaign, ...prev] : [newCampaign]));
+    return newCampaign;
+  }, []);
+
+  return { campaigns, loading, error, fetchCampaigns, setCampaigns, createCampaign };
+
 }

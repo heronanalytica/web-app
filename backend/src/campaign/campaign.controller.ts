@@ -8,13 +8,13 @@ import {
   UnauthorizedException,
   Patch,
   Delete,
+  Param,
 } from '@nestjs/common';
 import { CampaignService } from './campaign.service';
 import {
   CreateDraftCampaignDto,
   UpdateDraftCampaignDto,
   DeleteDraftCampaignDto,
-  GetDraftCampaignDto,
 } from './dto/campaign-draft.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Request } from 'express';
@@ -30,10 +30,8 @@ export class CampaignController {
     if (!userId) {
       throw new UnauthorizedException();
     }
-    return {
-      error: 0,
-      data: await this.campaignService.getUserCampaigns(userId),
-    };
+    const data = await this.campaignService.getUserCampaigns(userId);
+    return { error: 0, data };
   }
 
   @Post()
@@ -42,33 +40,32 @@ export class CampaignController {
     if (!userId) {
       throw new UnauthorizedException();
     }
-    return {
-      error: 0,
-      data: await this.campaignService.createCampaign(userId, dto.name),
-    };
+    const data = await this.campaignService.createCampaign(userId, dto.name);
+    return { error: 0, data };
   }
 
   @Get('draft')
   async getUserDraftCampaigns(@Req() req: Request) {
     const userId = req.user?.id;
     if (!userId) throw new UnauthorizedException();
-    return {
-      error: 0,
-      data: await this.campaignService.getUserDraftCampaigns(userId),
-    };
+    const data = await this.campaignService.getUserDraftCampaigns(userId);
+    return { error: 0, data };
   }
 
   @Get(':id/draft')
-  async getDraftCampaign(
-    @Req() req: Request,
-    @Body() dto: GetDraftCampaignDto,
-  ) {
+  async getDraftCampaign(@Req() req: Request, @Param('id') id: string) {
     const userId = req.user?.id;
     if (!userId) throw new UnauthorizedException();
-    return {
-      error: 0,
-      data: await this.campaignService.getDraftCampaign(userId, dto),
-    };
+    const data = await this.campaignService.getDraftCampaign(userId, id);
+    return { error: 0, data };
+  }
+
+  @Get(':id')
+  async getCampaignById(@Req() req: Request, @Param('id') id: string) {
+    const userId = req.user?.id;
+    if (!userId) throw new UnauthorizedException();
+    const data = await this.campaignService.getCampaignById(userId, id);
+    return { error: 0, data };
   }
 
   @Post('draft')
@@ -78,10 +75,8 @@ export class CampaignController {
   ) {
     const userId = req.user?.id;
     if (!userId) throw new UnauthorizedException();
-    return {
-      error: 0,
-      data: await this.campaignService.createDraftCampaign(userId, dto),
-    };
+    const data = await this.campaignService.createDraftCampaign(userId, dto);
+    return { error: 0, data };
   }
 
   @Patch(':id/draft')
@@ -91,10 +86,8 @@ export class CampaignController {
   ) {
     const userId = req.user?.id;
     if (!userId) throw new UnauthorizedException();
-    return {
-      error: 0,
-      data: await this.campaignService.updateDraftCampaign(userId, dto),
-    };
+    const data = await this.campaignService.updateDraftCampaign(userId, dto);
+    return { error: 0, data };
   }
 
   @Delete(':id/draft')
@@ -104,9 +97,7 @@ export class CampaignController {
   ) {
     const userId = req.user?.id;
     if (!userId) throw new UnauthorizedException();
-    return {
-      error: 0,
-      data: await this.campaignService.deleteDraftCampaign(userId, dto),
-    };
+    const data = await this.campaignService.deleteDraftCampaign(userId, dto);
+    return { error: 0, data };
   }
 }

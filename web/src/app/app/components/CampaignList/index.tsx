@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Card, Empty, Tag } from "antd";
+import { useRouter } from "next/navigation";
 import styles from "./style.module.scss";
 
 import { Campaign } from "@/types/campaign";
@@ -18,6 +19,7 @@ const statusColor: Record<string, string> = {
 };
 
 const CampaignList: React.FC<CampaignListProps> = ({ campaigns }) => {
+  const router = useRouter();
   if (!campaigns.length) {
     return (
       <div className={styles.emptyState}>
@@ -36,6 +38,9 @@ const CampaignList: React.FC<CampaignListProps> = ({ campaigns }) => {
           key={campaign.id}
           className={styles.campaignCard}
           bordered={false}
+          hoverable
+          onClick={() => router.push(`/app/campaign/${campaign.id}`)}
+          style={{ cursor: "pointer" }}
         >
           <div className={styles.campaignHeader}>
             <span className={styles.campaignName}>{campaign.name}</span>

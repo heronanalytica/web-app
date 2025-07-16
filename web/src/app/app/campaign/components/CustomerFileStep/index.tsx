@@ -7,9 +7,10 @@ import { InboxOutlined } from "@ant-design/icons";
 import FileList from "./FileList";
 import CsvPreviewModal from "./CsvPreviewModal";
 
-import type { CustomerFile, Props } from "./types";
+import type { CustomerFile } from "./types";
+import { useCampaignBuilder } from "../CampaignBuilderContext";
 
-const CustomerFileStep: React.FC<Props> = ({ onFileSelected }) => {
+const CustomerFileStep: React.FC = () => {
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<CustomerFile | null>(null);
   const [files, setFiles] = useState<CustomerFile[]>([]);
@@ -52,9 +53,13 @@ const CustomerFileStep: React.FC<Props> = ({ onFileSelected }) => {
     }
   };
 
+  const [selectedFile, setSelectedFile] = useState<CustomerFile | null>(null);
+  const { setCanGoNext } = useCampaignBuilder();
+
   const handleCsvConfirm = () => {
     if (csvPreviewFile) {
-      onFileSelected(csvPreviewFile.id);
+      setSelectedFile(csvPreviewFile);
+      setCanGoNext(true);
     }
     setCsvModalVisible(false);
     setCsvPreview(null);
@@ -144,64 +149,99 @@ const CustomerFileStep: React.FC<Props> = ({ onFileSelected }) => {
 
   return (
     <div className={styles.container}>
-      <label className={styles.uploadLabel}>
-        Upload a new Customer list CSV file
-      </label>
-      <div className={styles.uploadWrapper}>
-        <Upload.Dragger
-          name="file"
-          accept=".csv"
-          customRequest={customUpload}
-          showUploadList={false}
-          multiple={false}
-          disabled={uploading}
-          className={`${styles.fileInput} ${styles.fullWidth}`}
-        >
-          <p className="ant-upload-drag-icon">
-            <InboxOutlined className={styles.inboxIcon} />
-          </p>
-          <p className="ant-upload-text">
-            Click or drag CSV file to this area to upload
-          </p>
-          <p className="ant-upload-hint">Only .csv files are supported</p>
-        </Upload.Dragger>
-        {uploading && (
-          <div className={styles.uploadOverlay}>
-            <Spin size="large" />
+      <div style={{ width: "100%", display: "flex", gap: 24 }}>
+        <div style={{ flex: 1 }}>
+          <label className={styles.uploadLabel}>
+            Upload a new Customer list CSV file
+          </label>
+          <div className={styles.uploadWrapper}>
+            <Upload.Dragger
+              name="file"
+              accept=".csv"
+              customRequest={customUpload}
+              showUploadList={false}
+              multiple={false}
+              disabled={uploading}
+              className={`${styles.fileInput} ${styles.fullWidth}`}
+            >
+              <p className="ant-upload-drag-icon">
+                <InboxOutlined className={styles.inboxIcon} />
+              </p>
+              <p className="ant-upload-text">
+                Click or drag CSV file to this area to upload
+              </p>
+              <p className="ant-upload-hint">Only .csv files are supported</p>
+            </Upload.Dragger>
+            {uploading && (
+              <div className={styles.uploadOverlay}>
+                <Spin size="large" />
+              </div>
+            )}
           </div>
+        </div>
+        <div style={{ width: "450px" }}>
+          <div className={styles.sectionTitleFlex}>
+            Or select a previous upload:
+            {fetching && (
+              <Spin size="small" className={styles.sectionSpinner} />
+            )}
+          </div>
+          <FileList
+            files={files}
+            deletingId={deletingId}
+            onPreview={handlePreviewCsv}
+            onDownload={async (file: CustomerFile) => {
+              const response = await fetcher.raw(
+                `/api/file/download/${encodeURIComponent(file.id)}`
+              );
+              if (!response.ok) {
+                message.error("Failed to download file");
+                return;
+              }
+              const blob = await response.blob();
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = file.fileName;
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              window.URL.revokeObjectURL(url);
+            }}
+            onDelete={(file: CustomerFile) => {
+              setDeleteTarget(file);
+              setDeleteModalVisible(true);
+            }}
+          />
+        </div>
+      </div>
+      <div style={{ marginTop: 16, minHeight: 32 }}>
+        <b>Selected File:</b>{" "}
+        {selectedFile ? (
+          <span>
+            {selectedFile.fileName}
+            <button
+              type="button"
+              style={{
+                marginLeft: 12,
+                color: "#389e0d",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontWeight: 500,
+              }}
+              onClick={() => {
+                setSelectedFile(null);
+                setCanGoNext(false);
+              }}
+            >
+              Clear
+            </button>
+          </span>
+        ) : (
+          <span style={{ color: "#aaa" }}>None selected</span>
         )}
       </div>
-      <div className={styles.sectionTitleFlex}>
-        Or select a previous upload:
-        {fetching && <Spin size="small" className={styles.sectionSpinner} />}
-      </div>
-      <FileList
-        files={files}
-        deletingId={deletingId}
-        onPreview={handlePreviewCsv}
-        onDownload={async (file: CustomerFile) => {
-          const response = await fetcher.raw(
-            `/api/file/download/${encodeURIComponent(file.id)}`
-          );
-          if (!response.ok) {
-            message.error("Failed to download file");
-            return;
-          }
-          const blob = await response.blob();
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = file.fileName;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          window.URL.revokeObjectURL(url);
-        }}
-        onDelete={(file: CustomerFile) => {
-          setDeleteTarget(file);
-          setDeleteModalVisible(true);
-        }}
-      />
       <Modal
         open={deleteModalVisible}
         title="Delete this file?"

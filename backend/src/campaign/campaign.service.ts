@@ -5,7 +5,6 @@ import {
   CreateDraftCampaignDto,
   UpdateDraftCampaignDto,
   DeleteDraftCampaignDto,
-  GetDraftCampaignDto,
 } from './dto/campaign-draft.dto';
 
 @Injectable()
@@ -36,9 +35,15 @@ export class CampaignService {
     });
   }
 
-  async getDraftCampaign(userId: string, dto: GetDraftCampaignDto) {
+  async getDraftCampaign(userId: string, id: string) {
     return this.dbService.campaign.findFirst({
-      where: { id: dto.id, userId, status: CampaignStatus.DRAFT },
+      where: { id, userId, status: CampaignStatus.DRAFT },
+    });
+  }
+
+  async getCampaignById(userId: string, id: string) {
+    return this.dbService.campaign.findFirst({
+      where: { id, userId },
     });
   }
 

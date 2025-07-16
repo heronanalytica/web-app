@@ -13,7 +13,6 @@
 
 .uploadLabel {
   font-weight: 600;
-  margin-bottom: 0.5rem;
   color: #7b2ff2;
 }
 
@@ -65,6 +64,7 @@
   margin-bottom: 0.5rem;
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 .fileButton {
@@ -103,6 +103,7 @@
 .uploadWrapper {
   position: relative;
   width: 100%;
+  margin-top: 12px;
 }
 
 .uploadOverlay {
@@ -125,7 +126,7 @@
   gap: 8px;
   font-size: 1rem;
   font-weight: 600;
-  margin: 1.5rem 0 0.5rem 0;
+  margin: 0 0 1rem 0;
   color: #333;
 }
 
