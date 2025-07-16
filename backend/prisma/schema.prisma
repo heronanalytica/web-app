@@ -33,6 +33,7 @@ model User {
   SurveyIntakeQuestionAnswer SurveyIntakeQuestionAnswer[]
   campaigns                  Campaign[]
   uploadFiles                UserUploadFile[]
+  mailProviderTokens         MailProviderToken[]
 }
 
 enum UserRole {
@@ -77,6 +78,21 @@ model UserUploadFile {
   storageUrl String
   type       String
   uploadedAt DateTime @default(now())
+}
+
+model MailProviderToken {
+  id           String    @id @default(uuid())
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  provider     String
+  accessToken  String
+  refreshToken String?
+  expiresAt    DateTime?
+  meta         Json?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([userId, provider])
 }
 
 enum IntakeQuestionType {

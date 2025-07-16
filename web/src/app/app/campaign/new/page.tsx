@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import styles from "./styles.module.scss";
 import Steps from "../../components/Steps";
 import CustomerFileStep from "../components/CustomerFileStep";
+import { MailServiceConnectStep } from "../components/MailServiceConnectStep";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "@/constants/routes";
 
@@ -21,7 +22,7 @@ const NewCampaignPage = () => {
       case 0:
         return <CustomerFileStep onFileSelected={handleFileSelected} />;
       case 1:
-        return <div>Step 2: Mailchimp connection (coming soon)</div>;
+        return <MailServiceConnectStep />;
       default:
         return <div />;
     }

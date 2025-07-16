@@ -45,7 +45,7 @@ export const fetcher = {
 
   post: async <T = any>(
     path: string,
-    body: any,
+    body: any = {},
     options: RequestOptions = {}
   ): Promise<T> => {
     const { headers, ...rest } = options;

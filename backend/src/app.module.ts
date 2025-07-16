@@ -7,10 +7,12 @@ import { AiMarketingModule } from './ai-marketing/ai-marketing.module';
 import { CampaignModule } from './campaign/campaign.module';
 import { ConfigModule } from '@nestjs/config';
 import { FileModule } from './file/file.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
     AuthModule,
+    MailModule,
     DatabaseModule,
     FeatureFlagModule,
     SurveyModule,
