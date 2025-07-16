@@ -3,6 +3,7 @@
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import { Suspense } from "react"; // Import Suspense
+import { ConfigProvider } from "antd";
 import "./globals.css";
 import ClientLayout from "./clientLayout";
 import { AuthProvider } from "@/context/AuthContext";
@@ -52,16 +53,18 @@ export default function RootLayout({
         </script>
       </head>
       <body className={`${roboto.variable}`}>
-        {/* Wrap the client layout in Suspense */}
-        <Suspense fallback={<LoadingSession />}>
-          {displayComebackSoon ? (
-            <ComeBackSoonPage />
-          ) : (
-            <AuthProvider>
-              <ClientLayout>{children}</ClientLayout>
-            </AuthProvider>
-          )}
-        </Suspense>
+        {/* Set Ant Design primary color globally */}
+        <ConfigProvider theme={{ token: { colorPrimary: "#7a6def" } }}>
+          <Suspense fallback={<LoadingSession />}>
+            {displayComebackSoon ? (
+              <ComeBackSoonPage />
+            ) : (
+              <AuthProvider>
+                <ClientLayout>{children}</ClientLayout>
+              </AuthProvider>
+            )}
+          </Suspense>
+        </ConfigProvider>
       </body>
     </html>
   );

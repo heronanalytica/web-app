@@ -31,6 +31,7 @@ const CsvPreviewModal: React.FC<CsvPreviewModalProps> = ({
     okText="Confirm and Continue"
     cancelText="Cancel"
     confirmLoading={loading}
+    okButtonProps={{ type: 'primary' }}
   >
     {preview?.length && (
       <div className={styles.csvPreviewInfo}>
