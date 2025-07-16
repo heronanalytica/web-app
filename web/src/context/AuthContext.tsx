@@ -1,5 +1,8 @@
 "use client";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useCallback, useState } from "react";
+import { useRouter } from "next/navigation";
+import { ROUTES } from "@/constants/routes";
+import { fetcher } from "@/lib/fetcher";
 
 type User = {
   id: string;
@@ -24,32 +27,25 @@ const initialValue: AuthContextValue = {
 export const AuthContext = createContext<AuthContextValue>(initialValue);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/auth/me`,
-        {
-          credentials: "include",
-        }
-      );
-
-      if (!res.ok) throw new Error("Not authenticated");
-
-      const data = await res.json();
-      setUser(data.data);
+      const data = await fetcher.get<User>("/api/auth/me");
+      setUser(data);
     } catch {
       setUser(null);
+      router.push(ROUTES.LOGIN);
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
 
   useEffect(() => {
     fetchUser();
-  }, []);
+  }, [fetchUser]);
 
   return (
     <AuthContext.Provider
