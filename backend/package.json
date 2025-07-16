@@ -26,8 +26,11 @@
     "db:seed": "npx prisma db seed"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.845.0",
+    "@aws-sdk/s3-request-presigner": "^3.846.0",
     "@nestjs/cli": "^11.0.7",
     "@nestjs/common": "^11.0.1",
+    "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
     "@nestjs/jwt": "^11.0.0",
     "@nestjs/mapped-types": "*",
@@ -44,6 +47,7 @@
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
+    "uuid": "^11.1.0",
     "zod": "^3.25.30"
   },
   "devDependencies": {

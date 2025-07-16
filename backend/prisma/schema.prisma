@@ -32,6 +32,7 @@ model User {
   createdAt                  DateTime                     @default(now())
   SurveyIntakeQuestionAnswer SurveyIntakeQuestionAnswer[]
   campaigns                  Campaign[]
+  uploadFiles                UserUploadFile[]
 }
 
 enum UserRole {
@@ -66,6 +67,17 @@ model SurveyIntakeQuestions {
   options   Json? // Only for SINGLE or MULTIPLE
   createdAt DateTime           @default(now())
   updatedAt DateTime           @updatedAt
+}
+
+model UserUploadFile {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fileName   String
+  storageUrl String
+  columns    String[]
+  type       String
+  uploadedAt DateTime @default(now())
 }
 
 enum IntakeQuestionType {

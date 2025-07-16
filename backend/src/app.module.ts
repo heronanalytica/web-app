@@ -5,6 +5,7 @@ import { FeatureFlagModule } from './feature-flag/feature-flag.module';
 import { SurveyModule } from './survey/survey.module';
 import { AiMarketingModule } from './ai-marketing/ai-marketing.module';
 import { CampaignModule } from './campaign/campaign.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -14,6 +15,9 @@ import { CampaignModule } from './campaign/campaign.module';
     SurveyModule,
     AiMarketingModule,
     CampaignModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
   ],
   controllers: [],
   providers: [],
