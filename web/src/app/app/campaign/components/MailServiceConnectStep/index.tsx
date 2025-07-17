@@ -46,9 +46,14 @@ const PROVIDERS = [
   // Add more providers here (e.g. HubSpot)
 ];
 
-import { useCampaignBuilder } from "../CampaignBuilder/CampaignBuilderContext";
+import {
+  useCampaignBuilder,
+  useStepState,
+} from "../CampaignBuilder/CampaignBuilderContext";
+import { CampaignStepStateKey } from "@/types/campaignStepState";
 
 export const MailServiceConnectStep: React.FC = () => {
+  const [, setMailService] = useStepState(CampaignStepStateKey.MailService);
   const [messageApi, contextHolder] = message.useMessage();
   const [status, setStatus] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(false);
@@ -78,9 +83,21 @@ export const MailServiceConnectStep: React.FC = () => {
 
   // Enforce at least one connected
   useEffect(() => {
-    const anyConnected = Object.values(status).some((s: any) => s?.connected);
-    setCanGoNext(anyConnected);
-  }, [status, setCanGoNext]);
+    const connectedProvider = Object.entries(status).find(
+      ([, s]: any) => s?.connected
+    );
+    setCanGoNext(!!connectedProvider);
+    if (connectedProvider) {
+      const [providerKey, s] = connectedProvider;
+      setMailService({
+        provider: providerKey,
+        connected: true,
+        mailProviderId: s.mailProviderId || s.id || "",
+      });
+    } else {
+      setMailService(undefined);
+    }
+  }, [status, setCanGoNext, setMailService]);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {

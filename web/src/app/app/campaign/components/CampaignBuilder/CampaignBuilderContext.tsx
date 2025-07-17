@@ -1,6 +1,9 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
 import { Modal } from "antd";
 import { useRouter } from "next/navigation";
+import { fetcher } from "@/lib/fetcher";
+
+import type { CampaignStepState } from "@/types/campaignStepState";
 
 export interface CampaignBuilderContextType {
   currentStep: number;
@@ -12,6 +15,12 @@ export interface CampaignBuilderContextType {
   discard: () => void;
   save: () => void;
   campaign: Campaign | null;
+  stepState: CampaignStepState;
+  setStepState: (s: CampaignStepState) => void;
+  updateStepState: <K extends keyof CampaignStepState>(
+    key: K,
+    value: CampaignStepState[K]
+  ) => void;
 }
 
 const CampaignBuilderContext = createContext<
@@ -26,6 +35,15 @@ export const useCampaignBuilder = () => {
     );
   return ctx;
 };
+
+// Hook for step components to get/set their own state
+export function useStepState<K extends keyof CampaignStepState>(key: K) {
+  const { stepState, updateStepState } = useCampaignBuilder();
+  return [
+    stepState[key],
+    (value: CampaignStepState[K]) => updateStepState(key, value),
+  ] as const;
+}
 
 import type { Campaign } from "@/types/campaign";
 import { ROUTES } from "@/constants/routes";
@@ -44,6 +62,10 @@ export const CampaignBuilderProvider: React.FC<{
   );
   const [canGoNext, setCanGoNext] = useState(false);
 
+  const [stepState, setStepState] = useState<CampaignStepState>(
+    (campaign && (campaign as any).stepState) || {}
+  );
+
   const canGoBack = currentStep > 0;
 
   // Implement discard: context-aware Modal
@@ -61,9 +83,22 @@ export const CampaignBuilderProvider: React.FC<{
     setDiscardModalVisible(false);
   }, []);
 
-  const save = useCallback(() => {
-    // TODO: implement save logic
-  }, []);
+  const save = useCallback(async () => {
+    if (!campaign?.id) return;
+    // Save currentStep and stepState to backend
+    await fetcher.patch(`/api/campaigns/${campaign.id}/draft`, {
+      id: campaign.id,
+      currentStep,
+      stepState,
+    });
+  }, [campaign, currentStep, stepState]);
+
+  const updateStepState = <K extends keyof CampaignStepState>(
+    key: K,
+    value: CampaignStepState[K]
+  ) => {
+    setStepState((prev) => ({ ...prev, [key]: value }));
+  };
 
   const value: CampaignBuilderContextType & { campaign: Campaign | null } = {
     currentStep,
@@ -75,6 +110,9 @@ export const CampaignBuilderProvider: React.FC<{
     discard,
     save,
     campaign,
+    stepState,
+    setStepState,
+    updateStepState,
   };
 
   return (

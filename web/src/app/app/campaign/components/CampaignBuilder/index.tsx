@@ -12,7 +12,7 @@ import Steps from "../../../components/Steps";
 import CustomerFileStep from "../CustomerFileStep";
 import { MailServiceConnectStep } from "../MailServiceConnectStep";
 import { FontPoppins } from "@/assets/fonts/poppins";
-
+import { message } from "antd";
 import { Campaign } from "@/types/campaign";
 
 interface CampaignBuilderProps {
@@ -43,9 +43,25 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
     discard,
     save,
   } = useCampaignBuilder();
+  const [saveLoading, setSaveLoading] = React.useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
+
   // Handler for Next/Continue
   const handleNext = () => {
     if (canGoNext) setCurrentStep(currentStep + 1);
+  };
+
+  // Handler for Save with loading and message
+  const handleSave = async () => {
+    setSaveLoading(true);
+    try {
+      await save();
+      messageApi.success("Draft saved successfully");
+    } catch (err: any) {
+      messageApi.error(err?.message || "Failed to save draft");
+    } finally {
+      setSaveLoading(false);
+    }
   };
 
   const stepTitles = [
@@ -71,6 +87,7 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
 
   return (
     <>
+      {contextHolder}
       <div className={styles.appContainer}>
         <Steps totalSteps={5} active={currentStep} />
         <div className={styles.stepHeaderBox}>
@@ -87,7 +104,12 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
             <Button danger onClick={discard}>
               Discard
             </Button>
-            <Button type="primary" onClick={save}>
+            <Button
+              type="primary"
+              onClick={handleSave}
+              loading={saveLoading}
+              disabled={saveLoading}
+            >
               Save
             </Button>
           </div>

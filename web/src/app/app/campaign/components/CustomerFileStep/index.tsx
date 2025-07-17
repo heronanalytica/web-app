@@ -9,7 +9,11 @@ import CsvPreviewModal from "./CsvPreviewModal";
 import { FileOutlined } from "@ant-design/icons";
 
 import type { CustomerFile } from "./types";
-import { useCampaignBuilder } from "../CampaignBuilder/CampaignBuilderContext";
+import { CampaignStepStateKey } from "@/types/campaignStepState";
+import {
+  useCampaignBuilder,
+  useStepState,
+} from "../CampaignBuilder/CampaignBuilderContext";
 
 const CustomerFileStep: React.FC = () => {
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
@@ -18,6 +22,10 @@ const CustomerFileStep: React.FC = () => {
   const [uploading, setUploading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [customerFile, setCustomerFile] = useStepState(
+    CampaignStepStateKey.CustomerFile
+  );
+  const { setCanGoNext } = useCampaignBuilder();
 
   // CSV preview state
   const [csvModalVisible, setCsvModalVisible] = useState(false);
@@ -54,12 +62,12 @@ const CustomerFileStep: React.FC = () => {
     }
   };
 
-  const [selectedFile, setSelectedFile] = useState<CustomerFile | null>(null);
-  const { setCanGoNext } = useCampaignBuilder();
-
   const handleCsvConfirm = () => {
     if (csvPreviewFile) {
-      setSelectedFile(csvPreviewFile);
+      setCustomerFile({
+        fileId: csvPreviewFile.id,
+        fileName: csvPreviewFile.fileName,
+      });
       setCanGoNext(true);
     }
     setCsvModalVisible(false);
@@ -221,17 +229,17 @@ const CustomerFileStep: React.FC = () => {
         <b>Selected File:</b>
         <br />
         <br />
-        {selectedFile ? (
+        {customerFile ? (
           <span className={styles.selectedFileBox}>
             <FileOutlined className={styles.selectedFileIcon} />
             <span className={styles.selectedFileName}>
-              {selectedFile.fileName}
+              {customerFile.fileName}
             </span>
             <button
               type="button"
               className={styles.selectedFileClearBtn}
               onClick={() => {
-                setSelectedFile(null);
+                setCustomerFile(undefined);
                 setCanGoNext(false);
               }}
             >
