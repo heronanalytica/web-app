@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
+import { Modal } from "antd";
+import { useRouter } from "next/navigation";
 
 export interface CampaignBuilderContextType {
   currentStep: number;
@@ -25,6 +27,7 @@ export const useCampaignBuilder = () => {
 };
 
 import type { Campaign } from "@/types/campaign";
+import { ROUTES } from "@/constants/routes";
 
 export const CampaignBuilderProvider: React.FC<{
   campaign: Campaign | null;
@@ -42,11 +45,19 @@ export const CampaignBuilderProvider: React.FC<{
 
   const canGoBack = currentStep > 0;
 
-  // Placeholder discard/save logic
+  // Implement discard: context-aware Modal
+  const router = useRouter();
+  const [discardModalVisible, setDiscardModalVisible] = useState(false);
   const discard = useCallback(() => {
-    // TODO: implement discard logic
-    // e.g. show modal, reset state, etc.
-    // Optionally reset canGoNext if needed
+    setDiscardModalVisible(true);
+  }, []);
+  const handleDiscardOk = useCallback(() => {
+    setDiscardModalVisible(false);
+    router.push(ROUTES.APP_HOMEPAGE);
+    setCanGoNext(false);
+  }, [router, setCanGoNext]);
+  const handleDiscardCancel = useCallback(() => {
+    setDiscardModalVisible(false);
   }, []);
 
   const save = useCallback(() => {
@@ -68,6 +79,18 @@ export const CampaignBuilderProvider: React.FC<{
   return (
     <CampaignBuilderContext.Provider value={value}>
       {children}
+      <Modal
+        open={discardModalVisible}
+        title="Discard Campaign?"
+        okText="Discard"
+        okType="danger"
+        cancelText="Cancel"
+        onOk={handleDiscardOk}
+        onCancel={handleDiscardCancel}
+      >
+        Are you sure you want to discard this campaign draft and return to the
+        campaign list? All unsaved changes will be lost.
+      </Modal>
     </CampaignBuilderContext.Provider>
   );
 };

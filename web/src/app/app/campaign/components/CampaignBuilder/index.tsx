@@ -75,6 +75,14 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
           <h2 className={styles.stepTitle + " " + FontPoppins.className}>
             {stepTitles[currentStep]}
           </h2>
+          <div className={styles.headerActions}>
+            <Button danger onClick={discard} style={{ marginRight: 8 }}>
+              Discard
+            </Button>
+            <Button type="primary" onClick={save}>
+              Save
+            </Button>
+          </div>
         </div>
         <div className={styles.componentContainer}>{renderStepComponent()}</div>
         <div
@@ -92,12 +100,6 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
             disabled={!canGoBack}
           >
             Back
-          </Button>
-          <Button danger onClick={discard}>
-            Discard
-          </Button>
-          <Button type="primary" onClick={save}>
-            Save
           </Button>
           {/* Next/Continue button, hide on last step */}
           {currentStep < totalSteps - 1 && (

@@ -24,4 +24,14 @@
 
 .stepHeaderBox {
   margin-top: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
