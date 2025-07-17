@@ -27,6 +27,13 @@ const CustomerFileStep: React.FC = () => {
   );
   const { setCanGoNext } = useCampaignBuilder();
 
+  // Ensure Next is enabled if a file is pre-selected from stepState
+  useEffect(() => {
+    if (customerFile && files.length > 0) {
+      setCanGoNext(true);
+    }
+  }, [customerFile, files, setCanGoNext]);
+
   // CSV preview state
   const [csvModalVisible, setCsvModalVisible] = useState(false);
   const [csvPreview, setCsvPreview] = useState<any[][] | null>(null);
@@ -231,9 +238,27 @@ const CustomerFileStep: React.FC = () => {
         <br />
         {customerFile ? (
           <span className={styles.selectedFileBox}>
-            <FileOutlined className={styles.selectedFileIcon} />
-            <span className={styles.selectedFileName}>
-              {customerFile.fileName}
+            <span
+              className={styles.selectedFileClickable}
+              title="Preview CSV"
+              onClick={() => {
+                const fileObj = files.find((f) => f.id === customerFile.fileId);
+                if (fileObj) {
+                  handlePreviewCsv(fileObj);
+                } else {
+                  message.error("Full file info not found for preview.");
+                }
+              }}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                cursor: "pointer",
+              }}
+            >
+              <FileOutlined className={styles.selectedFileIcon} />
+              <span className={styles.selectedFileName}>
+                {customerFile.fileName}
+              </span>
             </span>
             <button
               type="button"
