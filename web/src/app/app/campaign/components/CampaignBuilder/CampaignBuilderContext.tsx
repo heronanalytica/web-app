@@ -21,6 +21,7 @@ export interface CampaignBuilderContextType {
     key: K,
     value: CampaignStepState[K]
   ) => void;
+  removeStepState: <K extends keyof CampaignStepState>(key: K) => void;
 }
 
 const CampaignBuilderContext = createContext<
@@ -36,12 +37,13 @@ export const useCampaignBuilder = () => {
   return ctx;
 };
 
-// Hook for step components to get/set their own state
+// Hook for step components to get/set/remove their own state
 export function useStepState<K extends keyof CampaignStepState>(key: K) {
-  const { stepState, updateStepState } = useCampaignBuilder();
+  const { stepState, updateStepState, removeStepState } = useCampaignBuilder();
   return [
     stepState[key],
     (value: CampaignStepState[K]) => updateStepState(key, value),
+    () => removeStepState(key),
   ] as const;
 }
 
@@ -100,6 +102,14 @@ export const CampaignBuilderProvider: React.FC<{
     setStepState((prev) => ({ ...prev, [key]: value }));
   };
 
+  const removeStepState = <K extends keyof CampaignStepState>(key: K) => {
+    setStepState((prev) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [key]: _removed, ...rest } = prev;
+      return rest as CampaignStepState;
+    });
+  };
+
   const value: CampaignBuilderContextType & { campaign: Campaign | null } = {
     currentStep,
     setCurrentStep,
@@ -113,6 +123,7 @@ export const CampaignBuilderProvider: React.FC<{
     stepState,
     setStepState,
     updateStepState,
+    removeStepState,
   };
 
   return (

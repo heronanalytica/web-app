@@ -12,7 +12,7 @@ import {
 import { CampaignStepStateKey } from "@/types/campaignStepState";
 
 export const MailServiceConnectStep: React.FC = () => {
-  const [mailService, setMailService] = useStepState(
+  const [mailService, setMailService, removeMailService] = useStepState(
     CampaignStepStateKey.MailService
   );
   const lastMailServiceRef = React.useRef<any>(mailService);
@@ -21,6 +21,16 @@ export const MailServiceConnectStep: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [connecting, setConnecting] = useState<string | null>(null);
   const [disconnecting, setDisconnecting] = useState<string | null>(null);
+
+  const { setCanGoNext, save } = useCampaignBuilder();
+  const [pendingSaveAfterRemove, setPendingSaveAfterRemove] = useState(false);
+
+  useEffect(() => {
+    if (pendingSaveAfterRemove) {
+      save();
+      setPendingSaveAfterRemove(false);
+    }
+  }, [pendingSaveAfterRemove, save]);
 
   const fetchStatus = useCallback(async () => {
     setLoading(true);
@@ -33,8 +43,6 @@ export const MailServiceConnectStep: React.FC = () => {
       setLoading(false);
     }
   }, [messageApi]);
-
-  const { setCanGoNext } = useCampaignBuilder();
 
   useEffect(() => {
     fetchStatus();
@@ -103,6 +111,12 @@ export const MailServiceConnectStep: React.FC = () => {
     try {
       await fetcher.post(`/api/mail/disconnect/${provider}`);
       messageApi.success("Disconnected");
+      // If the disconnected provider is the selected one, clear step state and persist
+      if (mailService && mailService.provider === provider) {
+        removeMailService();
+        lastMailServiceRef.current = undefined;
+        setPendingSaveAfterRemove(true);
+      }
       fetchStatus();
     } catch {
       messageApi.error("Failed to disconnect");

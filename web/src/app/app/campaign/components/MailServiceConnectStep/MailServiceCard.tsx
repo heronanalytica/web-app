@@ -53,8 +53,7 @@ const MailServiceCard: React.FC<MailServiceCardProps> = ({
           <div className={styles.providerName}>{provider.name}</div>
         </div>
         <div className={styles.providerBody}>
-          <div style={{ flex: 1 }}></div>
-          <div style={{ flex: 2, minWidth: 0 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <div className={styles.providerDesc}>{provider.description}</div>
             <div className={styles.providerActions}>
               <a
