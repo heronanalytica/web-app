@@ -46,6 +46,8 @@ const PROVIDERS = [
   // Add more providers here (e.g. HubSpot)
 ];
 
+import { useCampaignBuilder } from "../CampaignBuilder/CampaignBuilderContext";
+
 export const MailServiceConnectStep: React.FC = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const [status, setStatus] = useState<Record<string, any>>({});
@@ -65,12 +67,20 @@ export const MailServiceConnectStep: React.FC = () => {
     }
   }, [messageApi]);
 
+  const { setCanGoNext } = useCampaignBuilder();
+
   useEffect(() => {
     fetchStatus();
     // Listen for OAuth callback (poll or window event)
     window.addEventListener("focus", fetchStatus);
     return () => window.removeEventListener("focus", fetchStatus);
   }, [fetchStatus]);
+
+  // Enforce at least one connected
+  useEffect(() => {
+    const anyConnected = Object.values(status).some((s: any) => s?.connected);
+    setCanGoNext(anyConnected);
+  }, [status, setCanGoNext]);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -128,15 +138,13 @@ export const MailServiceConnectStep: React.FC = () => {
   return (
     <>
       {contextHolder}
-      <h2 className={styles.providerStepTitle}>
-        Connect Your Email Service
-      </h2>
-      {PROVIDERS.every(p => !status[p.key]?.connected) && (
+      <h2 className={styles.providerStepTitle}>Connect Your Email Service</h2>
+      {PROVIDERS.every((p) => !status[p.key]?.connected) && (
         <div className={styles.providerStepNotice}>
           You must connect at least one email service before continuing.
         </div>
       )}
-      <div className={styles.providerCardsRow} >
+      <div className={styles.providerCardsRow}>
         {PROVIDERS.map((p) => {
           if (p.comingSoon) {
             return (

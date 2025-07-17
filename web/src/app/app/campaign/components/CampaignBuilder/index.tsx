@@ -10,6 +10,7 @@ import styles from "./styles.module.scss";
 import Steps from "../../../components/Steps";
 import CustomerFileStep from "../CustomerFileStep";
 import { MailServiceConnectStep } from "../MailServiceConnectStep";
+import { FontPoppins } from "@/assets/fonts/poppins";
 
 import { Campaign } from "@/types/campaign";
 
@@ -45,6 +46,14 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
     if (canGoNext) setCurrentStep(currentStep + 1);
   };
 
+  const stepTitles = [
+    "Upload Customer File",
+    "Connect Mail Service",
+    "Configure Email Content",
+    "Review & Confirm",
+    "Launch Campaign",
+  ];
+
   const renderStepComponent = () => {
     switch (currentStep) {
       case 0:
@@ -62,6 +71,11 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
     <>
       <div className={styles.appContainer}>
         <Steps totalSteps={5} active={currentStep} />
+        <div className={styles.stepHeaderBox}>
+          <h2 className={styles.stepTitle + " " + FontPoppins.className}>
+            {stepTitles[currentStep]}
+          </h2>
+        </div>
         <div className={styles.componentContainer}>{renderStepComponent()}</div>
         <div
           style={{
