@@ -11,6 +11,7 @@ export interface CampaignBuilderContextType {
   canGoBack: boolean;
   discard: () => void;
   save: () => void;
+  campaign: Campaign | null;
 }
 
 const CampaignBuilderContext = createContext<

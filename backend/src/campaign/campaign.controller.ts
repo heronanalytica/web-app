@@ -14,7 +14,6 @@ import { CampaignService } from './campaign.service';
 import {
   CreateDraftCampaignDto,
   UpdateDraftCampaignDto,
-  DeleteDraftCampaignDto,
 } from './dto/campaign-draft.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Request } from 'express';
@@ -91,13 +90,10 @@ export class CampaignController {
   }
 
   @Delete(':id/draft')
-  async deleteDraftCampaign(
-    @Req() req: Request,
-    @Body() dto: DeleteDraftCampaignDto,
-  ) {
+  async deleteDraftCampaign(@Req() req: Request, @Param('id') id: string) {
     const userId = req.user?.id;
     if (!userId) throw new UnauthorizedException();
-    const data = await this.campaignService.deleteDraftCampaign(userId, dto);
+    const data = await this.campaignService.deleteDraftCampaign(userId, id);
     return { error: 0, data };
   }
 }

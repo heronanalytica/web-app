@@ -4,7 +4,6 @@ import { CampaignStatus } from './campaign-status.enum';
 import {
   CreateDraftCampaignDto,
   UpdateDraftCampaignDto,
-  DeleteDraftCampaignDto,
 } from './dto/campaign-draft.dto';
 
 @Injectable()
@@ -76,9 +75,9 @@ export class CampaignService {
     });
   }
 
-  async deleteDraftCampaign(userId: string, dto: DeleteDraftCampaignDto) {
+  async deleteDraftCampaign(userId: string, id: string) {
     return this.dbService.campaign.delete({
-      where: { id: dto.id, userId },
+      where: { id, userId },
     });
   }
 }

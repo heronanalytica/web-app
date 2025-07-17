@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Spin, Button } from "antd";
+import DeleteDraftButton from "./DeleteDraftButton";
 import {
   CampaignBuilderProvider,
   useCampaignBuilder,
@@ -32,6 +33,7 @@ export const CampaignBuilder: React.FC<CampaignBuilderProps> = ({
 };
 
 const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
+  const { campaign } = useCampaignBuilder();
   const {
     currentStep,
     setCurrentStep,
@@ -76,7 +78,13 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
             {stepTitles[currentStep]}
           </h2>
           <div className={styles.headerActions}>
-            <Button danger onClick={discard} style={{ marginRight: 8 }}>
+            {campaign?.id && (
+              <DeleteDraftButton
+                campaignId={campaign.id}
+                className={styles.deleteDraftBtn}
+              />
+            )}
+            <Button danger onClick={discard}>
               Discard
             </Button>
             <Button type="primary" onClick={save}>
