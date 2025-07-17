@@ -41,7 +41,11 @@ export class MailService {
     const res = await axios.post(config.tokenUrl, params, {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
-    const tokenData = res.data;
+    const tokenData: {
+      access_token: string;
+      refresh_token: string;
+      expires_in: number;
+    } = res.data;
     // Store or update token in DB for user
     await this.db.mailProviderToken.upsert({
       where: { userId_provider: { userId, provider } },
@@ -71,11 +75,15 @@ export class MailService {
     // Query DB for all connected providers for this user
     const tokens = await this.db.mailProviderToken.findMany({
       where: { userId },
-      select: { provider: true, meta: true },
+      select: { provider: true, meta: true, id: true },
     });
     const status: Record<string, any> = {};
     for (const t of tokens) {
-      status[t.provider] = { connected: true, meta: t.meta };
+      status[t.provider] = {
+        connected: true,
+        meta: t.meta,
+        mailProviderId: t.id,
+      };
     }
     return status;
   }

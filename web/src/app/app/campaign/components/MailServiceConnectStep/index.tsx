@@ -1,50 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Button, Spin, message, Modal } from "antd";
+import { message, Modal } from "antd";
 import { fetcher } from "@/lib/fetcher";
-import {
-  MailOutlined,
-  DisconnectOutlined,
-  CheckCircleTwoTone,
-} from "@ant-design/icons";
-import Image from "next/image";
 import styles from "./style.module.scss";
-
-const PROVIDERS = [
-  {
-    key: "mailchimp",
-    name: "MailChimp",
-    description:
-      "MailChimp is a leading email marketing platform. Connect your account to send campaigns directly from HeronAnalytica.",
-    logo: "/images/mailchimp_logo.png",
-    homepage: "https://mailchimp.com/",
-    icon: <MailOutlined style={{ fontSize: 32, color: "#ffe01b" }} />,
-    connectUrl: `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/mail/connect/mailchimp`,
-    headerBg: "linear-gradient(90deg, #ffe01b 0%, #ffe99f 100%)",
-  },
-  {
-    key: "hubspot",
-    name: "HubSpot",
-    description:
-      "HubSpot integration is coming soon. You'll be able to connect your HubSpot account to send campaigns from HeronAnalytica.",
-    logo: "/images/hubspot_logo.png",
-    homepage: "https://www.hubspot.com/",
-    connectUrl: "",
-    comingSoon: true,
-    headerBg: "linear-gradient(90deg, #ff7a59 0%, #ffb199 100%)",
-  },
-  {
-    key: "klaviyo",
-    name: "Klaviyo",
-    description:
-      "Klaviyo integration is coming soon. You'll be able to connect your Klaviyo account to send campaigns from HeronAnalytica.",
-    logo: "/images/klaviyo_logo.png",
-    homepage: "https://www.klaviyo.com/",
-    connectUrl: "",
-    comingSoon: true,
-    headerBg: "linear-gradient(90deg, #00c569 0%, #b1ffe7 100%)",
-  },
-  // Add more providers here (e.g. HubSpot)
-];
+import { PROVIDERS } from "./constants";
+import MailServiceCard from "./MailServiceCard";
 
 import {
   useCampaignBuilder,
@@ -53,7 +12,10 @@ import {
 import { CampaignStepStateKey } from "@/types/campaignStepState";
 
 export const MailServiceConnectStep: React.FC = () => {
-  const [, setMailService] = useStepState(CampaignStepStateKey.MailService);
+  const [mailService, setMailService] = useStepState(
+    CampaignStepStateKey.MailService
+  );
+  const lastMailServiceRef = React.useRef<any>(mailService);
   const [messageApi, contextHolder] = message.useMessage();
   const [status, setStatus] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(false);
@@ -87,15 +49,27 @@ export const MailServiceConnectStep: React.FC = () => {
       ([, s]: any) => s?.connected
     );
     setCanGoNext(!!connectedProvider);
+
     if (connectedProvider) {
       const [providerKey, s] = connectedProvider;
-      setMailService({
+      const newMailService = {
         provider: providerKey,
         connected: true,
         mailProviderId: s.mailProviderId || s.id || "",
-      });
-    } else {
+      };
+      // Only update if changed (deep compare)
+      if (
+        !lastMailServiceRef.current ||
+        lastMailServiceRef.current.provider !== newMailService.provider ||
+        lastMailServiceRef.current.mailProviderId !==
+          newMailService.mailProviderId
+      ) {
+        setMailService(newMailService);
+        lastMailServiceRef.current = newMailService;
+      }
+    } else if (lastMailServiceRef.current) {
       setMailService(undefined);
+      lastMailServiceRef.current = undefined;
     }
   }, [status, setCanGoNext, setMailService]);
 
@@ -161,150 +135,26 @@ export const MailServiceConnectStep: React.FC = () => {
         </div>
       )}
       <div className={styles.providerCardsRow}>
-        {PROVIDERS.map((p) => {
-          if (p.comingSoon) {
-            return (
-              <div
-                key={p.key}
-                className={`${styles.glassCard} ${styles.dimmedCard}`}
-              >
-                <div
-                  className={styles.providerHeader}
-                  style={{ background: p.headerBg }}
-                >
-                  <div className={styles.providerLogo}>
-                    <Image
-                      src={p.logo}
-                      alt={p.name + " logo"}
-                      width={48}
-                      height={48}
-                      style={{ objectFit: "contain" }}
-                    />
-                  </div>
-                  <div className={styles.providerName}>{p.name}</div>
-                  <span
-                    className={styles.providerStatusPill}
-                    style={{ background: "#ffe9b3", color: "#c28800" }}
-                  >
-                    <span style={{ marginRight: 6, fontSize: 15 }}>⏳</span>{" "}
-                    Coming soon
-                  </span>
-                </div>
-                <div className={styles.providerBody}>
-                  <div style={{ flex: 1 }}></div>
-                  <div style={{ flex: 2, minWidth: 0 }}>
-                    <div className={styles.providerDesc}>{p.description}</div>
-                    <div className={styles.providerActions}>
-                      <a
-                        href={p.homepage}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.providerLink}
-                        style={{ marginRight: 8 }}
-                      >
-                        Learn more
-                      </a>
-                      <Button
-                        type="primary"
-                        disabled
-                        style={{ opacity: 0.6, pointerEvents: "none" }}
-                      >
-                        Connect
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          }
-
-          const lastSynced = status[p.key]?.lastSynced || "Just now";
-          return (
-            <div key={p.key} className={styles.glassCard}>
-              <div className={styles.providerHeader}>
-                <div className={styles.providerLogo}>
-                  <Image
-                    src={p.logo}
-                    alt={p.name + " logo"}
-                    width={48}
-                    height={48}
-                    style={{ objectFit: "contain" }}
-                  />
-                </div>
-                <div className={styles.providerName}>{p.name}</div>
-                {status[p.key]?.connected && (
-                  <span className={styles.providerStatusPill}>
-                    <span className={styles.pulsingCheck}>
-                      <CheckCircleTwoTone twoToneColor="#52c41a" />
-                    </span>
-                    Connected
-                  </span>
-                )}
-              </div>
-              <Spin spinning={loading && !status[p.key]?.connected}>
-                <div className={styles.providerBody}>
-                  {/* Left column: status/meta */}
-                  <div
-                    style={{
-                      flex: 1,
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "flex-start",
-                      minWidth: 0,
-                    }}
-                  >
-                    {status[p.key]?.connected && (
-                      <>
-                        {status[p.key]?.meta?.login && (
-                          <div className={styles.providerMeta}>
-                            as <b>{status[p.key].meta.login}</b>
-                          </div>
-                        )}
-                        <div className={styles.providerMeta}>
-                          Last synced: {lastSynced}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                  {/* Right column: desc, actions, link */}
-                  <div style={{ flex: 2, minWidth: 0 }}>
-                    <div className={styles.providerDesc}>{p.description}</div>
-                    <div className={styles.providerActions}>
-                      <a
-                        href={p.homepage}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.providerLink}
-                        style={{ marginRight: 8 }}
-                      >
-                        Learn more
-                      </a>
-                      {status[p.key]?.connected ? (
-                        <Button
-                          danger
-                          icon={<DisconnectOutlined />}
-                          onClick={() => showDisconnectModal(p.key)}
-                          loading={loading}
-                        >
-                          Disconnect
-                        </Button>
-                      ) : (
-                        <Button
-                          type="primary"
-                          icon={<MailOutlined />}
-                          onClick={() => handleConnect(p.key, p.connectUrl)}
-                          loading={connecting === p.key}
-                        >
-                          Connect
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </Spin>
-            </div>
-          );
-        })}
+        {PROVIDERS.map((p) => (
+          <MailServiceCard
+            key={p.key}
+            provider={p}
+            status={status}
+            loading={loading}
+            selected={status[p.key]?.connected}
+            onSelect={() =>
+              setMailService({
+                provider: p.key,
+                connected: true,
+                mailProviderId:
+                  status[p.key]?.mailProviderId || status[p.key]?.id || "",
+              })
+            }
+            onConnect={handleConnect}
+            onDisconnect={showDisconnectModal}
+            connecting={connecting}
+          />
+        ))}
       </div>
       {/* Disconnect confirmation modal */}
       <Modal
