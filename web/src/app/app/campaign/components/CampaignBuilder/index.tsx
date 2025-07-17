@@ -6,10 +6,10 @@ import {
   CampaignBuilderProvider,
   useCampaignBuilder,
 } from "./CampaignBuilderContext";
-import styles from "../new/styles.module.scss";
-import Steps from "../../components/Steps";
-import CustomerFileStep from "./CustomerFileStep";
-import { MailServiceConnectStep } from "./MailServiceConnectStep";
+import styles from "./styles.module.scss";
+import Steps from "../../../components/Steps";
+import CustomerFileStep from "../CustomerFileStep";
+import { MailServiceConnectStep } from "../MailServiceConnectStep";
 
 import { Campaign } from "@/types/campaign";
 

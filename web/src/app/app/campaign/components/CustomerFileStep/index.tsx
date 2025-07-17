@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { fetcher } from "@/lib/fetcher";
 import styles from "./style.module.scss";
-import { Upload, message, Spin, Modal } from "antd";
+import { Upload, message, Spin, Modal, Divider } from "antd";
 import type { UploadProps } from "antd";
 import { InboxOutlined } from "@ant-design/icons";
 import FileList from "./FileList";
 import CsvPreviewModal from "./CsvPreviewModal";
+import { FileOutlined } from "@ant-design/icons";
 
 import type { CustomerFile } from "./types";
-import { useCampaignBuilder } from "../CampaignBuilderContext";
+import { useCampaignBuilder } from "../CampaignBuilder/CampaignBuilderContext";
 
 const CustomerFileStep: React.FC = () => {
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
@@ -215,27 +216,26 @@ const CustomerFileStep: React.FC = () => {
           />
         </div>
       </div>
+      <Divider />
       <div style={{ marginTop: 16, minHeight: 32 }}>
-        <b>Selected File:</b>{" "}
+        <b>Selected File:</b>
+        <br />
+        <br />
         {selectedFile ? (
-          <span>
-            {selectedFile.fileName}
+          <span className={styles.selectedFileBox}>
+            <FileOutlined className={styles.selectedFileIcon} />
+            <span className={styles.selectedFileName}>
+              {selectedFile.fileName}
+            </span>
             <button
               type="button"
-              style={{
-                marginLeft: 12,
-                color: "#389e0d",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                fontWeight: 500,
-              }}
+              className={styles.selectedFileClearBtn}
               onClick={() => {
                 setSelectedFile(null);
                 setCanGoNext(false);
               }}
             >
-              Clear
+              Remove
             </button>
           </span>
         ) : (

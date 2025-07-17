@@ -41,7 +41,7 @@ const CampaignDetailPage = () => {
       {campaign.status === CampaignStatus.DRAFT ? (
         <CampaignBuilder campaign={campaign} loading={loading} />
       ) : (
-        <div>Campaign view page coming soon.</div>
+        <div>View campaign page coming soon.</div>
       )}
     </>
   );

@@ -1,0 +1,23 @@
+.appContainer {
+  background-color: white;
+  margin: 30px;
+  border-radius: 20px;
+  padding: 30px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.componentContainer {
+  margin-top: 20px;
+  flex: 1;
+}
+
+.appFooter {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 24px 0 0 0;
+  width: 100%;
+  gap: 12px;
+}
