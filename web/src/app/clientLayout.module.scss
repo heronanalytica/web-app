@@ -1,0 +1,98 @@
+.layoutRoot {
+  min-height: 100vh;
+}
+
+.headerWrap {
+  z-index: 100;
+}
+
+.header {
+  height: 80px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  background-color: transparent;
+}
+
+.hamburgerDummy {
+  visibility: hidden;
+}
+
+.logoWrap {
+  position: absolute;
+  top: 0px;
+  left: 10px;
+  cursor: pointer;
+}
+
+.desktopMenu {
+  display: flex;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .desktopMenu {
+    display: none !important;
+  }
+}
+
+
+.navLink {
+  color: #000;
+  margin: 0 15px;
+  text-decoration: unset;
+  transition: color 0.2s;
+  font-weight: 500;
+  &:hover,
+  &:focus {
+    color: #505F98;
+    text-decoration: underline;
+  }
+}
+
+.profileBtn {
+  margin-left: 16px;
+  border: none;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 6px 0 rgba(80,95,152,0.10);
+  transition: box-shadow 0.2s, transform 0.2s;
+  cursor: pointer;
+  outline: none;
+  border-width: 2px;
+  border-style: solid;
+  border-color: #e7eaf3;
+  padding: 0;
+  &:hover,
+  &:focus {
+    box-shadow: 0 4px 16px 0 rgba(80,95,152,0.16);
+    transform: scale(1.07);
+  }
+}
+
+.profileIcon {
+  font-size: 22px !important;
+  color: #505F98 !important;
+  vertical-align: middle;
+}
+
+.menuIcon {
+  font-size: 24px;
+  color: #505F98;
+}
+
+.desktop-only {
+  display: inline-flex;
+}
+
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
+  }
+}

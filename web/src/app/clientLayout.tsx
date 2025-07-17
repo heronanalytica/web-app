@@ -1,7 +1,7 @@
 "use client";
 
 import { AntdRegistry } from "@ant-design/nextjs-registry";
-import { Drawer, Button, Flex } from "antd";
+import { Drawer, Button, Flex, Divider } from "antd";
 import HeronLogo from "./components/icons/HeronLogo";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -12,8 +12,10 @@ import {
   LinkedinFilled,
   MenuOutlined,
   TwitterCircleFilled,
+  UserOutlined,
 } from "@ant-design/icons";
 import { motion } from "framer-motion";
+import styles from "./clientLayout.module.scss";
 import { ROUTES } from "@/constants/routes";
 import useAuth from "@/hooks/useAuth";
 import LoadingSession from "./components/LoadingSession";
@@ -45,68 +47,34 @@ export default function ClientLayout({
 
   return (
     <AntdRegistry>
-      <Flex justify="space-between" vertical style={{ minHeight: "100vh" }}>
-        <div style={{ zIndex: 100 }}>
-          <div
-            style={{
-              height: "80px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "0 20px",
-              backgroundColor: "transparent",
-            }}
-          >
+      <Flex justify="space-between" vertical className={styles.layoutRoot}>
+        <div className={styles.headerWrap}>
+          <div className={styles.header}>
             {/* Dummy Mobile Hamburger Menu to style */}
-            <Button type="text" style={{ visibility: "hidden" }} />
+            <Button type="text" className={styles.hamburgerDummy} />
 
             {/* Logo */}
             <div
-              style={{
-                position: "absolute",
-                top: "0px",
-                left: "10px",
-              }}
+              className={styles.logoWrap}
               onClick={() => router.push(ROUTES.HOMEPAGE)}
             >
               <HeronLogo />
             </div>
 
             {/* Desktop Navigation */}
-            <div className="desktop-menu">
-              <Link
-                href={ROUTES.HOMEPAGE}
-                style={{
-                  color: "#000",
-                  margin: "0 15px",
-                  textDecoration: "unset",
-                }}
-              >
+            <div className={styles.desktopMenu}>
+              <Link href={ROUTES.HOMEPAGE} className={styles.navLink}>
                 Home
               </Link>
-              <Link
-                href={ROUTES.PRICING}
-                style={{
-                  color: "#000",
-                  margin: "0 15px",
-                  textDecoration: "unset",
-                }}
-              >
+              <Link href={ROUTES.PRICING} className={styles.navLink}>
                 Pricing
               </Link>
-              <Link
-                href={ROUTES.CONTACT}
-                style={{
-                  color: "#000",
-                  margin: "0 15px",
-                  textDecoration: "unset",
-                }}
-              >
+              <Link href={ROUTES.CONTACT} className={styles.navLink}>
                 Contact
               </Link>
             </div>
 
-            {/* Login Button Desktop */}
+            {/* Profile Icon Desktop */}
             {!isAuthenticated ? (
               <Button
                 className="desktop-login-btn"
@@ -120,15 +88,20 @@ export default function ClientLayout({
                 Login
               </Button>
             ) : (
-              <div />
+              <button
+                type="button"
+                aria-label="Go to homepage"
+                className={`${styles["desktop-only"]} ${styles.profileBtn}`}
+                onClick={() => router.push(ROUTES.APP_HOMEPAGE)}
+              >
+                <UserOutlined className={styles.profileIcon} />
+              </button>
             )}
 
             {/* Mobile Hamburger Menu */}
             <Button
               type="text"
-              icon={
-                <MenuOutlined style={{ fontSize: "24px", color: "#505F98" }} />
-              }
+              icon={<MenuOutlined className={styles.menuIcon} />}
               onClick={toggleDrawer}
               className="mobile-menu"
             />
@@ -144,6 +117,14 @@ export default function ClientLayout({
             <div
               style={{ display: "flex", flexDirection: "column", gap: "20px" }}
             >
+              <Link
+                href={ROUTES.APP_HOMEPAGE}
+                onClick={toggleDrawer}
+                style={{ color: "#505F98", fontWeight: 600 }}
+              >
+                App Homepage
+              </Link>
+              <Divider style={{ margin: 0 }} />
               <Link
                 href={ROUTES.HOMEPAGE}
                 onClick={toggleDrawer}
