@@ -5,6 +5,8 @@ import {
   CreateDraftCampaignDto,
   UpdateDraftCampaignDto,
 } from './dto/campaign-draft.dto';
+import { Prisma } from 'generated/prisma';
+import { instanceToPlain } from 'class-transformer';
 
 @Injectable()
 export class CampaignService {
@@ -69,6 +71,13 @@ export class CampaignService {
         ...(status !== undefined &&
         Object.values(CampaignStatus).includes(status as CampaignStatus)
           ? { status: status as CampaignStatus }
+          : {}),
+        ...(dto.stepState !== undefined
+          ? {
+              stepState: instanceToPlain(
+                dto.stepState,
+              ) as Prisma.InputJsonValue,
+            }
           : {}),
         lastSavedAt: new Date(),
       },

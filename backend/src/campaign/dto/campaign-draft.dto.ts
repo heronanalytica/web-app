@@ -1,4 +1,12 @@
-import { IsOptional, IsString, IsNumber, IsUUID } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsOptional,
+  IsString,
+  IsNumber,
+  IsUUID,
+  ValidateNested,
+} from 'class-validator';
+import { StepStateDto } from './campaign-step-state.dto';
 
 export class CreateDraftCampaignDto {
   @IsString()
@@ -7,6 +15,11 @@ export class CreateDraftCampaignDto {
   @IsOptional()
   @IsNumber()
   currentStep?: number;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => StepStateDto)
+  stepState?: StepStateDto;
 }
 
 export class UpdateDraftCampaignDto {
@@ -24,6 +37,11 @@ export class UpdateDraftCampaignDto {
   @IsOptional()
   @IsString()
   status?: string;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => StepStateDto)
+  stepState?: StepStateDto;
 }
 
 export class DeleteDraftCampaignDto {

@@ -49,9 +49,10 @@ model Campaign {
   currentStep Int? // Step user left off at (nullable for legacy)
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
-  lastSavedAt DateTime? // Last time the draft was saved
+  lastSavedAt DateTime?
   user        User           @relation(fields: [userId], references: [id])
   userId      String
+  stepState   Json?
 }
 
 enum CampaignStatus {
