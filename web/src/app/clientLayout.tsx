@@ -62,7 +62,7 @@ export default function ClientLayout({
             </div>
 
             {/* Desktop Navigation */}
-            {pathname !== ROUTES.APP_HOMEPAGE && (
+            {!pathname.startsWith(ROUTES.APP_HOMEPAGE) && (
               <div className={styles.desktopMenu}>
                 <Link href={ROUTES.HOMEPAGE} className={styles.navLink}>
                   Home
