@@ -27,13 +27,6 @@ import { callOpenAiAndParse } from './helpers/openai.helper';
 
 @Injectable()
 export class AiMarketingService {
-  private extractJsonFromMarkdown(content: string): string {
-    return content
-      .replace(/^```(?:json)?\s*/i, '')
-      .replace(/```$/, '')
-      .trim();
-  }
-
   async analyze(dto: SegmentAnalysisDto): Promise<MarketingAnalysisResult> {
     const personaSegments = await Promise.all(
       dto.segments.map((segment, idx) => this.parseSegment(segment, idx + 1)),
