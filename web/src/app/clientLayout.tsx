@@ -62,17 +62,19 @@ export default function ClientLayout({
             </div>
 
             {/* Desktop Navigation */}
-            <div className={styles.desktopMenu}>
-              <Link href={ROUTES.HOMEPAGE} className={styles.navLink}>
-                Home
-              </Link>
-              <Link href={ROUTES.PRICING} className={styles.navLink}>
-                Pricing
-              </Link>
-              <Link href={ROUTES.CONTACT} className={styles.navLink}>
-                Contact
-              </Link>
-            </div>
+            {pathname !== ROUTES.APP_HOMEPAGE && (
+              <div className={styles.desktopMenu}>
+                <Link href={ROUTES.HOMEPAGE} className={styles.navLink}>
+                  Home
+                </Link>
+                <Link href={ROUTES.PRICING} className={styles.navLink}>
+                  Pricing
+                </Link>
+                <Link href={ROUTES.CONTACT} className={styles.navLink}>
+                  Contact
+                </Link>
+              </div>
+            )}
 
             {/* Profile Icon Desktop */}
             {!isAuthenticated ? (
