@@ -1,7 +1,8 @@
 export enum CampaignStepStateKey {
   CustomerFile = "customerFile",
   MailService = "mailService",
-  Launched = "launched"
+  CompanyProfile = "companyProfile",
+  Launched = "launched",
 }
 
 export interface CustomerFileDto {
@@ -15,8 +16,17 @@ export interface MailServiceDto {
   mailProviderId: string; // MailProviderToken.id
 }
 
+export interface CompanyProfileDto {
+  id: string;
+  website: string;
+  marketingContentFileId: string;
+  designAssetFileId: string;
+  businessInfo?: string;
+}
+
 export interface CampaignStepState {
   customerFile?: CustomerFileDto;
   mailService?: MailServiceDto;
+  companyProfile?: CompanyProfileDto;
   launched?: boolean;
 }

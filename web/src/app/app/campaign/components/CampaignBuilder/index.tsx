@@ -11,6 +11,7 @@ import styles from "./styles.module.scss";
 import Steps from "../../../components/Steps";
 import CustomerFileStep from "../CustomerFileStep";
 import { MailServiceConnectStep } from "../MailServiceConnectStep";
+import CompanyProfileStep from "../CompanyProfileStep";
 import { FontPoppins } from "@/assets/fonts/poppins";
 import { message } from "antd";
 import { Campaign } from "@/types/campaign";
@@ -67,6 +68,7 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
   const stepTitles = [
     "Upload Customer File",
     "Connect Mail Service",
+    "Company Profile",
     "Configure Email Content",
     "Review & Confirm",
     "Launch Campaign",
@@ -78,6 +80,8 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
         return <CustomerFileStep />;
       case 1:
         return <MailServiceConnectStep />;
+      case 2:
+        return <CompanyProfileStep />;
       default:
         return <div />;
     }
