@@ -21,6 +21,7 @@ import {
   CompanyProfileDto,
 } from "../../../../../types/campaignStepState";
 import { fetcher } from "@/lib/fetcher";
+import styles from "./styles.module.scss";
 
 import { useCampaignBuilder } from "../CampaignBuilder/CampaignBuilderContext";
 
@@ -107,22 +108,35 @@ export default function CompanyProfileStep() {
   };
 
   return (
-    <div style={{ maxWidth: 600, margin: "0 auto" }}>
+    <div className={styles.container}>
       {ctx}
-      <Typography.Title level={3} style={{ textAlign: "center" }}>
-        Company Profile
-      </Typography.Title>
+      <div className={styles.header}>
+        <Typography.Title level={4} className={styles.title}>
+          Select a Company Profile
+        </Typography.Title>
+        <Typography.Text type="secondary">
+          Choose an existing company profile or create a new one to get started.
+        </Typography.Text>
+      </div>
+
       <List
         bordered
         loading={loading}
         dataSource={profiles}
+        className={styles.companyList}
         renderItem={(item) => (
           <List.Item
-            style={{
-              cursor: "pointer",
-              background: selected === item.id ? "#e6f7ff" : undefined,
-            }}
+            className={`${styles.companyItem} ${
+              selected === item.id ? styles.selected : ""
+            }`}
             onClick={() => setSelected(item.id)}
+            actions={[
+              selected === item.id ? (
+                <span key="selected" className={styles.selectedBadge}>
+                  Selected
+                </span>
+              ) : null,
+            ]}
           >
             <Typography.Text strong>{item.website}</Typography.Text>
           </List.Item>
@@ -221,9 +235,7 @@ export default function CompanyProfileStep() {
               </p>
             </Upload.Dragger>
             {form.getFieldValue("marketingContentFileId") && (
-              <div
-                style={{ marginTop: 8, display: "flex", alignItems: "center" }}
-              >
+              <div className={styles.fileActions}>
                 <FileOutlined style={{ marginRight: 8 }} />
                 <a
                   href={`/api/file/download/${form.getFieldValue(
@@ -231,7 +243,6 @@ export default function CompanyProfileStep() {
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ marginRight: 8 }}
                 >
                   {form.getFieldValue("marketingContentFileName") ||
                     "Download file"}
@@ -246,23 +257,7 @@ export default function CompanyProfileStep() {
                     });
                     setDeleteModalVisible(true);
                   }}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#ff4d4f",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "4px 8px",
-                    borderRadius: 4,
-                  }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.backgroundColor =
-                      "rgba(255, 77, 79, 0.1)";
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.backgroundColor = "transparent";
-                  }}
+                  className={styles.deleteButton}
                 >
                   <DeleteOutlined />
                 </button>
@@ -328,9 +323,7 @@ export default function CompanyProfileStep() {
               </p>
             </Upload.Dragger>
             {form.getFieldValue("designAssetFileId") && (
-              <div
-                style={{ marginTop: 8, display: "flex", alignItems: "center" }}
-              >
+              <div className={styles.fileActions}>
                 <FileOutlined style={{ marginRight: 8 }} />
                 <a
                   href={`/api/file/download/${form.getFieldValue(
@@ -338,7 +331,6 @@ export default function CompanyProfileStep() {
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ marginRight: 8 }}
                 >
                   {form.getFieldValue("designAssetFileName") || "Download file"}
                 </a>
@@ -352,23 +344,7 @@ export default function CompanyProfileStep() {
                     });
                     setDeleteModalVisible(true);
                   }}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#ff4d4f",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "4px 8px",
-                    borderRadius: 4,
-                  }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.backgroundColor =
-                      "rgba(255, 77, 79, 0.1)";
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.backgroundColor = "transparent";
-                  }}
+                  className={styles.deleteButton}
                 >
                   <DeleteOutlined />
                 </button>

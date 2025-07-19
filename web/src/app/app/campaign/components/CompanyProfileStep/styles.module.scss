@@ -1,0 +1,63 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: 24px;
+
+  .title {
+    margin-bottom: 16px;
+  }
+}
+
+.companyList {
+  border-radius: 8px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  border: 1px solid #f0f0f0;
+}
+
+.companyItem {
+  cursor: pointer;
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: all 0.3s;
+  background: #fff;
+  border-left: 3px solid transparent;
+
+  &:hover {
+    background: #fafafa;
+  }
+
+  &.selected {
+    background: #f6ffed;
+    border-left: 3px solid #52c41a;
+  }
+}
+
+.selectedBadge {
+  color: #52c41a;
+  font-style: italic;
+}
+
+.fileActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.deleteButton {
+  background: none;
+  border: none;
+  color: #ff4d4f;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: rgba(255, 77, 79, 0.1);
+  }
+}
