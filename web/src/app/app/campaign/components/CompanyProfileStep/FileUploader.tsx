@@ -57,10 +57,10 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
         [fileIdField]: undefined,
         [fileNameField]: undefined,
       });
-      message.success("File deleted successfully");
+      messageApi.success("File deleted successfully");
     } catch (error) {
       console.error("Failed to delete file:", error);
-      message.error("Failed to delete file");
+      messageApi.error("Failed to delete file");
     } finally {
       setDeletingId(null);
       setDeleteModalVisible(false);
@@ -76,50 +76,99 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
     return isLt50M;
   };
 
+  const getFileExtension = (filename: string): string => {
+    return filename.slice(((filename.lastIndexOf(".") - 1) >>> 0) + 2);
+  };
+
   const handleCustomRequest = async (options: any) => {
     const { file, onSuccess, onError } = options;
     try {
-      // 1. Get presigned URL
+      // Get file extension
+      const fileExt = getFileExtension(file.name);
+      // Ensure we have a content type
+      const contentType = file.type || `application/octet-stream`;
+
+      // 1. Get presigned URL with file extension and content type
       const { url, key } = await fetcher.post<{
         url: string;
         key: string;
       }>("/api/file/upload", {
         fileType,
-        contentType: (file as File).type,
+        contentType,
+        fileExtension: fileExt,
       });
 
-      // 2. Upload to S3
-      await fetch(url, {
+      // 2. Upload to S3 with proper content type
+      const uploadResponse = await fetch(url, {
         method: "PUT",
         body: file,
         headers: {
-          "Content-Type": file.type,
+          "Content-Type": contentType,
+          "Content-Disposition": `attachment; filename="${encodeURIComponent(
+            file.name
+          )}"`,
         },
       });
 
-      // 3. Send metadata to backend
-      const metaRes = await fetcher.post<{ id: string }>("/api/file", {
-        key,
-        fileName: (file as File).name,
-        type: fileType,
-      });
-
-      if (metaRes) {
-        // 4. Save file info to form
-        form.setFieldsValue({
-          [fileIdField]: metaRes.id,
-          [fileNameField]: file.name,
-          [name]: file,
+      if (!uploadResponse.ok) {
+        const errorText = await uploadResponse.text();
+        console.error("S3 Upload Error:", {
+          status: uploadResponse.status,
+          statusText: uploadResponse.statusText,
+          headers: Object.fromEntries(uploadResponse.headers.entries()),
+          error: errorText,
         });
-        message.success("File uploaded successfully");
-        forceUpdate({});
-        onSuccess({ key });
-      } else {
-        throw new Error("Failed to save file metadata");
+        throw new Error(
+          `Upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`
+        );
       }
-    } catch (error) {
+
+      // 3. Send metadata to backend
+      try {
+        const metaRes = await fetcher.post<{ id: string }>("/api/file", {
+          key,
+          fileName: file.name,
+          type: fileType,
+        });
+
+        if (metaRes?.id) {
+          // 4. Save file info to form
+          form.setFieldsValue({
+            [fileIdField]: metaRes.id,
+            [fileNameField]: file.name,
+            [name]: file,
+          });
+          messageApi.success("File uploaded successfully");
+          forceUpdate({});
+          onSuccess({ key });
+        } else {
+          throw new Error("Failed to save file metadata: No ID returned");
+        }
+      } catch (metaError) {
+        console.error("Metadata save error:", metaError);
+        // Attempt to clean up the uploaded file if metadata save fails
+        try {
+          await fetcher.delete(`/api/file/${key}`);
+        } catch (cleanupError) {
+          console.error(
+            "Failed to clean up file after metadata save failed:",
+            cleanupError
+          );
+        }
+        throw new Error("Failed to save file information. Please try again.");
+      }
+    } catch (error: unknown) {
       console.error("Upload failed:", error);
-      onError(new Error("Upload failed"));
+      const errorMessage = error instanceof Error ? error.message : "Failed to upload file";
+      messageApi.error(errorMessage);
+      // Clear the file from the upload component on error
+      form.setFieldsValue({
+        [fileIdField]: undefined,
+        [fileNameField]: undefined,
+        [name]: undefined,
+      });
+      forceUpdate({});
+      onError(new Error(errorMessage));
     }
   };
 
@@ -148,9 +197,21 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
       <Upload.Dragger
         name={name}
         accept={accept}
+        multiple={false}
         beforeUpload={beforeUpload}
         customRequest={handleCustomRequest}
-        maxCount={1}
+        className={styles.uploadArea}
+        onChange={({ file }) => {
+          // Clear the file from the uploader if there's an error
+          if (file.status === "error") {
+            form.setFieldsValue({
+              [fileIdField]: undefined,
+              [fileNameField]: undefined,
+              [name]: undefined,
+            });
+            forceUpdate({});
+          }
+        }}
         onRemove={handleRemove}
         fileList={
           form.getFieldValue(fileIdField)

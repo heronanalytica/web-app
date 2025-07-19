@@ -40,10 +40,19 @@ export class FileController {
   // POST /file/upload - Get presigned S3 upload URL
   @Post('upload')
   async getPresignedUrl(
-    @Body() body: { fileType: string; contentType?: string },
+    @Body()
+    body: {
+      fileType: string;
+      contentType?: string;
+      fileExtension?: string;
+    },
     @Req() req: Request,
   ) {
-    const { fileType, contentType = 'text/csv' } = body;
+    const {
+      fileType,
+      contentType = 'application/octet-stream',
+      fileExtension,
+    } = body;
     const userId = req.user?.id;
     if (!userId) {
       throw new UnauthorizedException('User not authenticated');
@@ -57,6 +66,7 @@ export class FileController {
         userId,
         fileType,
         contentType,
+        fileExtension,
       ),
     };
   }

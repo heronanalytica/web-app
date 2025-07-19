@@ -53,13 +53,19 @@ export class AwsService {
     userId?: string,
     fileType?: string,
     contentType = 'text/csv',
+    fileExtension?: string,
   ) {
     if (!userId || !fileType) {
       throw new Error('userId and fileType are required');
     }
 
-    // Key: <user-id>/<file-type>/<file-name>
-    const key = `${userId}/${fileType}/${uuidv4()}`;
+    // Create a base key with user ID and file type
+    const baseKey = `${userId}/${fileType}/${uuidv4()}`;
+    // Append file extension if provided
+    const key = fileExtension
+      ? `${baseKey}.${fileExtension.replace(/^\./, '')}`
+      : baseKey;
+
     const command = new PutObjectCommand({
       Bucket: this.s3Bucket,
       Key: key,
