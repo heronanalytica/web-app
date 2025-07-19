@@ -1,29 +1,15 @@
-import React, { useEffect, useState } from "react";
-import {
-  Button,
-  Modal,
-  Form,
-  Input,
-  List,
-  Typography,
-  message,
-  Upload,
-} from "antd";
-import {
-  DeleteOutlined,
-  FileOutlined,
-  UploadOutlined,
-} from "@ant-design/icons";
-import { beforeUpload50MB } from "./utils";
+import React, { useState, useEffect } from "react";
+import { Button, Form, Input, Typography, Modal } from "antd";
 import { useStepState } from "../CampaignBuilder/CampaignBuilderContext";
 import {
   CampaignStepStateKey,
   CompanyProfileDto,
 } from "../../../../../types/campaignStepState";
 import { fetcher } from "@/lib/fetcher";
-import styles from "./styles.module.scss";
-
 import { useCampaignBuilder } from "../CampaignBuilder/CampaignBuilderContext";
+import { FileUploader } from "./FileUploader";
+import { message } from "antd";
+import styles from "./styles.module.scss";
 
 export default function CompanyProfileStep() {
   const [profiles, setProfiles] = useState<CompanyProfileDto[]>([]);
@@ -36,7 +22,6 @@ export default function CompanyProfileStep() {
     CampaignStepStateKey.CompanyProfile
   );
   const { setCanGoNext } = useCampaignBuilder();
-  const [, forceUpdate] = useState({});
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{
     id: string;
@@ -44,7 +29,6 @@ export default function CompanyProfileStep() {
   } | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  // Fetch existing company profiles
   useEffect(() => {
     setLoading(true);
     fetcher
@@ -55,22 +39,21 @@ export default function CompanyProfileStep() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Preselect if resuming draft
   useEffect(() => {
     if (companyProfile?.id) {
       setSelected(companyProfile.id);
     }
   }, [companyProfile]);
 
-  // Save selection to context
   useEffect(() => {
     if (selected) {
       const profile = profiles.find((p) => p.id === selected);
-      if (profile) setCompanyProfile(profile);
+      if (profile && companyProfile?.id !== profile.id) {
+        setCompanyProfile(profile);
+      }
     }
-  }, [selected, profiles, setCompanyProfile]);
+  }, [selected, profiles, companyProfile?.id, setCompanyProfile]);
 
-  // Enable Next only if a company profile is selected
   useEffect(() => {
     setCanGoNext(!!companyProfile?.id);
   }, [companyProfile, setCanGoNext]);
@@ -78,14 +61,13 @@ export default function CompanyProfileStep() {
   const handleCreate = async () => {
     try {
       const values = await form.validateFields();
-
+      console.log(values);
       const payload = {
         ...values,
         marketingContentFileId: form.getFieldValue("marketingContentFileId"),
         designAssetFileId: form.getFieldValue("designAssetFileId"),
       };
 
-      // Remove the original file objects from payload
       delete payload.marketingContentFile;
       delete payload.designAssetFile;
 
@@ -107,6 +89,8 @@ export default function CompanyProfileStep() {
     }
   };
 
+  // Handle file deletion is now handled directly in the Modal's onOk handler
+
   return (
     <div className={styles.container}>
       {ctx}
@@ -119,30 +103,39 @@ export default function CompanyProfileStep() {
         </Typography.Text>
       </div>
 
-      <List
-        bordered
-        loading={loading}
-        dataSource={profiles}
-        className={styles.companyList}
-        renderItem={(item) => (
-          <List.Item
-            className={`${styles.companyItem} ${
-              selected === item.id ? styles.selected : ""
-            }`}
-            onClick={() => setSelected(item.id)}
-            actions={[
-              selected === item.id ? (
-                <span key="selected" className={styles.selectedBadge}>
-                  Selected
-                </span>
-              ) : null,
-            ]}
-          >
-            <Typography.Text strong>{item.website}</Typography.Text>
-          </List.Item>
+      <div className={styles.profileList}>
+        {profiles.length > 0 ? (
+          <div className={styles.profileListContainer}>
+            {profiles.map((profile) => (
+              <div
+                key={profile.id}
+                className={`${styles.profileItem} ${
+                  selected === profile.id ? styles.selected : ""
+                }`}
+                onClick={() => setSelected(profile.id)}
+              >
+                <div className={styles.profileInfo}>
+                  <Typography.Text strong>
+                    {profile.website || "No website"}
+                  </Typography.Text>
+                  {profile.businessInfo && (
+                    <Typography.Text type="secondary">
+                      {profile.businessInfo}
+                    </Typography.Text>
+                  )}
+                </div>
+                {selected === profile.id && (
+                  <span className={styles.selectedBadge}>Selected</span>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <Typography.Text type="secondary">
+            No company profiles found
+          </Typography.Text>
         )}
-        locale={{ emptyText: "No company profiles found." }}
-      />
+      </div>
       <Button
         block
         style={{ marginTop: 16 }}
@@ -175,181 +168,34 @@ export default function CompanyProfileStep() {
           </Form.Item>
           <Form.Item
             name="marketingContentFile"
-            label="Last Marketing Content (PDF, PNG, JPG)"
+            label="Marketing Content File"
             rules={[
               { required: true, message: "Please upload marketing content" },
             ]}
-            valuePropName="fileId"
           >
-            <Upload.Dragger
-              name="file"
+            <FileUploader
+              name="marketingContentFile"
+              label="Marketing Content File"
+              form={form}
+              fileIdField="marketingContentFileId"
+              fileNameField="marketingContentFileName"
+              fileType="company-marketing-content"
               accept=".pdf,.png,.jpg,.jpeg"
-              beforeUpload={beforeUpload50MB}
-              customRequest={async (options: any) => {
-                const { file, onSuccess, onError } = options;
-                try {
-                  // 1. Get presigned URL
-                  const { url, key } = await fetcher.post<{
-                    url: string;
-                    key: string;
-                  }>("/api/file/upload", {
-                    filename: (file as File).name,
-                    fileType: "company-marketing-content",
-                    contentType: (file as File).type,
-                  });
-                  // 2. Upload to S3
-                  await fetch(url, {
-                    method: "PUT",
-                    body: file,
-                    headers: { "Content-Type": (file as File).type },
-                  });
-                  // 3. Save metadata
-                  const metaRes = await fetcher.post<{ id: string }>(
-                    "/api/file",
-                    {
-                      fileName: (file as File).name,
-                      storageUrl: `s3://${key}`,
-                      type: "company-marketing-content",
-                      key,
-                    }
-                  );
-                  form.setFieldsValue({
-                    marketingContentFileId: metaRes.id,
-                    marketingContentFileName: (file as File).name,
-                  });
-                  forceUpdate({}); // Force re-render
-                  if (onSuccess) onSuccess(metaRes, file);
-                  msg.success("Marketing content uploaded");
-                } catch (e) {
-                  msg.error("Upload failed");
-                  if (onError) onError(e as any);
-                }
-              }}
-              showUploadList={false}
-            >
-              <p className="ant-upload-drag-icon">
-                <UploadOutlined style={{ fontSize: 24 }} />
-              </p>
-              <p className="ant-upload-text">
-                Click or drag file to upload marketing content
-              </p>
-            </Upload.Dragger>
-            {form.getFieldValue("marketingContentFileId") && (
-              <div className={styles.fileActions}>
-                <FileOutlined style={{ marginRight: 8 }} />
-                <a
-                  href={`/api/file/download/${form.getFieldValue(
-                    "marketingContentFileId"
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {form.getFieldValue("marketingContentFileName") ||
-                    "Download file"}
-                </a>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setDeleteTarget({
-                      id: form.getFieldValue("marketingContentFileId"),
-                      type: "marketing",
-                    });
-                    setDeleteModalVisible(true);
-                  }}
-                  className={styles.deleteButton}
-                >
-                  <DeleteOutlined />
-                </button>
-              </div>
-            )}
+            />
           </Form.Item>
           <Form.Item
             name="designAssetFile"
-            label="Design Asset (PDF, PNG, JPG)"
-            valuePropName="fileId"
+            label="Design Asset File (Optional)"
           >
-            <Upload.Dragger
-              name="file"
-              accept=".pdf,.png,.jpg,.jpeg"
-              beforeUpload={beforeUpload50MB}
-              customRequest={async (options: any) => {
-                const { file, onSuccess, onError } = options;
-                try {
-                  // 1. Get presigned URL
-                  const { url, key } = await fetcher.post<{
-                    url: string;
-                    key: string;
-                  }>("/api/file/upload", {
-                    filename: (file as File).name,
-                    fileType: "company-design-asset",
-                    contentType: (file as File).type,
-                  });
-                  // 2. Upload to S3
-                  await fetch(url, {
-                    method: "PUT",
-                    body: file,
-                    headers: { "Content-Type": (file as File).type },
-                  });
-                  // 3. Save metadata
-                  const metaRes = await fetcher.post<{ id: string }>(
-                    "/api/file",
-                    {
-                      fileName: (file as File).name,
-                      storageUrl: `s3://${key}`,
-                      type: "company-design-asset",
-                      key,
-                    }
-                  );
-                  form.setFieldsValue({
-                    designAssetFileId: metaRes.id,
-                    designAssetFileName: (file as File).name,
-                  });
-                  forceUpdate({}); // Force re-render
-                  if (onSuccess) onSuccess(metaRes, file);
-                  msg.success("Design asset uploaded");
-                } catch (e) {
-                  msg.error("Upload failed");
-                  if (onError) onError(e as any);
-                }
-              }}
-              showUploadList={false}
-            >
-              <p className="ant-upload-drag-icon">
-                <UploadOutlined style={{ fontSize: 24 }} />
-              </p>
-              <p className="ant-upload-text">
-                Click or drag file to upload design asset
-              </p>
-            </Upload.Dragger>
-            {form.getFieldValue("designAssetFileId") && (
-              <div className={styles.fileActions}>
-                <FileOutlined style={{ marginRight: 8 }} />
-                <a
-                  href={`/api/file/download/${form.getFieldValue(
-                    "designAssetFileId"
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {form.getFieldValue("designAssetFileName") || "Download file"}
-                </a>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setDeleteTarget({
-                      id: form.getFieldValue("designAssetFileId"),
-                      type: "design",
-                    });
-                    setDeleteModalVisible(true);
-                  }}
-                  className={styles.deleteButton}
-                >
-                  <DeleteOutlined />
-                </button>
-              </div>
-            )}
+            <FileUploader
+              name="designAssetFile"
+              label="Design Asset File (Optional)"
+              form={form}
+              fileIdField="designAssetFileId"
+              fileNameField="designAssetFileName"
+              fileType="company-design-asset"
+              accept=".png,.jpg,.jpeg,.svg"
+            />
           </Form.Item>
           <Form.Item name="businessInfo" label="Additional Business Info">
             <Input.TextArea rows={3} />
@@ -375,11 +221,10 @@ export default function CompanyProfileStep() {
                 designAssetFileName: undefined,
               });
             }
-            forceUpdate({});
-            msg.success("File deleted");
-          } catch (e) {
-            console.error(e);
-            msg.error("Failed to delete file");
+            message.success("File deleted successfully");
+          } catch (error) {
+            console.error("Failed to delete file:", error);
+            message.error("Failed to delete file");
           } finally {
             setDeletingId(null);
             setDeleteModalVisible(false);
