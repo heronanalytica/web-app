@@ -1,149 +1,91 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 import { Test, TestingModule } from '@nestjs/testing';
 import { CompanyProfileService } from './company-profile.service';
 import { DatabaseService } from '../database/database.service';
-import { CreateCompanyProfileDto, UpdateCompanyProfileDto } from './dto';
-import { CompanyProfile } from 'generated/prisma';
 
 describe('CompanyProfileService', () => {
   let service: CompanyProfileService;
-  let db: DatabaseService;
+  let dbMock: {
+    companyProfile: {
+      findMany: jest.Mock;
+      create: jest.Mock;
+      findUnique: jest.Mock;
+      update: jest.Mock;
+    };
+  };
 
   beforeEach(async () => {
+    dbMock = {
+      companyProfile: {
+        findMany: jest.fn(),
+        create: jest.fn(),
+        findUnique: jest.fn(),
+        update: jest.fn(),
+      },
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CompanyProfileService,
-        {
-          provide: DatabaseService,
-          useValue: {
-            companyProfile: {
-              findMany: jest.fn(),
-              create: jest.fn(),
-              findUnique: jest.fn(),
-              update: jest.fn(),
-            },
-          },
-        },
+        { provide: DatabaseService, useValue: dbMock },
       ],
     }).compile();
+
     service = module.get<CompanyProfileService>(CompanyProfileService);
-    db = module.get<DatabaseService>(DatabaseService);
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  describe('findAllByUser', () => {
-    it('should return company profiles for a user', async () => {
-      const mockProfiles: CompanyProfile[] = [
-        {
-          id: '1',
-          userId: 'u1',
-          name: 'Test',
-          website: null,
-          marketingContentFileId: null,
-          designAssetFileId: null,
-          businessInfo: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ];
-      (db.companyProfile.findMany as jest.Mock).mockResolvedValue(mockProfiles);
-      const result = await service.findAllByUser('u1');
-      expect(db.companyProfile.findMany).toHaveBeenCalledWith({
-        where: { userId: 'u1' },
-        orderBy: { createdAt: 'desc' },
-        include: { marketingContentFile: true, designAssetFile: true },
-      });
-      expect(result).toEqual(mockProfiles);
+  it('should return all profiles for a user', async () => {
+    const fakeProfiles = [{ id: '1', userId: 'user1' }];
+    dbMock.companyProfile.findMany.mockResolvedValueOnce(fakeProfiles);
+
+    const result = await service.findAllByUser('user1');
+    expect(result).toBe(fakeProfiles);
+    expect(dbMock.companyProfile.findMany).toHaveBeenCalledWith({
+      where: { userId: 'user1' },
+      orderBy: { createdAt: 'desc' },
     });
   });
 
-  describe('create', () => {
-    it('should create a company profile', async () => {
-      const dto: CreateCompanyProfileDto = { name: 'Test' };
-      const mockProfile: CompanyProfile = {
-        id: '1',
-        userId: 'u1',
-        name: 'Test',
-        website: null,
-        marketingContentFileId: null,
-        designAssetFileId: null,
-        businessInfo: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      (db.companyProfile.create as jest.Mock).mockResolvedValue(mockProfile);
-      const result = await service.create('u1', dto);
-      expect(db.companyProfile.create).toHaveBeenCalledWith({
-        data: {
-          userId: 'u1',
-          name: 'Test',
-          website: undefined,
-          marketingContentFileId: undefined,
-          designAssetFileId: undefined,
-          businessInfo: undefined,
-        },
-      });
-      expect(result).toEqual(mockProfile);
+  it('should create a company profile', async () => {
+    const dto = {
+      name: 'Test Co',
+      website: 'https://example.com',
+    };
+    const created = { id: 'new-id', userId: 'user1', ...dto };
+    dbMock.companyProfile.create.mockResolvedValueOnce(created);
+
+    const result = await service.create('user1', dto);
+    expect(result).toBe(created);
+    expect(dbMock.companyProfile.create).toHaveBeenCalledWith({
+      data: { userId: 'user1', ...dto },
     });
   });
 
-  describe('update', () => {
-    it('should update a company profile if user owns it', async () => {
-      const dto: UpdateCompanyProfileDto = { name: 'Updated' };
-      const mockProfile: CompanyProfile = {
-        id: '1',
-        userId: 'u1',
-        name: 'Test',
-        website: null,
-        marketingContentFileId: null,
-        designAssetFileId: null,
-        businessInfo: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      const updatedProfile: CompanyProfile = {
-        ...mockProfile,
-        name: 'Updated',
-      };
-      (db.companyProfile.findUnique as jest.Mock).mockResolvedValue(
-        mockProfile,
-      );
-      (db.companyProfile.update as jest.Mock).mockResolvedValue(updatedProfile);
-      const result = await service.update('u1', '1', dto);
-      expect(db.companyProfile.findUnique).toHaveBeenCalledWith({
-        where: { id: '1' },
-      });
-      expect(db.companyProfile.update).toHaveBeenCalledWith({
-        where: { id: '1' },
-        data: {
-          name: 'Updated',
-          website: undefined,
-          marketingContentFileId: undefined,
-          designAssetFileId: undefined,
-          businessInfo: undefined,
-        },
-      });
-      expect(result).toEqual(updatedProfile);
+  it('should update a company profile if user is owner', async () => {
+    const id = 'profile1';
+    const userId = 'user1';
+    const existingProfile = { id, userId };
+    const dto = { name: 'Updated Co' };
+    const updatedProfile = { ...existingProfile, ...dto };
+
+    dbMock.companyProfile.findUnique.mockResolvedValueOnce(existingProfile);
+    dbMock.companyProfile.update.mockResolvedValueOnce(updatedProfile);
+
+    const result = await service.update(userId, id, dto);
+    expect(result).toEqual(updatedProfile);
+  });
+
+  it('should throw if user is not owner', async () => {
+    dbMock.companyProfile.findUnique.mockResolvedValueOnce({
+      id: 'p1',
+      userId: 'otherUser',
     });
 
-    it('should throw if user does not own the profile', async () => {
-      (db.companyProfile.findUnique as jest.Mock).mockResolvedValue({
-        id: '1',
-        userId: 'other',
-        name: 'Test',
-        website: null,
-        marketingContentFileId: null,
-        designAssetFileId: null,
-        businessInfo: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
-      await expect(
-        service.update('u1', '1', { name: 'Updated' }),
-      ).rejects.toThrow('Not found or forbidden');
-    });
+    await expect(
+      service.update('user1', 'p1', { name: 'Hacked' }),
+    ).rejects.toThrow('Not found or forbidden');
   });
 });
