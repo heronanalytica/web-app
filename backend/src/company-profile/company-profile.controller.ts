@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Delete,
   Body,
   Param,
   Req,
@@ -37,6 +38,29 @@ export class CompanyProfileController {
       error: 0,
       data: await this.companyProfileService.create(userId, dto),
     };
+  }
+
+  @Delete(':id')
+  async remove(@Req() req: Request, @Param('id') id: string) {
+    const userId = req.user?.id;
+    if (!userId) throw new UnauthorizedException();
+    try {
+      await this.companyProfileService.delete(userId, id);
+      return {
+        error: 0,
+        message: 'Company profile deleted successfully',
+      };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Failed to delete company profile';
+
+      return {
+        error: 1,
+        message: errorMessage,
+      };
+    }
   }
 
   @Put(':id')

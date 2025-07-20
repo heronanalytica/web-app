@@ -53,4 +53,13 @@ export class CompanyProfileService {
     if (!updated) throw new Error('Failed to update company profile');
     return updated;
   }
+
+  async delete(userId: string, id: string): Promise<boolean> {
+    const profile = await this.db.companyProfile.findUnique({ where: { id } });
+    if (!profile || profile.userId !== userId) {
+      throw new Error('Not found or forbidden');
+    }
+    const deleted = await this.db.companyProfile.delete({ where: { id } });
+    return !!deleted;
+  }
 }
