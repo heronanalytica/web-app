@@ -101,17 +101,22 @@ const CustomerFileStep: React.FC = () => {
       });
   }, []);
 
+  const getFileExtension = (filename: string): string => {
+    return filename.slice(((filename.lastIndexOf(".") - 1) >>> 0) + 2);
+  };
+
   const customUpload: UploadProps["customRequest"] = async (options) => {
     const { file, onSuccess, onError } = options;
     setUploading(true);
     try {
+      const fileExt = getFileExtension((file as File).name);
       // 1. Get pre-signed S3 URL from backend
       const { url, key } = await fetcher.post<{ url: string; key: string }>(
         "/api/file/upload",
         {
-          filename: (file as File).name,
           fileType: "customer",
-          contentType: (file as File).type,
+          contentType: (file as File).type || "text/csv",
+          fileExtension: fileExt,
         }
       );
 

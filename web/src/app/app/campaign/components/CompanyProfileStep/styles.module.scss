@@ -1,21 +1,84 @@
 .container {
   max-width: 800px;
   margin: 0 auto;
+  padding: 0 16px;
 }
 
 .header {
   margin-bottom: 24px;
 
   .title {
-    margin-bottom: 16px;
+    margin-bottom: 8px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #1f1f1f;
   }
 }
 
 .profileList {
-  border-radius: 8px;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
   border: 1px solid #f0f0f0;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
+  background: #fff;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  
+  &.emptyState {
+    background: #fafbfc;
+    border: 1px dashed #e0e6ed;
+    flex-direction: column;
+    text-align: center;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      border-color: #c2cbd9;
+      background: #f5f7fa;
+    }
+  }
+}
+
+.emptyStateContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 400px;
+  margin: 0 auto;
+  
+  .emptyIcon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #f0f7ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    color: #1890ff;
+    font-size: 28px;
+  }
+  
+  .emptyTitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f1f1f;
+    margin-bottom: 8px;
+  }
+  
+  .emptyDescription {
+    color: #8c8c8c;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  
+  .emptyAction {
+    margin-top: 8px;
+  }
 }
 
 .profileListContainer {
@@ -23,6 +86,7 @@
   flex-direction: column;
   gap: 8px;
   padding: 8px;
+  width: 100%;
 }
 
 .profileItem {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Button, Form, Input, Typography, Modal } from "antd";
+import { PlusOutlined, ShopOutlined } from "@ant-design/icons";
 import { useStepState } from "../CampaignBuilder/CampaignBuilderContext";
 import {
   CampaignStepStateKey,
@@ -131,15 +132,31 @@ export default function CompanyProfileStep() {
             ))}
           </div>
         ) : (
-          <Typography.Text type="secondary">
-            No company profiles found
-          </Typography.Text>
+          <div className={styles.emptyState}>
+            <div className={styles.emptyStateContent}>
+              <div className={styles.emptyIcon}>
+                <ShopOutlined style={{ fontSize: "24px" }} />
+              </div>
+              <Typography.Title level={5} className={styles.emptyTitle}>
+                No company profiles found
+              </Typography.Title>
+              <Typography.Text
+                type="secondary"
+                className={styles.emptyDescription}
+              >
+                Get started by creating your first company profile.<br/>Add your
+                company information, marketing content, and design assets to
+                begin.
+              </Typography.Text>
+            </div>
+          </div>
         )}
       </div>
       <Button
         block
         style={{ marginTop: 16 }}
         onClick={() => setModalOpen(true)}
+        type="primary"
       >
         + Add New Company
       </Button>
