@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Button, Form, Input, Typography, Modal } from "antd";
-import { PlusOutlined, ShopOutlined } from "@ant-design/icons";
-import { useStepState } from "../CampaignBuilder/CampaignBuilderContext";
-import {
-  CampaignStepStateKey,
-  CompanyProfileDto,
-} from "../../../../../types/campaignStepState";
+import { Button, Form, Input, Typography, Modal, message } from "antd";
+import { ShopOutlined } from "@ant-design/icons";
+import { CompanyProfileListItem } from "./CompanyProfileListItem";
+import type { CompanyProfileDto } from "@/types/campaignStepState";
+import { CampaignStepStateKey } from "@/types/campaignStepState";
 import { fetcher } from "@/lib/fetcher";
-import { useCampaignBuilder } from "../CampaignBuilder/CampaignBuilderContext";
-import { FileUploader } from "./FileUploader";
-import { message } from "antd";
+import {
+  useCampaignBuilder,
+  useStepState,
+} from "../CampaignBuilder/CampaignBuilderContext";
 import styles from "./styles.module.scss";
+import { FileUploader } from "./FileUploader";
 
 export default function CompanyProfileStep() {
   const [profiles, setProfiles] = useState<CompanyProfileDto[]>([]);
@@ -24,10 +24,9 @@ export default function CompanyProfileStep() {
   );
   const { setCanGoNext } = useCampaignBuilder();
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<{
-    id: string;
-    type: "marketing" | "design";
-  } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<CompanyProfileDto | null>(
+    null
+  );
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -90,6 +89,37 @@ export default function CompanyProfileStep() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+
+    try {
+      setDeletingId(deleteTarget.id);
+      await fetcher.delete(`/api/company-profiles/${deleteTarget.id}`);
+
+      // Update profiles list
+      setProfiles((prev) => prev.filter((p) => p.id !== deleteTarget?.id));
+
+      // Clear selection if the deleted profile was selected
+      if (selected === deleteTarget.id) {
+        setSelected(null);
+        // Clear the form if the deleted profile was being edited
+        setCompanyProfile(undefined);
+      }
+
+      // Close modal and reset state
+      setDeleteModalVisible(false);
+      setDeleteTarget(null);
+
+      // Show success message
+      msg.success("Company profile deleted successfully");
+    } catch (error) {
+      console.error("Error deleting company profile:", error);
+      msg.error("Failed to delete company profile. Please try again.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   // Handle file deletion is now handled directly in the Modal's onOk handler
 
   return (
@@ -108,47 +138,35 @@ export default function CompanyProfileStep() {
         {profiles.length > 0 ? (
           <div className={styles.profileListContainer}>
             {profiles.map((profile) => (
-              <div
+              <CompanyProfileListItem
                 key={profile.id}
-                className={`${styles.profileItem} ${
-                  selected === profile.id ? styles.selected : ""
-                }`}
-                onClick={() => setSelected(profile.id)}
-              >
-                <div className={styles.profileInfo}>
-                  <Typography.Text strong>
-                    {profile.website || "No website"}
-                  </Typography.Text>
-                  {profile.businessInfo && (
-                    <Typography.Text type="secondary">
-                      {profile.businessInfo}
-                    </Typography.Text>
-                  )}
-                </div>
-                {selected === profile.id && (
-                  <span className={styles.selectedBadge}>Selected</span>
-                )}
-              </div>
+                profile={profile}
+                isSelected={selected === profile.id}
+                onSelect={setSelected}
+                onDelete={(profile) => {
+                  setDeleteTarget(profile);
+                  setDeleteModalVisible(true);
+                }}
+              />
             ))}
           </div>
         ) : (
-          <div className={styles.emptyState}>
-            <div className={styles.emptyStateContent}>
-              <div className={styles.emptyIcon}>
-                <ShopOutlined style={{ fontSize: "24px" }} />
-              </div>
-              <Typography.Title level={5} className={styles.emptyTitle}>
-                No company profiles found
-              </Typography.Title>
-              <Typography.Text
-                type="secondary"
-                className={styles.emptyDescription}
-              >
-                Get started by creating your first company profile.<br/>Add your
-                company information, marketing content, and design assets to
-                begin.
-              </Typography.Text>
+          <div className={`${styles.emptyState} ${styles.emptyStateContent}`}>
+            <div className={styles.emptyIcon}>
+              <ShopOutlined style={{ fontSize: 24 }} />
             </div>
+            <Typography.Title level={5} className={styles.emptyTitle}>
+              No company profiles found
+            </Typography.Title>
+            <Typography.Text
+              type="secondary"
+              className={styles.emptyDescription}
+            >
+              Get started by creating your first company profile.
+              <br />
+              Add your company information, marketing content, and design assets
+              to begin.
+            </Typography.Text>
           </div>
         )}
       </div>
@@ -220,34 +238,9 @@ export default function CompanyProfileStep() {
         </Form>
       </Modal>
       <Modal
+        title="Delete Company Profile"
         open={deleteModalVisible}
-        title="Delete this file?"
-        onOk={async () => {
-          if (!deleteTarget) return;
-          setDeletingId(deleteTarget.id);
-          try {
-            await fetcher.delete(`/api/file/${deleteTarget.id}`);
-            if (deleteTarget.type === "marketing") {
-              form.setFieldsValue({
-                marketingContentFileId: undefined,
-                marketingContentFileName: undefined,
-              });
-            } else {
-              form.setFieldsValue({
-                designAssetFileId: undefined,
-                designAssetFileName: undefined,
-              });
-            }
-            message.success("File deleted successfully");
-          } catch (error) {
-            console.error("Failed to delete file:", error);
-            message.error("Failed to delete file");
-          } finally {
-            setDeletingId(null);
-            setDeleteModalVisible(false);
-            setDeleteTarget(null);
-          }
-        }}
+        onOk={handleDelete}
         onCancel={() => {
           setDeleteModalVisible(false);
           setDeleteTarget(null);
@@ -257,7 +250,8 @@ export default function CompanyProfileStep() {
         okButtonProps={{ danger: true }}
       >
         <p>
-          Are you sure you want to delete this file? This action cannot be
+          Are you sure you want to delete the company profile for{" "}
+          {deleteTarget?.website || "this company"}? This action cannot be
           undone.
         </p>
       </Modal>

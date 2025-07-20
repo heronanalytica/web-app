@@ -22,6 +22,7 @@ export interface CompanyProfileDto {
   marketingContentFileId: string;
   designAssetFileId: string;
   businessInfo?: string;
+  createdAt?: string;
 }
 
 export interface CampaignStepState {
