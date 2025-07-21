@@ -15,6 +15,7 @@ import { CreateUserUploadFileDto } from './dto/create-user-upload-file.dto';
 import { FileService } from './file.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Request, Response } from 'express';
+import { contentTypeMap } from './constants';
 
 @UseGuards(JwtAuthGuard)
 @Controller('file')
@@ -111,7 +112,14 @@ export class FileController {
         'Content-Disposition',
         `attachment; filename="${encodeURIComponent(file.fileName)}"`,
       );
-      res.setHeader('Content-Type', 'text/csv');
+      // Infer content type from fileName
+      const ext = file.fileName.split('.').pop()?.toLowerCase();
+
+      const contentType =
+        ext && contentTypeMap[ext]
+          ? contentTypeMap[ext]
+          : 'application/octet-stream';
+      res.setHeader('Content-Type', contentType);
       s3Stream.pipe(res);
     } catch {
       res.status(404).send('File not found in storage');

@@ -26,14 +26,14 @@
   align-items: center;
   justify-content: center;
   padding: 32px 24px;
-  
+
   &.emptyState {
     background: #fafbfc;
     border: 1px dashed #e0e6ed;
     flex-direction: column;
     text-align: center;
     transition: all 0.3s ease;
-    
+
     &:hover {
       border-color: #c2cbd9;
       background: #f5f7fa;
@@ -47,7 +47,7 @@
   align-items: center;
   max-width: 400px;
   margin: 0 auto;
-  
+
   .emptyIcon {
     width: 64px;
     height: 64px;
@@ -60,14 +60,14 @@
     color: #1890ff;
     font-size: 28px;
   }
-  
+
   .emptyTitle {
     font-size: 16px;
     font-weight: 600;
     color: #1f1f1f;
     margin-bottom: 8px;
   }
-  
+
   .emptyDescription {
     color: #8c8c8c;
     font-size: 14px;
@@ -75,7 +75,7 @@
     margin-bottom: 16px;
     text-align: center;
   }
-  
+
   .emptyAction {
     margin-top: 8px;
   }
@@ -111,6 +111,12 @@
   }
 }
 
+.profileDownloads {
+  margin: 4px 0 0 0;
+  display: flex;
+  align-items: center;
+}
+
 .profileWebsite {
   display: block;
   font-size: 14px;
@@ -125,7 +131,7 @@
   align-items: flex-start;
   gap: 12px;
   width: 100%;
-  
+
   .profileIcon {
     display: flex;
     align-items: center;
@@ -136,12 +142,12 @@
     border-radius: 6px;
     flex-shrink: 0;
   }
-  
+
   .profileContent {
     flex: 1;
     min-width: 0;
   }
-  
+
   .profileActions {
     display: flex;
     flex-direction: column;
@@ -150,13 +156,13 @@
     margin-left: auto;
     justify-content: center;
   }
-  
+
   .profileName {
     font-weight: 500;
     color: #1f1f1f;
     margin-bottom: 2px;
   }
-  
+
   .profileDescription {
     font-size: 13px;
     display: block;
