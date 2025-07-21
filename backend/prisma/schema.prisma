@@ -59,16 +59,17 @@ enum UserRole {
 
 // Campaign
 model Campaign {
-  id          String         @id @default(uuid())
-  name        String
-  status      CampaignStatus @default(DRAFT)
-  currentStep Int? // Step user left off at (nullable for legacy)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  lastSavedAt DateTime?
-  user        User           @relation(fields: [userId], references: [id])
-  userId      String
-  stepState   Json?
+  id            String         @id @default(uuid())
+  analysisSteps Json?
+  name          String
+  status        CampaignStatus @default(DRAFT)
+  currentStep   Int? // Step user left off at (nullable for legacy)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  lastSavedAt   DateTime?
+  user          User           @relation(fields: [userId], references: [id])
+  userId        String
+  stepState     Json?
 }
 
 enum CampaignStatus {

@@ -54,7 +54,25 @@ export class CampaignService {
         name: dto.name,
         userId,
         status: CampaignStatus.DRAFT,
-        currentStep: dto.currentStep ?? 1,
+        currentStep: 0,
+        analysisSteps: [
+          {
+            key: 'analyzingCustomerDatabase',
+            label: 'Analyzing customer database',
+            status: 'waiting',
+          },
+          {
+            key: 'analyzeBusinessData',
+            label: 'Analyze business data',
+            status: 'waiting',
+          },
+          {
+            key: 'integrationsWithOtherPlatforms',
+            label: 'Integrations with other platforms',
+            status: 'waiting',
+          },
+          { key: 'wrappingUp', label: 'Wrapping up', status: 'waiting' },
+        ],
         lastSavedAt: new Date(),
       },
     });
@@ -77,6 +95,12 @@ export class CampaignService {
               stepState: instanceToPlain(
                 dto.stepState,
               ) as Prisma.InputJsonValue,
+            }
+          : {}),
+        ...(dto.analysisSteps !== undefined
+          ? {
+              analysisSteps:
+                dto.analysisSteps as unknown as Prisma.InputJsonValue,
             }
           : {}),
         lastSavedAt: new Date(),

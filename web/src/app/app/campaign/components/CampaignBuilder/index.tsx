@@ -12,6 +12,7 @@ import Steps from "../../../components/Steps";
 import CustomerFileStep from "../CustomerFileStep";
 import { MailServiceConnectStep } from "../MailServiceConnectStep";
 import CompanyProfileStep from "../CompanyProfileStep";
+import AnalysisWaitingStep from "../AnalysisWaitingStep";
 import { FontPoppins } from "@/assets/fonts/poppins";
 import { message } from "antd";
 import { Campaign } from "@/types/campaign";
@@ -69,6 +70,7 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
     "Upload Customer File",
     "Connect Mail Service",
     "Company Profile",
+    "Waiting for Analysis",
     "Configure Email Content",
     "Review & Confirm",
     "Launch Campaign",
@@ -82,6 +84,10 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
         return <MailServiceConnectStep />;
       case 2:
         return <CompanyProfileStep />;
+      case 3:
+        return (
+          <AnalysisWaitingStep steps={campaign?.analysisSteps || undefined} />
+        );
       default:
         return <div />;
     }

@@ -6,12 +6,33 @@ import {
   IsOptional,
   IsDateString,
   Matches,
+  IsArray,
+  IsIn,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
 // Reusable regex: UUID optionally followed by an extension like ".csv" / ".png"
 const UUID_WITH_EXT =
   /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}(\.[a-zA-Z0-9]+)?$/;
+
+export class AnalysisStepDto {
+  @IsString()
+  key: string;
+
+  @IsString()
+  label: string;
+
+  @IsString()
+  @IsIn(['waiting', 'in_progress', 'done', 'error'])
+  status: 'waiting' | 'in_progress' | 'done' | 'error';
+}
+
+export class UpdateAnalysisStepsDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => AnalysisStepDto)
+  steps: AnalysisStepDto[];
+}
 
 export class CustomerFileDto {
   @Matches(UUID_WITH_EXT, {

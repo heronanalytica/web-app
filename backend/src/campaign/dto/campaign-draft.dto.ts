@@ -5,21 +5,25 @@ import {
   IsNumber,
   IsUUID,
   ValidateNested,
+  IsArray,
 } from 'class-validator';
 import { StepStateDto } from './campaign-step-state.dto';
+import { AnalysisStepDto } from './campaign-step-state.dto';
 
 export class CreateDraftCampaignDto {
   @IsString()
   name: string;
 
   @IsOptional()
-  @IsNumber()
-  currentStep?: number;
-
-  @IsOptional()
   @ValidateNested()
   @Type(() => StepStateDto)
   stepState?: StepStateDto;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => AnalysisStepDto)
+  analysisSteps?: AnalysisStepDto[];
 }
 
 export class UpdateDraftCampaignDto {
@@ -42,6 +46,12 @@ export class UpdateDraftCampaignDto {
   @ValidateNested()
   @Type(() => StepStateDto)
   stepState?: StepStateDto;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => AnalysisStepDto)
+  analysisSteps?: AnalysisStepDto[];
 }
 
 export class DeleteDraftCampaignDto {

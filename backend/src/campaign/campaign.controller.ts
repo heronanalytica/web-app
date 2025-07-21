@@ -34,12 +34,13 @@ export class CampaignController {
   }
 
   @Post()
-  async createCampaign(@Req() req: Request, @Body() dto: { name: string }) {
+  async createCampaign(
+    @Req() req: Request,
+    @Body() dto: CreateDraftCampaignDto,
+  ) {
     const userId = req.user?.id;
-    if (!userId) {
-      throw new UnauthorizedException();
-    }
-    const data = await this.campaignService.createCampaign(userId, dto.name);
+    if (!userId) throw new UnauthorizedException();
+    const data = await this.campaignService.createDraftCampaign(userId, dto);
     return { error: 0, data };
   }
 
@@ -64,17 +65,6 @@ export class CampaignController {
     const userId = req.user?.id;
     if (!userId) throw new UnauthorizedException();
     const data = await this.campaignService.getCampaignById(userId, id);
-    return { error: 0, data };
-  }
-
-  @Post('draft')
-  async createDraftCampaign(
-    @Req() req: Request,
-    @Body() dto: CreateDraftCampaignDto,
-  ) {
-    const userId = req.user?.id;
-    if (!userId) throw new UnauthorizedException();
-    const data = await this.campaignService.createDraftCampaign(userId, dto);
     return { error: 0, data };
   }
 
