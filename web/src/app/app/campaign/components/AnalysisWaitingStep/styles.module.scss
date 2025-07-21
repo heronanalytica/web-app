@@ -1,0 +1,71 @@
+.root {
+  max-width: 700px;
+  margin: 40px auto;
+  background: linear-gradient(135deg, #f8f9fa 0%, #f3f0ff 100%);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(80, 70, 200, 0.1);
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #ece9fc;
+
+  :global(.ant-timeline-item-head-custom) {
+    background-color: transparent !important;
+  }
+}
+
+.title {
+  margin-bottom: 16px;
+  text-align: center;
+  color: #2d1a6b;
+  font-weight: 600;
+}
+
+.timeline {
+  margin-top: 32px;
+  width: 100%;
+}
+
+.dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: 400;
+  border: 2px solid #d9d9d9;
+  color: #8c8c8c;
+  transition: background 0.2s, border 0.2s, color 0.2s;
+}
+
+.dot--in_progress {
+  border: 2px solid #9254de;
+  color: #fff;
+  background: #9254de;
+  font-weight: 600;
+}
+
+.dot--done {
+  border: 2px solid #52c41a;
+  color: #fff;
+  background: #52c41a;
+}
+
+.label {
+  font-size: 18px;
+  font-weight: 400;
+  color: #222;
+}
+
+.label--in_progress {
+  font-weight: 600;
+  color: #2d1a6b;
+}
+
+.label--done {
+  text-decoration: line-through;
+  color: #52c41a;
+}
