@@ -111,6 +111,14 @@
   }
 }
 
+.profileWebsite {
+  display: block;
+  font-size: 14px;
+  color: #888;
+  margin-top: 2px;
+  word-break: break-all;
+}
+
 .profileInfo {
   flex: 1;
   display: flex;
@@ -132,14 +140,6 @@
   .profileContent {
     flex: 1;
     min-width: 0;
-  }
-  
-  .profileHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    gap: 8px;
   }
   
   .profileActions {

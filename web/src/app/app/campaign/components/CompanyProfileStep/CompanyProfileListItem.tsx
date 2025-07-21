@@ -36,9 +36,10 @@ export const CompanyProfileListItem: React.FC<CompanyProfileListItemProps> = ({
           <BuildOutlined style={{ fontSize: "18px", color: "#666" }} />
         </div>
         <div className={styles.profileContent}>
-          <div className={styles.profileHeader}>
-            <Typography.Text strong>{profile.website}</Typography.Text>
-          </div>
+          <Typography.Text strong>{profile.name}</Typography.Text>
+          <Typography.Text type="secondary" className={styles.profileWebsite}>
+            {profile.website}
+          </Typography.Text>
           {profile.businessInfo && (
             <Typography.Text
               type="secondary"

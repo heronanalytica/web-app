@@ -18,6 +18,7 @@ export interface MailServiceDto {
 
 export interface CompanyProfileDto {
   id: string;
+  name: string;
   website: string;
   marketingContentFileId: string;
   designAssetFileId: string;

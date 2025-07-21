@@ -19,15 +19,15 @@ export default function CompanyProfileStep() {
   const [form] = Form.useForm();
   const [selected, setSelected] = useState<string | null>(null);
   const [msg, ctx] = message.useMessage();
-  const [companyProfile, setCompanyProfile] = useStepState(
-    CampaignStepStateKey.CompanyProfile
-  );
-  const { setCanGoNext } = useCampaignBuilder();
+  const [companyProfile, setCompanyProfile, removeCompanyProfile] =
+    useStepState(CampaignStepStateKey.CompanyProfile);
+  const { setCanGoNext, save } = useCampaignBuilder();
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<CompanyProfileDto | null>(
     null
   );
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [pendingSaveAfterRemove, setPendingSaveAfterRemove] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -95,15 +95,14 @@ export default function CompanyProfileStep() {
     try {
       setDeletingId(deleteTarget.id);
       await fetcher.delete(`/api/company-profiles/${deleteTarget.id}`);
-
-      // Update profiles list
       setProfiles((prev) => prev.filter((p) => p.id !== deleteTarget?.id));
 
-      // Clear selection if the deleted profile was selected
       if (selected === deleteTarget.id) {
         setSelected(null);
-        // Clear the form if the deleted profile was being edited
         setCompanyProfile(undefined);
+        setCanGoNext(false);
+        removeCompanyProfile();
+        setPendingSaveAfterRemove(true);
       }
 
       // Close modal and reset state
@@ -119,6 +118,13 @@ export default function CompanyProfileStep() {
       setDeletingId(null);
     }
   };
+
+  useEffect(() => {
+    if (pendingSaveAfterRemove) {
+      save();
+      setPendingSaveAfterRemove(false);
+    }
+  }, [pendingSaveAfterRemove, save]);
 
   // Handle file deletion is now handled directly in the Modal's onOk handler
 
