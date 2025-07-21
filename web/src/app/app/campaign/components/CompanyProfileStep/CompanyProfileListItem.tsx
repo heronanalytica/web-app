@@ -1,10 +1,6 @@
 import React from "react";
 import { Button, Typography } from "antd";
-import {
-  BuildOutlined,
-  DeleteOutlined,
-  DownloadOutlined,
-} from "@ant-design/icons";
+import { BuildOutlined, DeleteOutlined, FileOutlined } from "@ant-design/icons";
 import { fetcher } from "@/lib/fetcher";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -24,6 +20,66 @@ interface CompanyProfileListItemProps {
 function sanitizeCompanyName(name: string): string {
   return name.replace(/\s+/g, "").toLowerCase();
 }
+
+interface DownloadFileButtonProps {
+  fileId: string;
+  fileName?: string;
+  companyName: string;
+  variant: "marketing-content" | "design-asset";
+  text: string;
+  title?: string;
+  className?: string;
+  messageApi: any;
+}
+
+const DownloadFileButton: React.FC<DownloadFileButtonProps> = ({
+  fileId,
+  fileName,
+  companyName,
+  variant,
+  text,
+  title,
+  className,
+  messageApi,
+}) => {
+  const handleDownload = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      const response = await fetcher.raw(
+        `/api/file/download/${encodeURIComponent(fileId)}`
+      );
+      if (!response.ok) {
+        messageApi.error("Failed to download file");
+        return;
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${sanitizeCompanyName(companyName)}-${variant}${
+        fileName && fileName.includes(".")
+          ? "." + fileName.split(".").pop()
+          : ""
+      }`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      messageApi.error("Failed to download file");
+    }
+  };
+  return (
+    <span
+      title={title}
+      className={`${className ?? ""} ${styles.downloadButton}`}
+      onClick={handleDownload}
+    >
+      <FileOutlined className={styles.downloadButtonIcon} />
+      <span className={styles.downloadButtonText}>{text}</span>
+    </span>
+  );
+};
 
 export const CompanyProfileListItem: React.FC<CompanyProfileListItemProps> = ({
   profile,
@@ -54,84 +110,27 @@ export const CompanyProfileListItem: React.FC<CompanyProfileListItemProps> = ({
           </Typography.Text>
           <div className={styles.profileDownloads}>
             {profile.marketingContentFileId && (
-              <DownloadOutlined
+              <DownloadFileButton
+                fileId={profile.marketingContentFileId}
+                fileName={(profile as any).marketingContentFileName}
+                companyName={profile.name}
                 title="Download marketing content file"
+                variant="marketing-content"
+                text="Marketing Content"
                 className={styles.downloadIcon}
-                onClick={async (e: React.MouseEvent) => {
-                  e.stopPropagation();
-                  try {
-                    const response = await fetcher.raw(
-                      `/api/file/download/${encodeURIComponent(
-                        profile.marketingContentFileId
-                      )}`
-                    );
-                    if (!response.ok) {
-                      messageApi.error("Failed to download file");
-                      return;
-                    }
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = `${sanitizeCompanyName(
-                      profile.name
-                    )}-marketing-content${
-                      (profile as any).marketingContentFileName &&
-                      (profile as any).marketingContentFileName.includes(".")
-                        ? "." +
-                          (profile as any).marketingContentFileName
-                            .split(".")
-                            .pop()
-                        : ""
-                    }`;
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    window.URL.revokeObjectURL(url);
-                  } catch {
-                    messageApi.error("Failed to download file");
-                  }
-                }}
+                messageApi={messageApi}
               />
             )}
             {profile.designAssetFileId && (
-              <DownloadOutlined
+              <DownloadFileButton
+                fileId={profile.designAssetFileId}
+                fileName={(profile as any).designAssetFileName}
+                companyName={profile.name}
                 title="Download design asset file"
+                variant="design-asset"
+                text="Design Asset"
                 className={styles.downloadIcon}
-                style={{ marginLeft: 8 }}
-                onClick={async (e: React.MouseEvent) => {
-                  e.stopPropagation();
-                  try {
-                    const response = await fetcher.raw(
-                      `/api/file/download/${encodeURIComponent(
-                        profile.designAssetFileId
-                      )}`
-                    );
-                    if (!response.ok) {
-                      messageApi.error("Failed to download file");
-                      return;
-                    }
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = `${profile.name
-                      .replace(/\s+/g, "")
-                      .toLowerCase()}-design-asset${
-                      (profile as any).designAssetFileName &&
-                      (profile as any).designAssetFileName.includes(".")
-                        ? "." +
-                          (profile as any).designAssetFileName.split(".").pop()
-                        : ""
-                    }`;
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    window.URL.revokeObjectURL(url);
-                  } catch {
-                    messageApi.error("Failed to download file");
-                  }
-                }}
+                messageApi={messageApi}
               />
             )}
           </div>
