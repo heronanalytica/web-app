@@ -118,41 +118,36 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
               type="primary"
               onClick={handleSave}
               loading={saveLoading}
-              disabled={saveLoading}
+              disabled={saveLoading || currentStep === 3}
             >
               Save
             </Button>
           </div>
         </div>
         <div className={styles.componentContainer}>{renderStepComponent()}</div>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            gap: 8,
-            marginTop: 24,
-          }}
-        >
-          <Button
-            onClick={() =>
-              setCurrentStep(currentStep > 0 ? currentStep - 1 : 0)
-            }
-            disabled={!canGoBack || saveLoading}
-          >
-            Back
-          </Button>
-          {/* Next/Continue button, hide on last step */}
-          {currentStep < totalSteps - 1 && (
+
+        {currentStep !== 3 && (
+          <div className={styles.footerActions}>
             <Button
-              type="primary"
-              onClick={handleNext}
-              disabled={!canGoNext || saveLoading}
-              loading={saveLoading}
+              onClick={() =>
+                setCurrentStep(currentStep > 0 ? currentStep - 1 : 0)
+              }
+              disabled={!canGoBack || saveLoading}
             >
-              Next
+              Back
             </Button>
-          )}
-        </div>
+            {currentStep < totalSteps - 1 && (
+              <Button
+                type="primary"
+                onClick={handleNext}
+                disabled={!canGoNext || saveLoading}
+                loading={saveLoading}
+              >
+                Next
+              </Button>
+            )}
+          </div>
+        )}
       </div>
     </>
   );
