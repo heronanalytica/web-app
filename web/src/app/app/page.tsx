@@ -15,6 +15,23 @@ const App = () => {
   const [modalOpen, setModalOpen] = React.useState(false);
   const [campaignName, setCampaignName] = React.useState("");
   const { createCampaign } = useCampaign();
+  const router = useRouter();
+  const { isAuthenticated, loading } = useAuth();
+  const { campaigns, loading: campaignLoading, fetchCampaigns } = useCampaign();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchCampaigns();
+    }
+  }, [fetchCampaigns, isAuthenticated]);
+  if (loading || campaignLoading) {
+    return <Spin fullscreen />;
+  }
+
+  if (!isAuthenticated) {
+    router.push(ROUTES.LOGIN);
+    return;
+  }
 
   const handleCreateCampaign = async () => {
     if (!campaignName.trim()) return;
@@ -28,24 +45,6 @@ const App = () => {
       messageApi.error("Failed to create campaign");
     }
   };
-  const router = useRouter();
-  const { isAuthenticated, loading } = useAuth();
-  const { campaigns, loading: campaignLoading, fetchCampaigns } = useCampaign();
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchCampaigns();
-    }
-  }, [fetchCampaigns, isAuthenticated]);
-
-  if (loading || campaignLoading) {
-    return <Spin fullscreen />;
-  }
-
-  if (!isAuthenticated) {
-    router.push(ROUTES.LOGIN);
-    return;
-  }
 
   return (
     <>

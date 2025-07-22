@@ -16,6 +16,7 @@ import AnalysisWaitingStep from "../AnalysisWaitingStep";
 import { FontPoppins } from "@/assets/fonts/poppins";
 import { message } from "antd";
 import { Campaign } from "@/types/campaign";
+import { CAMPAIGN_TOTAL_STEPS, stepTitles } from "./constants";
 
 interface CampaignBuilderProps {
   campaign: Campaign | null;
@@ -26,7 +27,6 @@ export const CampaignBuilder: React.FC<CampaignBuilderProps> = ({
   campaign,
   loading,
 }) => {
-  // Use context for step state and navigation
   return (
     <CampaignBuilderProvider campaign={campaign} totalSteps={5}>
       <CampaignBuilderInner loading={loading} />
@@ -49,8 +49,17 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
   const [messageApi, contextHolder] = message.useMessage();
 
   // Handler for Next/Continue
-  const handleNext = () => {
-    if (canGoNext) setCurrentStep(currentStep + 1);
+  const handleNext = async () => {
+    if (canGoNext) {
+      try {
+        await save();
+        setCurrentStep(currentStep + 1);
+      } catch (err: any) {
+        messageApi.error(
+          err?.message || "There was an error auto save the campaign"
+        );
+      }
+    }
   };
 
   // Handler for Save with loading and message
@@ -58,23 +67,13 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
     setSaveLoading(true);
     try {
       await save();
-      messageApi.success("Draft saved successfully");
+      messageApi.success("Campaign saved successfully");
     } catch (err: any) {
-      messageApi.error(err?.message || "Failed to save draft");
+      messageApi.error(err?.message || "Failed to save campaign");
     } finally {
       setSaveLoading(false);
     }
   };
-
-  const stepTitles = [
-    "Upload Customer File",
-    "Connect Mail Service",
-    "Company Profile",
-    "Waiting for Analysis",
-    "Configure Email Content",
-    "Review & Confirm",
-    "Launch Campaign",
-  ];
 
   const renderStepComponent = () => {
     switch (currentStep) {
@@ -98,8 +97,9 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
   return (
     <>
       {contextHolder}
+      {saveLoading && <Spin fullscreen />}
       <div className={styles.appContainer}>
-        <Steps totalSteps={5} active={currentStep} />
+        <Steps totalSteps={CAMPAIGN_TOTAL_STEPS} active={currentStep} />
         <div className={styles.stepHeaderBox}>
           <h2 className={styles.stepTitle + " " + FontPoppins.className}>
             {stepTitles[currentStep]}
@@ -111,7 +111,7 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
                 className={styles.deleteDraftBtn}
               />
             )}
-            <Button danger onClick={discard}>
+            <Button danger onClick={discard} disabled={saveLoading}>
               Discard
             </Button>
             <Button
@@ -137,13 +137,18 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
             onClick={() =>
               setCurrentStep(currentStep > 0 ? currentStep - 1 : 0)
             }
-            disabled={!canGoBack}
+            disabled={!canGoBack || saveLoading}
           >
             Back
           </Button>
           {/* Next/Continue button, hide on last step */}
           {currentStep < totalSteps - 1 && (
-            <Button type="primary" onClick={handleNext} disabled={!canGoNext}>
+            <Button
+              type="primary"
+              onClick={handleNext}
+              disabled={!canGoNext || saveLoading}
+              loading={saveLoading}
+            >
               Next
             </Button>
           )}

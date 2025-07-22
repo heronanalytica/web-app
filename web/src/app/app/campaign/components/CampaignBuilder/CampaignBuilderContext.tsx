@@ -13,7 +13,7 @@ export interface CampaignBuilderContextType {
   setCanGoNext: (can: boolean) => void;
   canGoBack: boolean;
   discard: () => void;
-  save: () => void;
+  save: () => Promise<void>;
   campaign: Campaign | null;
   stepState: CampaignStepState;
   setStepState: (s: CampaignStepState) => void;
