@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Spin, Button } from "antd";
 import DeleteDraftButton from "./DeleteDraftButton";
 import {
@@ -47,13 +47,21 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
   } = useCampaignBuilder();
   const [saveLoading, setSaveLoading] = React.useState(false);
   const [messageApi, contextHolder] = message.useMessage();
+  const [pendingSave, setPendingSave] = React.useState(false);
+
+  useEffect(() => {
+    if (pendingSave) {
+      save();
+      setPendingSave(false);
+    }
+  }, [pendingSave, save]);
 
   // Handler for Next/Continue
   const handleNext = async () => {
     if (canGoNext) {
       try {
-        await save();
         setCurrentStep(currentStep + 1);
+        setPendingSave(true);
       } catch (err: any) {
         messageApi.error(
           err?.message || "There was an error auto save the campaign"
