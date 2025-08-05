@@ -11,11 +11,22 @@ export interface AnalysisStep {
   status: "waiting" | "in_progress" | "done" | "error";
 }
 
+export interface User {
+  id: string;
+  email: string;
+  name?: string;
+  role?: string;
+}
+
 export interface Campaign {
   id: string;
   name: string;
+  description?: string;
   status: CampaignStatus;
+  currentStep?: number;
+  user?: User;
   createdAt: string;
   updatedAt: string;
   analysisSteps?: AnalysisStep[];
+  [key: string]: any; // For any additional fields that might come from the API
 }

@@ -2,11 +2,12 @@
 
 import { Table, Typography, Button, Tag } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
-import { CampaignStatus } from "@/types/campaign";
+import { Campaign, CampaignStatus } from "@/types/campaign";
 import { useAdminCampaigns } from "@/hooks/useAdminCampaigns";
 import { stepTitles } from "@/app/app/campaign/components/CampaignBuilder/constants";
 import styles from "./CampaignsTab.module.scss";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { CampaignDetailView } from "./CampaignDetailView";
 
 const { Title } = Typography;
 
@@ -85,18 +86,7 @@ const columns = [
     key: "updatedAt",
     render: (date: string) => new Date(date).toLocaleDateString(),
   },
-  {
-    title: "Actions",
-    key: "actions",
-    render: (_: any, record: any) => (
-      <Button
-        type="link"
-        onClick={() => window.open(`/app/campaign/${record.id}`, "_blank")}
-      >
-        View
-      </Button>
-    ),
-  },
+  // Actions column is now handled in the component state
 ];
 
 export default function CampaignsTab() {
@@ -107,6 +97,10 @@ export default function CampaignsTab() {
     pagination,
     fetchCampaigns,
   } = useAdminCampaigns();
+
+  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(
+    null
+  );
 
   useEffect(() => {
     fetchCampaigns(pagination.page, pagination.limit);
@@ -119,6 +113,37 @@ export default function CampaignsTab() {
   const refreshData = () => {
     fetchCampaigns(pagination.page, pagination.limit);
   };
+
+  const handleViewDetails = (campaign: Campaign) => {
+    setSelectedCampaign(campaign);
+  };
+
+  const handleBackToList = () => {
+    setSelectedCampaign(null);
+  };
+
+  // Update the actions column to use handleViewDetails
+  const columnsWithDetails = [
+    ...columns.filter((col) => col.key !== "actions"),
+    {
+      title: "Actions",
+      key: "actions",
+      render: (_: any, record: Campaign) => (
+        <Button type="link" onClick={() => handleViewDetails(record)}>
+          Details
+        </Button>
+      ),
+    },
+  ];
+
+  if (selectedCampaign) {
+    return (
+      <CampaignDetailView
+        campaign={selectedCampaign}
+        onBack={handleBackToList}
+      />
+    );
+  }
 
   return (
     <div>
@@ -137,7 +162,7 @@ export default function CampaignsTab() {
       {error && <div className={styles.error}>{error}</div>}
       <Table
         className={styles.table}
-        columns={columns}
+        columns={columnsWithDetails}
         dataSource={campaigns || []}
         rowKey="id"
         rowClassName={getRowClassName}

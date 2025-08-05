@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Campaign } from "@/types/campaign";
 import { fetcher } from "@/lib/fetcher";
 
@@ -12,7 +12,9 @@ export interface PaginatedResponse<T> {
 
 export function useAdminCampaigns() {
   const [campaigns, setCampaigns] = useState<Campaign[] | null>(null);
-  const [pagination, setPagination] = useState<Omit<PaginatedResponse<Campaign>, 'items'>>({
+  const [pagination, setPagination] = useState<
+    Omit<PaginatedResponse<Campaign>, "items">
+  >({
     total: 0,
     page: 1,
     totalPages: 1,
@@ -21,49 +23,56 @@ export function useAdminCampaigns() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchCampaigns = useCallback(async (page: number = 1, limit: number = 10) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await fetcher.get<PaginatedResponse<Campaign>>(
-        `/api/campaigns/admin/all?page=${page}&limit=${limit}`
-      );
-      
-      setCampaigns(data.items);
-      setPagination({
-        total: data.total,
-        page: data.page,
-        totalPages: data.totalPages,
-        limit: data.limit,
-      });
-      return data;
-    } catch (err: any) {
-      setError(err?.message || "Failed to fetch campaigns");
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const fetchCampaigns = useCallback(
+    async (page: number = 1, limit: number = 10) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await fetcher.get<PaginatedResponse<Campaign>>(
+          `/api/campaigns/admin/all?page=${page}&limit=${limit}`
+        );
 
-  const updateCampaignStatus = useCallback(async (campaignId: string, status: string) => {
-    try {
-      const updatedCampaign = await fetcher.patch<Campaign>(
-        `/api/campaigns/${campaignId}/status`,
-        { status }
-      );
-      
-      setCampaigns(prev => 
-        prev?.map(campaign => 
-          campaign.id === campaignId ? updatedCampaign : campaign
-        ) || null
-      );
-      
-      return updatedCampaign;
-    } catch (err: any) {
-      setError(err?.message || "Failed to update campaign status");
-      throw err;
-    }
-  }, []);
+        setCampaigns(data.items);
+        setPagination({
+          total: data.total,
+          page: data.page,
+          totalPages: data.totalPages,
+          limit: data.limit,
+        });
+        return data;
+      } catch (err: any) {
+        setError(err?.message || "Failed to fetch campaigns");
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
+  const updateCampaignStatus = useCallback(
+    async (campaignId: string, status: string) => {
+      try {
+        const updatedCampaign = await fetcher.patch<Campaign>(
+          `/api/campaigns/${campaignId}/status`,
+          { status }
+        );
+
+        setCampaigns(
+          (prev) =>
+            prev?.map((campaign) =>
+              campaign.id === campaignId ? updatedCampaign : campaign
+            ) || null
+        );
+
+        return updatedCampaign;
+      } catch (err: any) {
+        setError(err?.message || "Failed to update campaign status");
+        throw err;
+      }
+    },
+    []
+  );
 
   return {
     campaigns,
@@ -72,5 +81,40 @@ export function useAdminCampaigns() {
     pagination,
     fetchCampaigns,
     updateCampaignStatus,
+  };
+}
+
+export function useAdminCampaign(campaignId: string) {
+  const [campaign, setCampaign] = useState<Campaign | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchCampaign = useCallback(async () => {
+    if (!campaignId) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const data = await fetcher.get<Campaign>(
+        `/api/campaigns/admin/${campaignId}`
+      );
+      setCampaign(data);
+    } catch (err: any) {
+      setError(err?.message || "Failed to fetch campaign");
+    } finally {
+      setLoading(false);
+    }
+  }, [campaignId]);
+
+  useEffect(() => {
+    fetchCampaign();
+  }, [fetchCampaign]);
+
+  return {
+    campaign,
+    loading,
+    error,
+    refetch: fetchCampaign,
   };
 }

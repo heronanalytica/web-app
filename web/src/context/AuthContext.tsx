@@ -9,6 +9,7 @@ type User = { id: string; email: string; role: string };
 type AuthContextValue = {
   user: User | null;
   isAuthenticated: boolean;
+  isAdmin: boolean;
   loading: boolean;
   refresh: () => Promise<void>;
 };
@@ -16,6 +17,7 @@ type AuthContextValue = {
 const initialValue: AuthContextValue = {
   user: null,
   isAuthenticated: false,
+  isAdmin: false,
   loading: false,
   refresh: async () => {},
 };
@@ -53,11 +55,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     fetchUser();
   }, [fetchUser]);
 
+  const isAdmin = user?.role === "ADMIN";
+
   return (
     <AuthContext.Provider
       value={{
         user,
         isAuthenticated: !!user,
+        isAdmin,
         loading,
         refresh: fetchUser,
       }}
