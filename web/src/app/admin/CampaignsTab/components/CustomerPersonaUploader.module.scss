@@ -1,0 +1,172 @@
+.uploaderContainer {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+
+  :global(.ant-upload.ant-upload-drag) {
+    border: 2px dashed #d9d9d9;
+    border-radius: 8px;
+    background-color: #fafafa;
+    transition: all 0.3s ease;
+    margin-bottom: 16px;
+    padding: 24px 16px;
+
+    &:not(.ant-upload-disabled):hover {
+      border-color: #1890ff;
+    }
+
+    &.hasFile {
+      border-style: solid;
+      background-color: #f6ffed;
+      border-color: #b7eb8f;
+    }
+
+    .ant-upload {
+      padding: 0;
+    }
+  }
+}
+
+.fileContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background-color: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  transition: all 0.3s ease;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  &:hover {
+    box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.08);
+  }
+}
+
+.fileInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.fileIcon {
+  font-size: 24px;
+  color: #1890ff;
+  flex-shrink: 0;
+}
+
+.fileName {
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+  word-break: break-all;
+  font-size: 15px;
+}
+
+.fileMeta {
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 13px;
+  margin-top: 2px;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+
+  @media (max-width: 480px) {
+    width: 100%;
+    gap: 8px;
+
+    button {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+}
+
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 100px;
+  transition: all 0.2s;
+
+  &:hover {
+    opacity: 0.85;
+  }
+
+  @media (max-width: 480px) {
+    min-width: 0;
+    padding: 0 12px;
+  }
+}
+
+.previewButton {
+  background-color: #f0f7ff;
+  color: #1890ff;
+  border-color: #91d5ff;
+
+  &:hover,
+  &:focus {
+    background-color: #e6f7ff;
+    color: #40a9ff;
+    border-color: #69c0ff;
+  }
+}
+
+.deleteButton {
+  color: #ff4d4f;
+  border-color: #ffa39e;
+  background-color: #fff1f0;
+
+  &:hover,
+  &:focus {
+    color: #ff7875;
+    background-color: #fff2f0;
+    border-color: #ffa39e;
+  }
+}
+
+.previewModal {
+  .ant-modal-body {
+    padding: 0;
+    max-height: 60vh;
+    overflow: auto;
+  }
+}
+
+@media (min-width: 576px) {
+  .fileContainer {
+    flex-direction: row;
+    align-items: center;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .fileInfo {
+    margin-bottom: 0;
+    flex: 1;
+    margin-right: 16px;
+  }
+
+  .actionButtons {
+    margin-top: 0;
+    width: auto;
+  }
+
+  .actionButton {
+    flex: none;
+    min-width: 100px;
+  }
+}

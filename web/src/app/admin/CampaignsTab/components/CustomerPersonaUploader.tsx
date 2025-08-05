@@ -31,6 +31,7 @@ const CustomerPersonaUploader: React.FC<CustomerPersonaUploaderProps> = ({
   onUploadSuccess,
   onDelete,
 }) => {
+  const [messageApi, contextHolder] = message.useMessage();
   const [fileId, setFileId] = useState(initialFileId);
   const [fileName, setFileName] = useState(initialFileName);
   const [isUploading, setIsUploading] = useState(false);
@@ -94,13 +95,13 @@ const CustomerPersonaUploader: React.FC<CustomerPersonaUploaderProps> = ({
       });
 
       onUploadSuccess?.(meta.id, file.name);
-      message.success(
+      messageApi.success(
         "File uploaded and associated with campaign successfully"
       );
       return true;
     } catch (err) {
       console.error("Upload failed:", err);
-      message.error("File upload failed");
+      messageApi.error("File upload failed");
       return false;
     } finally {
       setIsUploading(false);
@@ -122,10 +123,10 @@ const CustomerPersonaUploader: React.FC<CustomerPersonaUploaderProps> = ({
       setPreviewData(null);
       onDelete?.();
 
-      message.success("File deleted successfully");
+      messageApi.success("File deleted successfully");
     } catch (error) {
       console.error("Delete failed:", error);
-      message.error("Failed to delete file");
+      messageApi.error("Failed to delete file");
     } finally {
       setIsDeleting(false);
       setDeleteModalVisible(false);
@@ -154,7 +155,7 @@ const CustomerPersonaUploader: React.FC<CustomerPersonaUploaderProps> = ({
         complete: (results: Papa.ParseResult<any>) => {
           if (results.errors.length > 0) {
             console.error("CSV parse errors:", results.errors);
-            message.error("Failed to parse CSV file");
+            messageApi.error("Failed to parse CSV file");
             return;
           }
 
@@ -170,12 +171,12 @@ const CustomerPersonaUploader: React.FC<CustomerPersonaUploaderProps> = ({
         },
         error: (error: Error) => {
           console.error("CSV parse error:", error);
-          message.error("Failed to parse CSV file");
+          messageApi.error("Failed to parse CSV file");
         },
       });
     } catch (err) {
       console.error("Preview failed:", err);
-      message.error("Failed to load file preview");
+      messageApi.error("Failed to load file preview");
     } finally {
       setIsUploading(false);
     }
@@ -189,28 +190,57 @@ const CustomerPersonaUploader: React.FC<CustomerPersonaUploaderProps> = ({
       render: (text: string) => text || "-",
     })) || [];
 
+  const beforeUpload = (file: File) => {
+    const isCsv = file.type === "text/csv";
+    if (!isCsv) {
+      messageApi.error("Only CSV files are supported");
+    }
+    const isLt10M = file.size / 1024 / 1024 < 10;
+    if (!isLt10M) {
+      messageApi.error("File must be smaller than 10MB");
+    }
+    return isCsv && isLt10M;
+  };
+
   return (
     <div className={styles.uploaderContainer}>
-      {!fileId ? (
-        <Upload
-          accept=".csv"
-          showUploadList={false}
-          customRequest={({ file, onSuccess, onError }) => {
-            handleUpload(file as File)
-              .then(() => onSuccess?.(null))
-              .catch(onError);
-          }}
+      {contextHolder}
+      <Upload.Dragger
+        name="file"
+        multiple={false}
+        accept=".csv"
+        showUploadList={false}
+        beforeUpload={beforeUpload}
+        customRequest={({ file, onSuccess, onError }) => {
+          handleUpload(file as File)
+            .then(() => onSuccess?.(true))
+            .catch((error) => onError?.(error));
+          return false;
+        }}
+        disabled={isUploading}
+        className={fileId ? "hasFile" : ""}
+      >
+        <p className="ant-upload-drag-icon">
+          <UploadOutlined
+            style={{ fontSize: 32, color: fileId ? "#52c41a" : "#1890ff" }}
+          />
+        </p>
+        <p
+          className="ant-upload-text"
+          style={{ fontSize: 16, marginBottom: 8 }}
         >
-          <Button
-            icon={<UploadOutlined />}
-            loading={isUploading}
-            disabled={isUploading}
-            type="primary"
-          >
-            Upload CSV File
-          </Button>
-        </Upload>
-      ) : (
+          {fileId
+            ? "File uploaded successfully!"
+            : "Click or drag file to this area to upload"}
+        </p>
+        <p className="ant-upload-hint" style={{ fontSize: 14 }}>
+          {fileId
+            ? "You can replace this file by dragging a new one here or clicking to select"
+            : "Support for a single CSV file upload. Max file size: 10MB"}
+        </p>
+      </Upload.Dragger>
+
+      {fileId && (
         <div className={styles.fileContainer}>
           <div className={styles.fileInfo}>
             <FileTextOutlined className={styles.fileIcon} />
@@ -240,13 +270,26 @@ const CustomerPersonaUploader: React.FC<CustomerPersonaUploaderProps> = ({
       )}
 
       <Modal
-        title="Preview CSV Data"
+        title={
+          <>
+            <FileTextOutlined style={{ marginRight: 8 }} />
+            CSV Preview: {fileName}
+          </>
+        }
         open={isPreviewModalVisible}
         onCancel={() => setIsPreviewModalVisible(false)}
-        width="80%"
-        footer={
-          <Button onClick={() => setIsPreviewModalVisible(false)}>Close</Button>
-        }
+        footer={[
+          <Button
+            key="close"
+            type="primary"
+            onClick={() => setIsPreviewModalVisible(false)}
+          >
+            Close Preview
+          </Button>,
+        ]}
+        width="90%"
+        className={styles.previewModal}
+        styles={{ body: { padding: 0 } }}
       >
         {previewData && (
           <div style={{ maxHeight: "60vh", overflow: "auto" }}>

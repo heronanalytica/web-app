@@ -1,0 +1,26 @@
+.analysisSteps {
+  margin-top: 16px;
+
+  .stepsContainer {
+    margin-top: 12px;
+  }
+
+  :global(.ant-steps-item-title) {
+    width: 500px;
+  }
+
+  .stepTitleRow {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    width: 100%;
+    gap: 16px;
+  }
+
+  .stepLabel {
+    font-weight: 500;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
