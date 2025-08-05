@@ -11,6 +11,7 @@ import useAuth from "@/hooks/useAuth";
 import { EAuthRole } from "@/types/auth";
 import { useAdminCampaigns } from "@/hooks/useAdminCampaigns";
 import { CampaignStatus } from "@/types/campaign";
+import { stepTitles } from "../app/campaign/components/CampaignBuilder/constants";
 
 const { Content, Sider } = Layout;
 const { Title } = Typography;
@@ -52,6 +53,19 @@ const columns = [
     render: (status: CampaignStatus) => (
       <Tag color={getStatusColor(status)}>{status.toUpperCase()}</Tag>
     ),
+  },
+  {
+    title: "Current Step",
+    key: "currentStep",
+    render: (_: any, record: any) => {
+      // Get the current step from the campaign's currentStep field or default to 0
+      const currentStep = (record as any).currentStep ?? 0;
+      const stepIndex = Math.min(
+        Math.max(0, currentStep),
+        stepTitles.length - 1
+      );
+      return stepTitles[stepIndex] || "Not Started";
+    },
   },
   {
     title: "Created By",

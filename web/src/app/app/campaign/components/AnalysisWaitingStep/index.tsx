@@ -2,12 +2,7 @@ import React from "react";
 import { Typography, Timeline } from "antd";
 import { DEFAULT_ANALYSIS_STEPS } from "./steps";
 import styles from "./styles.module.scss";
-
-export interface AnalysisStep {
-  key: string;
-  label: string;
-  status: "waiting" | "in_progress" | "done" | "error";
-}
+import { AnalysisStep } from "@/types/campaign";
 
 interface AnalysisWaitingStepProps {
   steps?: AnalysisStep[];
