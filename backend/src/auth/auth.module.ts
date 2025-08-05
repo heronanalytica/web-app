@@ -10,7 +10,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
   imports: [
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'super_secret',
-      signOptions: { expiresIn: '1h' },
+      signOptions: { expiresIn: '24h' },
     }),
     DatabaseModule,
     FeatureFlagModule,

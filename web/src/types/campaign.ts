@@ -1,3 +1,5 @@
+import { CampaignStepState } from "./campaignStepState";
+
 export enum CampaignStatus {
   DRAFT = "DRAFT",
   ACTIVE = "ACTIVE",
@@ -27,6 +29,7 @@ export interface Campaign {
   user?: User;
   createdAt: string;
   updatedAt: string;
+  stepState?: CampaignStepState;
   analysisSteps?: AnalysisStep[];
   [key: string]: any; // For any additional fields that might come from the API
 }

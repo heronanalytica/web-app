@@ -240,22 +240,31 @@ export const CampaignDetailView = ({
         </div>
         <CustomerPersonaUploader
           campaignId={campaign.id}
-          initialFileId={campaign.customerPersonaFileId}
-          initialFileName={campaign.customerPersonaFileName}
+          initialFileId={campaign.stepState?.classifiedPersonaFile?.fileId}
+          initialFileName={campaign.stepState?.classifiedPersonaFile?.fileName}
           onUploadSuccess={(fileId, fileName) => {
             // Update local campaign state to reflect the new file
             setCampaign((prev) => ({
               ...prev,
-              customerPersonaFileId: fileId,
-              customerPersonaFileName: fileName,
+              classifiedPersonaFileId: fileId,
+              stepState: {
+                ...prev.stepState,
+                classifiedPersonaFile: {
+                  fileId,
+                  fileName,
+                },
+              },
             }));
           }}
           onDelete={() => {
             // Update local campaign state to remove the file reference
             setCampaign((prev) => ({
               ...prev,
-              customerPersonaFileId: undefined,
-              customerPersonaFileName: undefined,
+              classifiedPersonaFileId: undefined,
+              stepState: {
+                ...prev.stepState,
+                classifiedPersonaFile: undefined,
+              },
             }));
           }}
         />

@@ -86,8 +86,16 @@ const CustomerPersonaUploader: React.FC<CustomerPersonaUploaderProps> = ({
       setFileId(meta.id);
       setFileName(file.name);
 
+      // 4. Update campaign with the new file
+      await fetcher.patch(`/api/campaigns/${campaignId}/classified-persona`, {
+        fileId: meta.id,
+        fileName: file.name,
+      });
+
       onUploadSuccess?.(meta.id, file.name);
-      message.success("File uploaded successfully");
+      message.success(
+        "File uploaded and associated with campaign successfully"
+      );
       return true;
     } catch (err) {
       console.error("Upload failed:", err);
@@ -102,11 +110,17 @@ const CustomerPersonaUploader: React.FC<CustomerPersonaUploaderProps> = ({
     if (!fileId) return;
     try {
       setIsDeleting(true);
+      // Delete the file record
       await fetcher.delete(`/api/file/${fileId}`);
+      // Update the campaign to remove the classified persona reference
+      await fetcher.delete(`/api/campaigns/${campaignId}/classified-persona`);
+      
+      // Update local state
       setFileId(undefined);
       setFileName(undefined);
       setPreviewData(null);
       onDelete?.();
+      
       message.success("File deleted successfully");
     } catch (error) {
       console.error("Delete failed:", error);
@@ -119,30 +133,41 @@ const CustomerPersonaUploader: React.FC<CustomerPersonaUploaderProps> = ({
 
   const handlePreview = async () => {
     if (!fileId) return;
+
     try {
-      const response = await fetch(`/api/file/${fileId}`, {
-        credentials: "include",
-        headers: { Accept: "text/csv" },
-      });
-      if (!response.ok) throw new Error("Failed to fetch file");
+      setIsUploading(true);
+
+      // Fetch the actual file content for preview
+      const response = await fetcher.raw(`/api/file/download/${fileId}`);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch file content");
+      }
 
       const csvText = await response.text();
+
+      // Parse the CSV content
       Papa.parse(csvText, {
         header: true,
         skipEmptyLines: true,
-        complete: (results) => {
+        complete: (results: Papa.ParseResult<any>) => {
           if (results.errors.length > 0) {
             console.error("CSV parse errors:", results.errors);
             message.error("Failed to parse CSV file");
             return;
           }
+
+          // Limit the number of rows for preview
+          const previewRows = results.data.slice(0, 100); // Show first 100 rows max
+
           setPreviewData({
             headers: results.meta.fields || [],
-            rows: results.data,
+            rows: previewRows,
           });
+
           setIsPreviewModalVisible(true);
         },
-        error: (error: any) => {
+        error: (error: Error) => {
           console.error("CSV parse error:", error);
           message.error("Failed to parse CSV file");
         },
@@ -150,6 +175,8 @@ const CustomerPersonaUploader: React.FC<CustomerPersonaUploaderProps> = ({
     } catch (err) {
       console.error("Preview failed:", err);
       message.error("Failed to load file preview");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -237,6 +264,7 @@ const CustomerPersonaUploader: React.FC<CustomerPersonaUploaderProps> = ({
         onOk={handleDelete}
         onCancel={() => setDeleteModalVisible(false)}
         confirmLoading={isDeleting}
+        okButtonProps={{ danger: true }}
       >
         <p>
           Are you sure you want to delete this file? This action cannot be
