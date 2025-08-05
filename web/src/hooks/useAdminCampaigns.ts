@@ -74,13 +74,52 @@ export function useAdminCampaigns() {
     []
   );
 
+  const updateAnalysisStep = useCallback(
+    async (
+      campaignId: string,
+      stepKey: string,
+      status: "waiting" | "in_progress" | "done" | "error",
+      message?: string
+    ) => {
+      try {
+        const updatedCampaign = await fetcher.patch<Campaign>(
+          `/api/campaigns/${campaignId}/analysis-steps`,
+          {
+            steps: [
+              {
+                key: stepKey,
+                status,
+                message,
+              },
+            ],
+          }
+        );
+
+        // Update the campaigns list if it exists
+        setCampaigns(
+          (prevCampaigns) =>
+            prevCampaigns?.map((campaign) =>
+              campaign.id === campaignId ? updatedCampaign : campaign
+            ) || null
+        );
+
+        return updatedCampaign;
+      } catch (err: any) {
+        setError(err?.message || "Failed to update analysis step");
+        throw err;
+      }
+    },
+    []
+  );
+
   return {
     campaigns,
+    pagination,
     loading,
     error,
-    pagination,
     fetchCampaigns,
     updateCampaignStatus,
+    updateAnalysisStep,
   };
 }
 

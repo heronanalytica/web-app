@@ -1,3 +1,4 @@
+import { useState, useCallback } from "react";
 import {
   Typography,
   Button,
@@ -6,6 +7,9 @@ import {
   Space,
   Descriptions,
   Steps,
+  Dropdown,
+  Menu,
+  message,
 } from "antd";
 import {
   ArrowLeftOutlined,
@@ -13,9 +17,14 @@ import {
   ClockCircleOutlined,
   ExclamationCircleOutlined,
   SyncOutlined,
+  DownOutlined,
+  CheckOutlined,
+  CloseOutlined,
+  SyncOutlined as SyncOutlinedSpin,
 } from "@ant-design/icons";
 import { Campaign, CampaignStatus, AnalysisStep } from "@/types/campaign";
 import { stepTitles } from "@/app/app/campaign/components/CampaignBuilder/constants";
+import { useAdminCampaigns } from "@/hooks/useAdminCampaigns";
 import styles from "./CampaignsTab.module.scss";
 
 const { Step } = Steps;
@@ -54,9 +63,67 @@ const getStepIcon = (status: string) => {
 };
 
 export const CampaignDetailView = ({
-  campaign,
+  campaign: initialCampaign,
   onBack,
 }: CampaignDetailViewProps) => {
+  const [campaign, setCampaign] = useState(initialCampaign);
+  const [updatingStep, setUpdatingStep] = useState<string | null>(null);
+  const { updateAnalysisStep } = useAdminCampaigns();
+
+  const handleStatusUpdate = useCallback(
+    async (
+      stepKey: string,
+      status: "waiting" | "in_progress" | "done" | "error"
+    ) => {
+      if (!campaign?.id) return;
+
+      try {
+        setUpdatingStep(stepKey);
+        const updatedCampaign = await updateAnalysisStep(
+          campaign.id,
+          stepKey,
+          status
+        );
+
+        setCampaign(updatedCampaign);
+        message.success(`Updated status for step`);
+      } catch (error) {
+        console.error("Failed to update step status:", error);
+        message.error("Failed to update step status");
+      } finally {
+        setUpdatingStep(null);
+      }
+    },
+    [campaign?.id, updateAnalysisStep]
+  );
+
+  const getStatusMenu = (step: AnalysisStep) => (
+    <Menu
+      onClick={({ key }) => handleStatusUpdate(step.key, key as any)}
+      disabled={updatingStep === step.key}
+    >
+      <Menu.Item key="waiting" icon={<ClockCircleOutlined />}>
+        Set as Waiting
+      </Menu.Item>
+      <Menu.Item key="in_progress" icon={<SyncOutlinedSpin />}>
+        Set as In Progress
+      </Menu.Item>
+      <Menu.Divider />
+      <Menu.Item
+        key="done"
+        icon={<CheckOutlined style={{ color: "#52c41a" }} />}
+      >
+        Mark as Done
+      </Menu.Item>
+      <Menu.Item
+        key="error"
+        icon={<CloseOutlined style={{ color: "#ff4d4f" }} />}
+      >
+        Mark as Error
+      </Menu.Item>
+    </Menu>
+  );
+
   const getStatusTag = (status: CampaignStatus) => {
     const statusColors = {
       [CampaignStatus.DRAFT]: "blue",
@@ -117,20 +184,43 @@ export const CampaignDetailView = ({
           {campaign.currentStep === 3 && campaign.analysisSteps && (
             <div className={styles.analysisSteps}>
               <Text strong>Analysis Progress:</Text>
-              <Steps
-                direction="vertical"
-                current={-1}
-                className={styles.stepsContainer}
-              >
-                {campaign.analysisSteps.map((step: AnalysisStep) => (
-                  <Step
-                    key={step.key}
-                    title={step.label}
-                    status={getStepStatus(step.status)}
-                    icon={getStepIcon(step.status)}
-                  />
-                ))}
-              </Steps>
+              <div className={styles.stepsContainer}>
+                <Steps direction="vertical" current={-1}>
+                  {campaign.analysisSteps.map((step: AnalysisStep) => {
+                    const isUpdating = updatingStep === step.key;
+                    const stepTitle = (
+                      <div className={styles.stepTitleRow}>
+                        <div className={styles.stepLabel}>{step.label}</div>
+                        <Dropdown
+                          overlay={getStatusMenu(step)}
+                          trigger={["click"]}
+                          disabled={isUpdating}
+                        >
+                          <Button type="text" size="small" loading={isUpdating}>
+                            {isUpdating ? "Updating..." : "Update Status"}{" "}
+                            <DownOutlined />
+                          </Button>
+                        </Dropdown>
+                      </div>
+                    );
+
+                    return (
+                      <Step
+                        key={step.key}
+                        title={stepTitle}
+                        status={getStepStatus(step.status)}
+                        icon={
+                          isUpdating ? (
+                            <SyncOutlined spin />
+                          ) : (
+                            getStepIcon(step.status)
+                          )
+                        }
+                      />
+                    );
+                  })}
+                </Steps>
+              </div>
             </div>
           )}
         </Space>

@@ -141,4 +141,46 @@ export class CampaignService {
       where: { id, userId },
     });
   }
+
+  async updateAnalysisSteps(
+    campaignId: string,
+    steps: Array<{ key: string; status: string }>,
+  ) {
+    // First get the current campaign to preserve existing steps
+    const campaign = await this.dbService.campaign.findUnique({
+      where: { id: campaignId },
+      select: { analysisSteps: true },
+    });
+
+    if (!campaign) {
+      throw new Error('Campaign not found');
+    }
+
+    // Create a map of the new steps for easy lookup
+    const stepsMap = new Map(steps.map((step) => [step.key, step]));
+
+    // Update existing steps with new statuses, preserving other properties
+    const currentSteps = (campaign.analysisSteps || []) as Array<{
+      key: string;
+      label: string;
+      status: string;
+    }>;
+
+    const updatedSteps = currentSteps.map((step) => {
+      const updatedStep = stepsMap.get(step.key);
+      if (updatedStep) {
+        return { ...step, status: updatedStep.status };
+      }
+      return step;
+    });
+
+    // Update the campaign with the new steps
+    return this.dbService.campaign.update({
+      where: { id: campaignId },
+      data: {
+        analysisSteps: updatedSteps as Prisma.InputJsonValue,
+        updatedAt: new Date(),
+      },
+    });
+  }
 }

@@ -17,7 +17,9 @@ import {
   CreateDraftCampaignDto,
   UpdateDraftCampaignDto,
 } from './dto/campaign-draft.dto';
+import { UpdateAnalysisStepsDto } from './dto/campaign-step-state.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AdminGuard } from '../auth/guards/admin.guard';
 import { Request } from 'express';
 import { EAuthRole } from '../auth/auth.types';
 
@@ -109,6 +111,25 @@ export class CampaignController {
     const userId = req.user?.id;
     if (!userId) throw new UnauthorizedException();
     const data = await this.campaignService.deleteDraftCampaign(userId, id);
+    return { error: 0, data };
+  }
+
+  @Patch(':id/analysis-steps')
+  @UseGuards(AdminGuard)
+  async updateAnalysisSteps(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body() dto: UpdateAnalysisStepsDto,
+  ) {
+    if (!req.user?.id) throw new UnauthorizedException();
+
+    const data = await this.campaignService.updateAnalysisSteps(
+      id,
+      dto.steps.map((step) => ({
+        key: step.key,
+        status: step.status,
+      })),
+    );
     return { error: 0, data };
   }
 }

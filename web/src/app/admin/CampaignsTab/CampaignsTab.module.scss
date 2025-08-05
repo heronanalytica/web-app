@@ -68,3 +68,16 @@
 :global(.ant-steps-item-error .ant-steps-item-icon) {
   border-color: #ff4d4f;
 }
+.stepTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.stepLabel {
+  flex: 0 0 250px; // 👈 fixed width
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
