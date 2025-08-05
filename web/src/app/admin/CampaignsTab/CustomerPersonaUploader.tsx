@@ -9,6 +9,7 @@ import {
 } from "@ant-design/icons";
 import { fetcher } from "@/lib/fetcher";
 import Papa from "papaparse";
+import styles from "./CustomerPersonaUploader.module.scss";
 
 interface CustomerPersonaUploaderProps {
   campaignId: string;
@@ -114,13 +115,13 @@ const CustomerPersonaUploader: React.FC<CustomerPersonaUploaderProps> = ({
       await fetcher.delete(`/api/file/${fileId}`);
       // Update the campaign to remove the classified persona reference
       await fetcher.delete(`/api/campaigns/${campaignId}/classified-persona`);
-      
+
       // Update local state
       setFileId(undefined);
       setFileName(undefined);
       setPreviewData(null);
       onDelete?.();
-      
+
       message.success("File deleted successfully");
     } catch (error) {
       console.error("Delete failed:", error);
@@ -189,7 +190,7 @@ const CustomerPersonaUploader: React.FC<CustomerPersonaUploaderProps> = ({
     })) || [];
 
   return (
-    <div>
+    <div className={styles.uploaderContainer}>
       {!fileId ? (
         <Upload
           accept=".csv"
@@ -204,31 +205,37 @@ const CustomerPersonaUploader: React.FC<CustomerPersonaUploaderProps> = ({
             icon={<UploadOutlined />}
             loading={isUploading}
             disabled={isUploading}
+            type="primary"
           >
             Upload CSV File
           </Button>
         </Upload>
       ) : (
-        <div>
-          <span>
-            <FileTextOutlined /> {fileName}
-          </span>
-          <Button
-            icon={<EyeOutlined />}
-            onClick={handlePreview}
-            disabled={isUploading || isDeleting}
-          >
-            Preview
-          </Button>
-          <Button
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => setDeleteModalVisible(true)}
-            disabled={isUploading || isDeleting}
-            loading={isDeleting}
-          >
-            Delete
-          </Button>
+        <div className={styles.fileContainer}>
+          <div className={styles.fileInfo}>
+            <FileTextOutlined className={styles.fileIcon} />
+            <span className={styles.fileName}>{fileName}</span>
+          </div>
+          <div className={styles.actionButtons}>
+            <Button
+              icon={<EyeOutlined />}
+              onClick={handlePreview}
+              disabled={isUploading || isDeleting}
+              className={styles.actionButton}
+            >
+              Preview
+            </Button>
+            <Button
+              danger
+              icon={<DeleteOutlined />}
+              onClick={() => setDeleteModalVisible(true)}
+              disabled={isUploading || isDeleting}
+              loading={isDeleting}
+              className={styles.actionButton}
+            >
+              Delete
+            </Button>
+          </div>
         </div>
       )}
 
