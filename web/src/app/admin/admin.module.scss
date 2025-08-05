@@ -47,4 +47,16 @@
     color: #ff4d4f;
     font-weight: 500;
   }
+
+  .waitingAnalysisRow {
+    background-color: #fffbe6;
+
+    :global(.ant-table-row:hover) > td {
+      background-color: #fff1b8 !important;
+    }
+
+    :global(td.ant-table-cell-row-hover) {
+      background-color: #fff1b8 !important;
+    }
+  }
 }

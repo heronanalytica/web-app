@@ -31,6 +31,12 @@ const getStatusColor = (status: CampaignStatus) => {
   }
 };
 
+const getRowClassName = (record: any) => {
+  const currentStep = record.currentStep ?? 0;
+  const stepIndex = Math.min(Math.max(0, currentStep), stepTitles.length - 1);
+  return stepTitles[stepIndex] === "Waiting for Analysis" ? styles.waitingAnalysisRow : "";
+};
+
 const columns = [
   {
     title: "Name",
@@ -213,6 +219,7 @@ export default function AdminDashboard() {
                   columns={columns}
                   dataSource={campaigns || []}
                   rowKey="id"
+                  rowClassName={getRowClassName}
                   loading={campaignsLoading}
                   pagination={{
                     current: campaignsPagination.page,
