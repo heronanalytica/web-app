@@ -1,7 +1,7 @@
 "use client";
 
-import { Layout, Menu, Table, Tag } from "antd";
-import { DashboardOutlined } from "@ant-design/icons";
+import { Layout, Menu, Table, Tag, Typography, Button } from "antd";
+import { DashboardOutlined, ReloadOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -9,94 +9,146 @@ import { ROUTES } from "@/constants/routes";
 import styles from "./admin.module.scss";
 import useAuth from "@/hooks/useAuth";
 import { EAuthRole } from "@/types/auth";
+import { useAdminCampaigns } from "@/hooks/useAdminCampaigns";
+import { CampaignStatus } from "@/types/campaign";
 
 const { Content, Sider } = Layout;
+const { Title } = Typography;
 
-// Mock data for campaigns
-const mockCampaigns = [
-  {
-    key: "1",
-    name: "Summer Sale",
-    status: "active",
-    createdBy: "user1@example.com",
-    startDate: "2025-07-15",
-    endDate: "2025-08-15",
-    participants: 1500,
-  },
-  {
-    key: "2",
-    name: "New Product Launch",
-    status: "upcoming",
-    createdBy: "user2@example.com",
-    startDate: "2025-08-20",
-    endDate: "2025-09-20",
-    participants: 0,
-  },
-];
+const getStatusColor = (status: CampaignStatus) => {
+  switch (status) {
+    case CampaignStatus.ACTIVE:
+      return "green";
+    case CampaignStatus.DRAFT:
+      return "blue";
+    case CampaignStatus.COMPLETED:
+      return "gray";
+    case CampaignStatus.PAUSED:
+      return "orange";
+    default:
+      return "default";
+  }
+};
 
 const columns = [
   {
-    title: "Campaign Name",
+    title: "Name",
     dataIndex: "name",
     key: "name",
-    render: (text: string) => <a>{text}</a>,
+    render: (text: string, record: any) => (
+      <a
+        href={`/app/campaign/${record.id}`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {text}
+      </a>
+    ),
   },
   {
     title: "Status",
     dataIndex: "status",
     key: "status",
-    render: (status: string) => {
-      let color = "default";
-      if (status === "active") color = "green";
-      if (status === "upcoming") color = "blue";
-      if (status === "completed") color = "gray";
-      return <Tag color={color}>{status.toUpperCase()}</Tag>;
-    },
+    render: (status: CampaignStatus) => (
+      <Tag color={getStatusColor(status)}>{status.toUpperCase()}</Tag>
+    ),
   },
   {
     title: "Created By",
-    dataIndex: "createdBy",
-    key: "createdBy",
+    key: "user",
+    render: (_: any, record: any) => record.user?.email || "Unknown",
   },
   {
-    title: "Start Date",
-    dataIndex: "startDate",
-    key: "startDate",
+    title: "Created At",
+    dataIndex: "createdAt",
+    key: "createdAt",
+    render: (date: string) => new Date(date).toLocaleDateString(),
   },
   {
-    title: "End Date",
-    dataIndex: "endDate",
-    key: "endDate",
+    title: "Updated At",
+    dataIndex: "updatedAt",
+    key: "updatedAt",
+    render: (date: string) => new Date(date).toLocaleDateString(),
   },
   {
-    title: "Participants",
-    dataIndex: "participants",
-    key: "participants",
+    title: "Actions",
+    key: "actions",
+    render: (_: any, record: any) => (
+      <Button
+        type="link"
+        onClick={() => window.open(`/app/campaign/${record.id}`, "_blank")}
+      >
+        View
+      </Button>
+    ),
   },
 ];
 
 export default function AdminDashboard() {
   const [collapsed, setCollapsed] = useState(false);
   const [selectedKey, setSelectedKey] = useState("campaigns");
-  const { user, isAuthenticated, loading } = useAuth();
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+  });
+
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const router = useRouter();
+  const {
+    campaigns,
+    loading: campaignsLoading,
+    error,
+    pagination: campaignsPagination,
+    fetchCampaigns,
+  } = useAdminCampaigns();
 
   useEffect(() => {
     // Redirect to login if not authenticated
-    if (!loading && !isAuthenticated) {
+    if (!authLoading && !isAuthenticated) {
       router.push(ROUTES.LOGIN);
+      return;
     }
+
     // Check if user is admin
     if (user && user.role !== EAuthRole.ADMIN) {
       router.push(ROUTES.HOMEPAGE);
+      return;
     }
-  }, [isAuthenticated, loading, router, user]);
+
+    // Only fetch campaigns if user is authenticated and is admin
+    if (isAuthenticated && user?.role === EAuthRole.ADMIN) {
+      fetchCampaigns(pagination.current, pagination.pageSize);
+    }
+  }, [
+    isAuthenticated,
+    authLoading,
+    router,
+    user,
+    pagination.pageSize,
+    fetchCampaigns,
+    pagination,
+  ]);
 
   const handleMenuClick = (e: any) => {
     setSelectedKey(e.key);
   };
 
-  if (loading || !isAuthenticated || (user && user.role !== EAuthRole.ADMIN)) {
+  const handleTableChange = (pagination: any) => {
+    setPagination({
+      current: pagination.current,
+      pageSize: pagination.pageSize,
+    });
+  };
+
+  const refreshData = () => {
+    fetchCampaigns(pagination.current, pagination.pageSize);
+  };
+
+  if (
+    authLoading ||
+    !isAuthenticated ||
+    (user && user.role !== EAuthRole.ADMIN)
+  ) {
     return <div>Loading...</div>;
   }
 
@@ -129,12 +181,35 @@ export default function AdminDashboard() {
           <div className={styles.dashboardContent}>
             {selectedKey === "campaigns" && (
               <div>
-                <h2>Campaigns</h2>
+                <div className={styles.tableHeader}>
+                  <Title level={4} style={{ margin: 0 }}>
+                    Campaigns
+                  </Title>
+                  <Button
+                    icon={<ReloadOutlined />}
+                    onClick={refreshData}
+                    loading={campaignsLoading}
+                  >
+                    Refresh
+                  </Button>
+                </div>
+                {error && <div className={styles.error}>{error}</div>}
                 <Table
                   className={styles.table}
                   columns={columns}
-                  dataSource={mockCampaigns}
-                  pagination={{ pageSize: 10 }}
+                  dataSource={campaigns || []}
+                  rowKey="id"
+                  loading={campaignsLoading}
+                  pagination={{
+                    current: campaignsPagination.page,
+                    pageSize: campaignsPagination.limit,
+                    total: campaignsPagination.total,
+                    showSizeChanger: true,
+                    pageSizeOptions: ["10", "20", "50", "100"],
+                    showTotal: (total, range) =>
+                      `${range[0]}-${range[1]} of ${total} campaigns`,
+                  }}
+                  onChange={handleTableChange}
                 />
               </div>
             )}

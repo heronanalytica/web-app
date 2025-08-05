@@ -48,6 +48,34 @@ export class CampaignService {
     });
   }
 
+  async getAllCampaigns(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+
+    const [total, items] = await Promise.all([
+      this.dbService.campaign.count(),
+      this.dbService.campaign.findMany({
+        include: {
+          user: {
+            select: {
+              email: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+    ]);
+
+    return {
+      items,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+      limit,
+    };
+  }
+
   async createDraftCampaign(userId: string, dto: CreateDraftCampaignDto) {
     return this.dbService.campaign.create({
       data: {
