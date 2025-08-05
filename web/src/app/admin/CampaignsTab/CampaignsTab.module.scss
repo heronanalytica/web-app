@@ -1,0 +1,32 @@
+.tableHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.error {
+  margin: 12px 0;
+  color: #ff4d4f;
+  font-weight: 500;
+}
+
+.table {
+  margin-top: 20px;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+}
+
+.waitingAnalysisRow {
+  background-color: #fffbe6;
+
+  :global(.ant-table-row:hover) > td {
+    background-color: #fff1b8 !important;
+  }
+
+  :global(td.ant-table-cell-row-hover) {
+    background-color: #fff1b8 !important;
+  }
+}
