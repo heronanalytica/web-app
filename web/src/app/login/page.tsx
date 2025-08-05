@@ -11,7 +11,7 @@ import { ROUTES } from "@/constants/routes";
 import { useRouter } from "next/navigation";
 import useAuth from "@/hooks/useAuth";
 import { fetcher } from "@/lib/fetcher";
-import { AuthUser } from "@supabase/supabase-js";
+import { AuthLoginResponse, EAuthRole } from "@/types/auth";
 
 const { Title, Text, Link } = Typography;
 
@@ -41,9 +41,16 @@ export default function Login() {
     setLoading(true);
 
     try {
-      await fetcher.post<AuthUser>("/api/auth/login", formData);
+      const { user } = await fetcher.post<AuthLoginResponse>(
+        "/api/auth/login",
+        formData
+      );
       await refresh();
-      router.push(ROUTES.APP_HOMEPAGE);
+      router.push(
+        user.role === EAuthRole.ADMIN
+          ? ROUTES.ADMIN_HOMEPAGE
+          : ROUTES.APP_HOMEPAGE
+      );
     } catch (err: any) {
       setError(err.message ?? "Login failed");
     } finally {
