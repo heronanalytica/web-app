@@ -30,7 +30,7 @@ export default function ClientLayout({
   const searchParams = useSearchParams();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { isAuthenticated, loading } = useAuth();
-  const showFooter = !pathname.startsWith("/app");
+  const showFooter = !pathname.startsWith("/app") && !pathname.startsWith("/admin");
 
   useEffect(() => {
     const url = `${pathname}${searchParams ? `?${searchParams}` : ""}`;

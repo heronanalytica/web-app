@@ -1,14 +1,7 @@
 "use client";
 
-import { Layout, Menu, theme, Typography, Table, Tag } from "antd";
-import {
-  DashboardOutlined,
-  FileOutlined,
-  TeamOutlined,
-  SettingOutlined,
-  LogoutOutlined,
-  LineChartOutlined,
-} from "@ant-design/icons";
+import { Layout, Menu, Table, Tag } from "antd";
+import { DashboardOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -17,8 +10,7 @@ import styles from "./admin.module.scss";
 import useAuth from "@/hooks/useAuth";
 import { EAuthRole } from "@/types/auth";
 
-const { Header, Content, Sider } = Layout;
-const { Title } = Typography;
+const { Content, Sider } = Layout;
 
 // Mock data for campaigns
 const mockCampaigns = [
@@ -85,12 +77,9 @@ const columns = [
 
 export default function AdminDashboard() {
   const [collapsed, setCollapsed] = useState(false);
-  const [selectedKey, setSelectedKey] = useState("1");
+  const [selectedKey, setSelectedKey] = useState("campaigns");
   const { user, isAuthenticated, loading } = useAuth();
   const router = useRouter();
-  const {
-    token: { colorBgContainer },
-  } = theme.useToken();
 
   useEffect(() => {
     // Redirect to login if not authenticated
@@ -119,79 +108,26 @@ export default function AdminDashboard() {
         collapsed={collapsed}
         onCollapse={(value) => setCollapsed(value)}
       >
-        <div className={styles.logo} />
         <Menu
           theme="dark"
-          defaultSelectedKeys={["1"]}
+          defaultSelectedKeys={["campaigns"]}
           mode="inline"
           selectedKeys={[selectedKey]}
           onClick={handleMenuClick}
           className={styles.menu}
-        >
-          <Menu.Item
-            key="1"
-            icon={<DashboardOutlined />}
-            className={styles.menuItem}
-          >
-            Dashboard
-          </Menu.Item>
-          <Menu.Item
-            key="2"
-            icon={<LineChartOutlined />}
-            className={styles.menuItem}
-          >
-            Analytics
-          </Menu.Item>
-          <Menu.Item
-            key="3"
-            icon={<FileOutlined />}
-            className={styles.menuItem}
-          >
-            Campaigns
-          </Menu.Item>
-          <Menu.Item
-            key="4"
-            icon={<TeamOutlined />}
-            className={styles.menuItem}
-          >
-            Users
-          </Menu.Item>
-          <Menu.Item
-            key="5"
-            icon={<SettingOutlined />}
-            className={styles.menuItem}
-          >
-            Settings
-          </Menu.Item>
-          <Menu.Item
-            key="6"
-            icon={<LogoutOutlined />}
-            className={styles.menuItem}
-          >
-            Logout
-          </Menu.Item>
-        </Menu>
+          items={[
+            {
+              key: "campaigns",
+              label: "Campaigns",
+              icon: <DashboardOutlined />,
+            },
+          ]}
+        />
       </Sider>
       <Layout className={styles.siteLayout}>
-        <Header
-          className={styles.header}
-          style={{ background: colorBgContainer }}
-        >
-          <div>
-            <Title level={4} style={{ lineHeight: "64px", margin: 0 }}>
-              Admin Dashboard
-            </Title>
-          </div>
-        </Header>
         <Content className={styles.content}>
           <div className={styles.dashboardContent}>
-            {selectedKey === "1" && (
-              <div>
-                <h2>Welcome, {user?.email}</h2>
-                <p>This is the admin dashboard. Use the sidebar to navigate.</p>
-              </div>
-            )}
-            {selectedKey === "3" && (
+            {selectedKey === "campaigns" && (
               <div>
                 <h2>Campaigns</h2>
                 <Table
@@ -202,11 +138,6 @@ export default function AdminDashboard() {
                 />
               </div>
             )}
-            {selectedKey === "2" && <div>Analytics content goes here</div>}
-            {selectedKey === "4" && (
-              <div>User management content goes here</div>
-            )}
-            {selectedKey === "5" && <div>Settings content goes here</div>}
           </div>
         </Content>
       </Layout>
