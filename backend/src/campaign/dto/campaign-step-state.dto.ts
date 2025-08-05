@@ -55,6 +55,16 @@ export class MailServiceDto {
   mailProviderId: string; // MailProviderToken.id
 }
 
+export class ClassifiedPersonaFileDto {
+  @Matches(UUID_WITH_EXT, {
+    message: 'fileId must be a UUID optionally followed by an extension',
+  })
+  fileId: string;
+
+  @IsString()
+  fileName: string;
+}
+
 export class CompanyProfileDto {
   @IsUUID()
   id: string;
@@ -103,6 +113,11 @@ export class StepStateDto {
   @ValidateNested()
   @Type(() => MailServiceDto)
   mailService?: MailServiceDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ClassifiedPersonaFileDto)
+  classifiedPersonaFile?: ClassifiedPersonaFileDto;
 
   @IsOptional()
   @ValidateNested()

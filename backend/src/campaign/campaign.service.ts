@@ -7,6 +7,7 @@ import {
 } from './dto/campaign-draft.dto';
 import { Prisma } from 'generated/prisma';
 import { instanceToPlain } from 'class-transformer';
+import { isJsonObject, omit } from 'src/utils';
 
 @Injectable()
 export class CampaignService {
@@ -179,6 +180,66 @@ export class CampaignService {
       where: { id: campaignId },
       data: {
         analysisSteps: updatedSteps as Prisma.InputJsonValue,
+        updatedAt: new Date(),
+      },
+    });
+  }
+
+  async updateClassifiedPersona(
+    campaignId: string,
+    fileId: string,
+    fileName: string,
+  ) {
+    // Get existing stepState
+    const campaign = await this.dbService.campaign.findUnique({
+      where: { id: campaignId },
+      select: { stepState: true },
+    });
+
+    if (!campaign) throw new Error('Campaign not found');
+
+    const existingState =
+      typeof campaign.stepState === 'object' && campaign.stepState !== null
+        ? { ...campaign.stepState }
+        : {};
+
+    const updatedState = {
+      ...existingState,
+      classifiedPersonaFile: {
+        fileId,
+        fileName,
+      },
+    };
+
+    return this.dbService.campaign.update({
+      where: { id: campaignId },
+      data: {
+        classifiedPersonaFileId: fileId,
+        stepState: updatedState as Prisma.InputJsonValue,
+        updatedAt: new Date(),
+      },
+    });
+  }
+
+  async removeClassifiedPersona(campaignId: string) {
+    const campaign = await this.dbService.campaign.findUnique({
+      where: { id: campaignId },
+      select: { stepState: true },
+    });
+
+    if (!campaign) throw new Error('Campaign not found');
+
+    let updatedState: Prisma.JsonObject = {};
+
+    if (isJsonObject(campaign.stepState)) {
+      updatedState = omit(campaign.stepState, ['classifiedPersonaFile']);
+    }
+
+    return this.dbService.campaign.update({
+      where: { id: campaignId },
+      data: {
+        classifiedPersonaFileId: null,
+        stepState: updatedState,
         updatedAt: new Date(),
       },
     });

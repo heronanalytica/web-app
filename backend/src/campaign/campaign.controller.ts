@@ -22,6 +22,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { Request } from 'express';
 import { EAuthRole } from '../auth/auth.types';
+import { UpdateClassifiedPersonaDto } from './dto/update-classified-persona.dto';
 
 @Controller('campaigns')
 @UseGuards(JwtAuthGuard)
@@ -130,6 +131,35 @@ export class CampaignController {
         status: step.status,
       })),
     );
+    return { error: 0, data };
+  }
+
+  @Patch(':id/classified-persona')
+  @UseGuards(AdminGuard)
+  async updateClassifiedPersona(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body() dto: UpdateClassifiedPersonaDto,
+  ): Promise<{ error: number; data: any }> {
+    if (!req.user?.id) throw new UnauthorizedException();
+
+    const data = await this.campaignService.updateClassifiedPersona(
+      id,
+      dto.fileId,
+      dto.fileName,
+    );
+    return { error: 0, data };
+  }
+
+  @Delete(':id/classified-persona')
+  @UseGuards(AdminGuard)
+  async removeClassifiedPersona(
+    @Req() req: Request,
+    @Param('id') id: string,
+  ): Promise<{ error: number; data: any }> {
+    if (!req.user?.id) throw new UnauthorizedException();
+
+    const data = await this.campaignService.removeClassifiedPersona(id);
     return { error: 0, data };
   }
 }
