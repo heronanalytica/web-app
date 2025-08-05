@@ -123,9 +123,39 @@ export const fetcher = {
    * Returns the raw fetch Response (for file downloads, etc)
    */
   raw: async (path: string, options: RequestInit = {}) => {
-    return fetch(`${BASE_URL}${path}`, {
+    const url = new URL(`${BASE_URL}${path}`);
+    const res = await fetch(url.toString(), {
       credentials: "include",
       ...options,
     });
+    return res;
+  },
+
+  upload: async <T = any>(
+    path: string,
+    formData: FormData,
+    options: RequestOptions = {}
+  ): Promise<T> => {
+    const url = new URL(`${BASE_URL}${path}`);
+    const { headers, ...rest } = options;
+
+    const res = await fetch(url.toString(), {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+      headers: {
+        // Don't set Content-Type header, let the browser set it with the correct boundary
+        ...(headers || {}),
+      },
+      ...rest,
+    });
+
+    const json: BackendResponse<T> = await res.json();
+
+    if (!res.ok || json.error) {
+      throw new Error(json.error || json.message || "Upload failed");
+    }
+
+    return json.data;
   },
 };

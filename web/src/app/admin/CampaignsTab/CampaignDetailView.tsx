@@ -25,6 +25,7 @@ import {
 import { Campaign, CampaignStatus, AnalysisStep } from "@/types/campaign";
 import { stepTitles } from "@/app/app/campaign/components/CampaignBuilder/constants";
 import { useAdminCampaigns } from "@/hooks/useAdminCampaigns";
+import CustomerPersonaUploader from "./CustomerPersonaUploader";
 import styles from "./CampaignsTab.module.scss";
 
 const { Step } = Steps;
@@ -224,6 +225,40 @@ export const CampaignDetailView = ({
             </div>
           )}
         </Space>
+      </Card>
+
+      <Card
+        title="Classified Customers Persona"
+        style={{ marginBottom: 24 }}
+        className={styles.sectionCard}
+      >
+        <div className={styles.sectionDescription}>
+          <Text type="secondary">
+            Upload a CSV file containing classified customer persona data. This
+            data will be used for analysis and reporting.
+          </Text>
+        </div>
+        <CustomerPersonaUploader
+          campaignId={campaign.id}
+          initialFileId={campaign.customerPersonaFileId}
+          initialFileName={campaign.customerPersonaFileName}
+          onUploadSuccess={(fileId, fileName) => {
+            // Update local campaign state to reflect the new file
+            setCampaign((prev) => ({
+              ...prev,
+              customerPersonaFileId: fileId,
+              customerPersonaFileName: fileName,
+            }));
+          }}
+          onDelete={() => {
+            // Update local campaign state to remove the file reference
+            setCampaign((prev) => ({
+              ...prev,
+              customerPersonaFileId: undefined,
+              customerPersonaFileName: undefined,
+            }));
+          }}
+        />
       </Card>
     </div>
   );
