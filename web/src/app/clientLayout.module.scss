@@ -37,7 +37,6 @@
   }
 }
 
-
 .navLink {
   color: #000;
   margin: 0 15px;
@@ -46,7 +45,7 @@
   font-weight: 500;
   &:hover,
   &:focus {
-    color: #505F98;
+    color: #505f98;
     text-decoration: underline;
   }
 }
@@ -61,7 +60,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 6px 0 rgba(80,95,152,0.10);
+  box-shadow: 0 1px 6px 0 rgba(80, 95, 152, 0.1);
   transition: box-shadow 0.2s, transform 0.2s;
   cursor: pointer;
   outline: none;
@@ -71,20 +70,20 @@
   padding: 0;
   &:hover,
   &:focus {
-    box-shadow: 0 4px 16px 0 rgba(80,95,152,0.16);
+    box-shadow: 0 4px 16px 0 rgba(80, 95, 152, 0.16);
     transform: scale(1.07);
   }
 }
 
 .profileIcon {
   font-size: 22px !important;
-  color: #505F98 !important;
+  color: #505f98 !important;
   vertical-align: middle;
 }
 
 .menuIcon {
   font-size: 24px;
-  color: #505F98;
+  color: #505f98;
 }
 
 .desktop-only {
@@ -93,6 +92,50 @@
 
 @media (max-width: 768px) {
   .desktop-only {
+    display: none !important;
+  }
+}
+
+.drawerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.drawerLink {
+  color: #505f98;
+  font-weight: 600;
+}
+
+.footerContainer {
+  margin: 30px 0;
+  padding: 30px 10%;
+  flex-wrap: wrap;
+  height: 100px;
+  z-index: 100;
+}
+
+.footerLink {
+  color: #000;
+}
+
+.socialIcon {
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.footerLogo {
+  display: none;
+}
+
+@media screen and (min-width: 768px) {
+  .footerLogo {
+    display: block !important;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .footerLogo {
     display: none !important;
   }
 }
