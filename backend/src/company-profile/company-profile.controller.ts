@@ -68,9 +68,7 @@ export class CompanyProfileController {
     return {
       error: 0,
       message: 'Analysis complete',
-      data: {
-        generatedOverallProfile: updated,
-      },
+      data: updated,
     };
   }
 
@@ -128,6 +126,22 @@ export class CompanyProfileController {
     return {
       error: 0,
       data: await this.companyProfileService.update(userId, id, dto),
+    };
+  }
+
+  @Put('admin/:id')
+  @UseGuards(AdminGuard)
+  async adminUpdate(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body() dto: UpdateCompanyProfileDto & { userId: string },
+  ) {
+    const userId = req.user?.id;
+    if (!userId) throw new UnauthorizedException();
+    const { userId: clientId, ...rest } = dto;
+    return {
+      error: 0,
+      data: await this.companyProfileService.update(clientId, id, rest),
     };
   }
 }

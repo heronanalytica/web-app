@@ -8,6 +8,7 @@ import {
 import { Prisma } from 'generated/prisma';
 import { instanceToPlain } from 'class-transformer';
 import { isJsonObject, omit } from 'src/utils';
+import { CompanyProfileDto } from './dto/campaign-step-state.dto';
 
 @Injectable()
 export class CampaignService {
@@ -61,6 +62,7 @@ export class CampaignService {
               email: true,
             },
           },
+          companyProfile: true,
         },
         orderBy: { createdAt: 'desc' },
         skip,
@@ -108,8 +110,17 @@ export class CampaignService {
   }
 
   async updateDraftCampaign(userId: string, dto: UpdateDraftCampaignDto) {
-    // Only allow updating allowed fields
     const { id, name, currentStep, status } = dto;
+
+    let companyProfileId: string | undefined;
+
+    if (dto.stepState && typeof dto.stepState === 'object') {
+      const rawState = instanceToPlain(dto.stepState);
+      if ((rawState?.companyProfile as CompanyProfileDto)?.id) {
+        companyProfileId = (rawState?.companyProfile as CompanyProfileDto).id;
+      }
+    }
+
     return this.dbService.campaign.update({
       where: { id, userId },
       data: {
@@ -132,6 +143,9 @@ export class CampaignService {
                 dto.analysisSteps as unknown as Prisma.InputJsonValue,
             }
           : {}),
+        ...(companyProfileId
+          ? { companyProfileId }
+          : { companyProfileId: null }),
         lastSavedAt: new Date(),
       },
     });

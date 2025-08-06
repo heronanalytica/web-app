@@ -17,37 +17,37 @@ const CompanyProfileCard: React.FC<CompanyProfileCardProps> = ({
   campaign,
   onUpdate,
 }) => {
+  const [messageApi, contextHolder] = message.useMessage();
   const [loading, setLoading] = useState(false);
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editingValue, setEditingValue] = useState("");
-  const companyProfile = campaign.stepState?.companyProfile;
+  const companyProfile = campaign.companyProfile;
 
   const handleAnalyzeProfile = async () => {
     try {
       setLoading(true);
       // Call the analyze endpoint
-      const result = await fetcher.post(`/api/company-profiles/analyze`, {
-        campaignId: campaign.id,
-        companyProfileId: companyProfile?.id,
-      });
+      const newCompanyProfile = await fetcher.post(
+        `/api/company-profiles/analyze`,
+        {
+          campaignId: campaign.id,
+          companyProfileId: companyProfile?.id,
+        }
+      );
 
-      console.log(result);
+      console.log(newCompanyProfile);
 
-      if (result.success) {
+      if (newCompanyProfile && companyProfile) {
         // Update the campaign with the analyzed data
         onUpdate({
           ...campaign,
-          companyProfile: {
-            ...companyProfile,
-            generatedOverallProfile: result.data.generatedOverallProfile,
-            generatedMarketingTone: result.data.generatedMarketingTone,
-          },
+          companyProfile: newCompanyProfile,
         });
-        message.success("Company profile analyzed successfully");
+        messageApi.success("Company profile analyzed successfully");
       }
     } catch (error) {
       console.error("Error analyzing company profile:", error);
-      message.error("Failed to analyze company profile");
+      messageApi.error("Failed to analyze company profile");
     } finally {
       setLoading(false);
     }
@@ -59,28 +59,41 @@ const CompanyProfileCard: React.FC<CompanyProfileCardProps> = ({
       return;
     }
 
+    if (!companyProfile) {
+      return;
+    }
+
     try {
       setLoading(true);
       // Call the update endpoint
-      const result = await fetcher.patch(`/api/company-profiles/ai-update`, {
-        [editingField]: editingValue,
+      await fetcher.put(`/api/company-profiles/admin/${companyProfile.id}`, {
+        userId: campaign.userId,
+        [editingField]: {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-expect-error
+          ...companyProfile[editingField],
+          summary: editingValue,
+        },
       });
 
-      if (result) {
-        // Update the campaign with the new data
-        onUpdate({
-          ...campaign,
-          companyProfile: {
-            ...companyProfile,
-            [editingField]: editingValue,
+      // Update the campaign with the new data
+      onUpdate({
+        ...campaign,
+        companyProfile: {
+          ...companyProfile,
+          [editingField]: {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            ...companyProfile[editingField],
+            summary: editingValue,
           },
-        });
-        message.success("Company profile updated successfully");
-        setEditingField(null);
-      }
+        },
+      });
+      messageApi.success("Company profile updated successfully");
+      setEditingField(null);
     } catch (error) {
       console.error("Error updating company profile:", error);
-      message.error("Failed to update company profile");
+      messageApi.error("Failed to update company profile");
     } finally {
       setLoading(false);
     }
@@ -157,47 +170,50 @@ const CompanyProfileCard: React.FC<CompanyProfileCardProps> = ({
   };
 
   return (
-    <Card
-      title={
-        <Space>
-          <Title level={5} style={{ margin: 0 }}>
-            Company Profile & Marketing Tone
-          </Title>
-        </Space>
-      }
-      style={{ marginBottom: 16 }}
-      extra={
-        <Button
-          type="primary"
-          onClick={handleAnalyzeProfile}
-          loading={loading}
-          disabled={!companyProfile}
-        >
-          Analyze with AI
-        </Button>
-      }
-    >
-      {!companyProfile ? (
-        <Text type="secondary">
-          No company profile available for this campaign
-        </Text>
-      ) : (
-        <>
-          {renderEditableField(
-            "generatedOverallProfile",
-            "Company Profile",
-            companyProfile.generatedOverallProfile?.summary || "",
-            true
-          )}
-          <Divider style={{ margin: "16px 0" }} />
-          {renderEditableField(
-            "generatedMarketingTone",
-            "Marketing Tone",
-            companyProfile.generatedMarketingTone || ""
-          )}
-        </>
-      )}
-    </Card>
+    <>
+      {contextHolder}
+      <Card
+        title={
+          <Space>
+            <Title level={5} style={{ margin: 0 }}>
+              Company Profile & Marketing Tone
+            </Title>
+          </Space>
+        }
+        style={{ marginBottom: 16 }}
+        extra={
+          <Button
+            type="primary"
+            onClick={handleAnalyzeProfile}
+            loading={loading}
+            disabled={!companyProfile}
+          >
+            Analyze with AI
+          </Button>
+        }
+      >
+        {!companyProfile ? (
+          <Text type="secondary">
+            No company profile available for this campaign
+          </Text>
+        ) : (
+          <>
+            {renderEditableField(
+              "generatedOverallProfile",
+              "Company Profile",
+              companyProfile.generatedOverallProfile?.summary || "",
+              true
+            )}
+            <Divider style={{ margin: "16px 0" }} />
+            {renderEditableField(
+              "generatedMarketingTone",
+              "Marketing Tone",
+              companyProfile.generatedMarketingTone || ""
+            )}
+          </>
+        )}
+      </Card>
+    </>
   );
 };
 

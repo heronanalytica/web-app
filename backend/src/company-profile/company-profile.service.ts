@@ -74,6 +74,8 @@ export class CompanyProfileService {
       updateData.generatedMarketingTone = dto.generatedMarketingTone;
     }
 
+    console.log(dto);
+    console.log(updateData);
     const updated = await this.db.companyProfile.update({
       where: { id },
       data: updateData,

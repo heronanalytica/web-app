@@ -1,4 +1,5 @@
 import { CampaignStepState } from "./campaignStepState";
+import { CompanyProfile } from "./companyProfile";
 
 export enum CampaignStatus {
   DRAFT = "DRAFT",
@@ -31,5 +32,6 @@ export interface Campaign {
   updatedAt: string;
   stepState?: CampaignStepState;
   analysisSteps?: AnalysisStep[];
+  companyProfile?: CompanyProfile;
   [key: string]: any; // For any additional fields that might come from the API
 }

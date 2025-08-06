@@ -119,6 +119,32 @@ export const fetcher = {
     return json.data;
   },
 
+  put: async <T = any>(
+    path: string,
+    body: any = {},
+    options: RequestOptions = {}
+  ): Promise<T> => {
+    const { headers, ...rest } = options;
+    const res = await fetch(`${BASE_URL}${path}`, {
+      method: "PUT",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        ...(headers || {}),
+      },
+      body: JSON.stringify(body),
+      ...rest,
+    });
+
+    const json: BackendResponse<T> = await res.json();
+
+    if (!res.ok || json.error) {
+      throw new Error(json.error || json.message || "Request failed");
+    }
+
+    return json.data;
+  },
+
   /**
    * Returns the raw fetch Response (for file downloads, etc)
    */
