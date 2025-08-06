@@ -38,18 +38,20 @@ model User {
 }
 
 model CompanyProfile {
-  id                     String          @id @default(uuid())
-  user                   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId                 String
-  name                   String
-  website                String?
-  marketingContentFileId String?
-  marketingContentFile   UserUploadFile? @relation("MarketingContentFile", fields: [marketingContentFileId], references: [id])
-  designAssetFileId      String?
-  designAssetFile        UserUploadFile? @relation("DesignAssetFile", fields: [designAssetFileId], references: [id])
-  businessInfo           String?
-  createdAt              DateTime        @default(now())
-  updatedAt              DateTime        @updatedAt
+  id                      String          @id @default(uuid())
+  user                    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                  String
+  name                    String
+  website                 String?
+  marketingContentFileId  String?
+  marketingContentFile    UserUploadFile? @relation("MarketingContentFile", fields: [marketingContentFileId], references: [id])
+  designAssetFileId       String?
+  designAssetFile         UserUploadFile? @relation("DesignAssetFile", fields: [designAssetFileId], references: [id])
+  businessInfo            String?
+  generatedOverallProfile Json?
+  generatedMarketingTone  Json?
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
 }
 
 enum UserRole {
@@ -70,7 +72,7 @@ model Campaign {
   user                    User            @relation(fields: [userId], references: [id])
   userId                  String
   stepState               Json?
-  classifiedPersonaFileId String? @unique
+  classifiedPersonaFileId String?         @unique
   classifiedPersonaFile   UserUploadFile? @relation("ClassifiedPersonaFile", fields: [classifiedPersonaFileId], references: [id], onDelete: SetNull)
 }
 
@@ -93,16 +95,16 @@ model SurveyIntakeQuestions {
 }
 
 model UserUploadFile {
-  id                       String           @id @default(uuid())
-  userId                   String
-  user                     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  fileName                 String
-  storageUrl               String
-  type                     String
-  uploadedAt               DateTime         @default(now())
-  classifiedPersonaCampaign Campaign?       @relation("ClassifiedPersonaFile")
-  marketingContentProfiles CompanyProfile[] @relation("MarketingContentFile")
-  designAssetProfiles      CompanyProfile[] @relation("DesignAssetFile")
+  id                        String           @id @default(uuid())
+  userId                    String
+  user                      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fileName                  String
+  storageUrl                String
+  type                      String
+  uploadedAt                DateTime         @default(now())
+  classifiedPersonaCampaign Campaign?        @relation("ClassifiedPersonaFile")
+  marketingContentProfiles  CompanyProfile[] @relation("MarketingContentFile")
+  designAssetProfiles       CompanyProfile[] @relation("DesignAssetFile")
 }
 
 model MailProviderToken {

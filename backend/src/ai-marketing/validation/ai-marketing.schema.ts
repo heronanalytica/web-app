@@ -25,6 +25,7 @@ export const CompanyProfileSchema = z.object({
     income_level: z.string(),
   }),
   products: z.array(z.string()),
+  summary: z.string(),
 });
 
 export const MarketingStrategySchema = z.object({

@@ -38,7 +38,8 @@ export function buildCompanyPrompt(companyUrl: string): string {
         "lifestyle": "string",
         "income_level": "string"
       },
-      "products": ["string"]
+      "products": ["string"],
+      "summary": "string"
     }
 
     Guidelines:
@@ -47,6 +48,7 @@ export function buildCompanyPrompt(companyUrl: string): string {
     - "tone_of_voice": Describe the communication style used in branding or marketing.
     - "typical_customer_profile": Describe the main customer demographic in terms of age, interests, lifestyle, and income.
     - "products": Provide 3–6 representative products or services offered by the company. Use general categories or specific examples based on available information.
+    - "summary": Provide a concise summary of the company's brand, products, and target audience.
 
     Rules:
     - Respond with **only** valid JSON (no markdown, no code block).
@@ -165,4 +167,31 @@ export function buildAdTemplatesPrompt(
   - Platform should be "facebook_instagram"
   - Use concise and engaging marketing language
   - Use JSON array only, no markdown, no explanations`;
+}
+
+// ai-marketing/prompts/prompt.ts
+export function buildCompanyPromptFromContent(content: string): string {
+  return `You are a brand analyst. Given the following company information:
+
+  ${content}
+
+  Return only a valid JSON object in the following format:
+  {
+    "brand_positioning": "string",
+    "values": ["string"],
+    "tone_of_voice": "string",
+    "typical_customer_profile": {
+      "age_range": "string",
+      "interests": ["string"],
+      "lifestyle": "string",
+      "income_level": "string"
+    },
+    "products": ["string"],
+    "summary": "string"
+  }
+
+  Guidelines:
+  - Fill in fields as best as possible based on content.
+  - Add a 'summary' that is 3 concise sentences and easy to understand by customers.
+  - Return valid JSON only. No explanations, no markdown.`;
 }

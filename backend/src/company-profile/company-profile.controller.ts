@@ -9,16 +9,70 @@ import {
   Req,
   UseGuards,
   UnauthorizedException,
+  NotFoundException,
 } from '@nestjs/common';
-import { CreateCompanyProfileDto, UpdateCompanyProfileDto } from './dto';
+import {
+  CreateCompanyProfileDto,
+  UpdateCompanyProfileDto,
+  AnalyzeCompanyProfileDto,
+} from './dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Request } from 'express';
 import { CompanyProfileService } from './company-profile.service';
+import { AdminGuard } from 'src/auth/guards/admin.guard';
+import { AiMarketingService } from 'src/ai-marketing/ai-marketing.service';
 
 @Controller('company-profiles')
 @UseGuards(JwtAuthGuard)
 export class CompanyProfileController {
-  constructor(private readonly companyProfileService: CompanyProfileService) {}
+  constructor(
+    private readonly companyProfileService: CompanyProfileService,
+    private readonly aiMarketingService: AiMarketingService,
+  ) {}
+
+  @Post('analyze')
+  @UseGuards(AdminGuard)
+  async analyzeCompanyProfile(
+    @Body() analyzeDto: AnalyzeCompanyProfileDto,
+    @Req() req: Request,
+  ) {
+    const userId = req.user?.id;
+    if (!userId) throw new UnauthorizedException();
+
+    const profile = await this.companyProfileService.findById(
+      analyzeDto.companyProfileId,
+    );
+
+    if (!profile) {
+      throw new NotFoundException('Company profile not found');
+    }
+
+    const { website, businessInfo } = profile;
+
+    // Combine for analysis
+    const contentToAnalyze = `${website ?? ''}\n${businessInfo ?? ''}`;
+
+    const aiResult =
+      await this.aiMarketingService.parseCompanyFromRawContent(
+        contentToAnalyze,
+      );
+
+    const updated = await this.companyProfileService.update(
+      profile.userId,
+      profile.id,
+      {
+        generatedOverallProfile: aiResult,
+      },
+    );
+
+    return {
+      error: 0,
+      message: 'Analysis complete',
+      data: {
+        generatedOverallProfile: updated,
+      },
+    };
+  }
 
   @Get()
   async findAll(@Req() req: Request) {

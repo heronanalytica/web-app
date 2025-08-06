@@ -11,6 +11,7 @@ import {
 import {
   buildAdTemplatesPrompt,
   buildCompanyPrompt,
+  buildCompanyPromptFromContent,
   buildEmailTemplatePrompt,
   buildPersonaPrompt,
   buildStrategyPrompt,
@@ -64,6 +65,16 @@ export class AiMarketingService {
     return callOpenAiAndParse({
       user: `company-profile`,
       prompt: buildCompanyPrompt(companyUrl),
+      schema: CompanyProfileSchema,
+      systemPrompt: SYSTEM_PROMPTS.company,
+      temperature: 0.3,
+    });
+  }
+
+  async parseCompanyFromRawContent(content: string): Promise<CompanyProfile> {
+    return callOpenAiAndParse({
+      user: `company-profile-custom-input`,
+      prompt: buildCompanyPromptFromContent(content),
       schema: CompanyProfileSchema,
       systemPrompt: SYSTEM_PROMPTS.company,
       temperature: 0.3,

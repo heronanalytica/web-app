@@ -22,6 +22,20 @@ export interface ClassifiedPersonaFileDto {
   fileName: string;
 }
 
+export type GeneratedOverallProfile = {
+  brand_positioning: string;
+  values: string[];
+  tone_of_voice: string;
+  typical_customer_profile: {
+    age_range: string;
+    interests: string[];
+    lifestyle: string;
+    income_level: string;
+  };
+  products: string[];
+  summary: string;
+};
+
 export interface CompanyProfileDto {
   id: string;
   name: string;
@@ -29,6 +43,8 @@ export interface CompanyProfileDto {
   marketingContentFileId: string;
   designAssetFileId: string;
   businessInfo?: string;
+  generatedOverallProfile?: GeneratedOverallProfile;
+  generatedMarketingTone?: string;
   createdAt?: string;
 }
 

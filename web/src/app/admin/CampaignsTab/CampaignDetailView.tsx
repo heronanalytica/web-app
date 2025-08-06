@@ -6,6 +6,7 @@ import { useAdminCampaigns } from "@/hooks/useAdminCampaigns";
 import BasicInfoCard from "./components/BasicInfoCard";
 import CampaignProgressCard from "./components/CampaignProgressCard";
 import ClassifiedPersonaCard from "./components/ClassifiedPersonaCard";
+import CompanyProfileCard from "./components/CompanyProfileCard";
 import styles from "./CampaignDetailView.module.scss";
 
 interface CampaignDetailViewProps {
@@ -87,6 +88,11 @@ export const CampaignDetailView: React.FC<CampaignDetailViewProps> = ({
       />
 
       <ClassifiedPersonaCard
+        campaign={campaign}
+        onUpdate={handleCampaignUpdate}
+      />
+
+      <CompanyProfileCard
         campaign={campaign}
         onUpdate={handleCampaignUpdate}
       />
