@@ -61,7 +61,6 @@ export default function CompanyProfileStep() {
   const handleCreate = async () => {
     try {
       const values = await form.validateFields();
-      console.log(values);
       const payload = {
         ...values,
         marketingContentFileId: form.getFieldValue("marketingContentFileId"),

@@ -35,8 +35,6 @@ const CompanyProfileCard: React.FC<CompanyProfileCardProps> = ({
         }
       );
 
-      console.log(newCompanyProfile);
-
       if (newCompanyProfile && companyProfile) {
         // Update the campaign with the analyzed data
         onUpdate({
@@ -208,7 +206,7 @@ const CompanyProfileCard: React.FC<CompanyProfileCardProps> = ({
             {renderEditableField(
               "generatedMarketingTone",
               "Marketing Tone",
-              companyProfile.generatedMarketingTone || ""
+              companyProfile.generatedMarketingTone?.summary || ""
             )}
           </>
         )}

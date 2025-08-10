@@ -1,4 +1,4 @@
-import { GeneratedOverallProfile } from "./campaignStepState";
+import { GeneratedOverallProfile, GeneratedMarketingTone } from "./campaignStepState";
 
 export interface CompanyProfile {
   id: string;
@@ -8,6 +8,6 @@ export interface CompanyProfile {
   designAssetFileId: string;
   businessInfo?: string;
   generatedOverallProfile?: GeneratedOverallProfile;
-  generatedMarketingTone?: string;
+  generatedMarketingTone?: GeneratedMarketingTone;
   createdAt?: string;
 }

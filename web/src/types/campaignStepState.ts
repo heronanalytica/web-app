@@ -36,6 +36,10 @@ export type GeneratedOverallProfile = {
   summary: string;
 };
 
+export interface GeneratedMarketingTone {
+  summary: string;
+}
+
 export interface CompanyProfileDto {
   id: string;
   name: string;
@@ -44,7 +48,7 @@ export interface CompanyProfileDto {
   designAssetFileId: string;
   businessInfo?: string;
   generatedOverallProfile?: GeneratedOverallProfile;
-  generatedMarketingTone?: string;
+  generatedMarketingTone?: GeneratedMarketingTone;
   createdAt?: string;
 }
 
