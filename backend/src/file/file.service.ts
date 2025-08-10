@@ -20,6 +20,12 @@ export class FileService {
     });
   }
 
+  async getFileById(id: string) {
+    return this.database.userUploadFile.findUnique({
+      where: { id },
+    });
+  }
+
   async saveFileMetadata(
     userId: string,
     dto: CreateUserUploadFileDto & { key: string },
@@ -45,6 +51,22 @@ export class FileService {
     });
     if (!file || file.userId !== userId) {
       throw new Error('File not found or not authorized');
+    }
+    // Extract the S3 key from storageUrl (format: s3://bucket/key)
+    const storageUrl: string = file.storageUrl;
+    const s3Key = storageUrl.replace(/^s3:\/\/[^/]+\//, '');
+    await this.awsService.deleteObjectFromS3(s3Key);
+    await this.database.userUploadFile.delete({ where: { id: fileId } });
+    return true;
+  }
+
+  async deleteFileById(fileId: string) {
+    // Only allow deletion if the file belongs to the user
+    const file = await this.database.userUploadFile.findUnique({
+      where: { id: fileId },
+    });
+    if (!file) {
+      throw new Error('File not found');
     }
     // Extract the S3 key from storageUrl (format: s3://bucket/key)
     const storageUrl: string = file.storageUrl;

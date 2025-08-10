@@ -17,6 +17,7 @@ import { FileService } from './file.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Request, Response } from 'express';
 import { contentTypeMap } from './constants';
+import { isAdmin } from 'src/auth/auth.utils';
 
 @UseGuards(JwtAuthGuard)
 @Controller('file')
@@ -105,9 +106,12 @@ export class FileController {
     if (!userId) {
       throw new UnauthorizedException('User not authenticated');
     }
-    console.log(userId, fileId);
+    const isAdminUser = isAdmin(req.user);
+
     // Find file and check ownership
-    const file = await this.fileService.getFileByIdAndUser(fileId, userId);
+    const file = isAdminUser
+      ? await this.fileService.getFileById(fileId)
+      : await this.fileService.getFileByIdAndUser(fileId, userId);
 
     if (!file) {
       return res.status(404).send('File not found');
@@ -139,10 +143,15 @@ export class FileController {
   @Delete(':id')
   async deleteFile(@Param('id') fileId: string, @Req() req: Request) {
     const userId = req.user?.id;
+    const isAdminUser = isAdmin(req.user);
     if (!userId) {
       throw new UnauthorizedException('User not authenticated');
     }
-    await this.fileService.deleteFile(userId, fileId);
+    if (isAdminUser) {
+      await this.fileService.deleteFileById(fileId);
+    } else {
+      await this.fileService.deleteFile(userId, fileId);
+    }
     return { error: 0, message: 'File deleted' };
   }
 }
