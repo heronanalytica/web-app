@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Card, Tabs } from "antd";
 import { InfoCircleOutlined, TeamOutlined } from "@ant-design/icons";
 import { useCampaignBuilder } from "../CampaignBuilder/CampaignBuilderContext";
@@ -7,8 +7,12 @@ import { PersonasInfo } from "./components/PersonasInfo/PersonasInfo";
 import styles from "./styles.module.scss";
 
 const CompanyAndPersonasStep: React.FC = () => {
-  const { campaign } = useCampaignBuilder();
+  const { campaign, setCanGoNext } = useCampaignBuilder();
   const companyProfile = campaign?.companyProfile;
+
+  useEffect(() => {
+    setCanGoNext(true);
+  }, [campaign, setCanGoNext]);
 
   if (!companyProfile) {
     return <div>No company profile found</div>;

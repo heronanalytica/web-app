@@ -29,7 +29,7 @@ export const CampaignBuilder: React.FC<CampaignBuilderProps> = ({
   loading,
 }) => {
   return (
-    <CampaignBuilderProvider campaign={campaign} totalSteps={5}>
+    <CampaignBuilderProvider campaign={campaign} totalSteps={CAMPAIGN_TOTAL_STEPS}>
       <CampaignBuilderInner loading={loading} />
     </CampaignBuilderProvider>
   );
@@ -105,6 +105,7 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
 
   if (loading) return <Spin fullscreen />;
 
+  const hideFooter = currentStep === 3;
   return (
     <>
       {contextHolder}
@@ -137,7 +138,7 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
         </div>
         <div className={styles.componentContainer}>{renderStepComponent()}</div>
 
-        {currentStep !== 3 && (
+        {!hideFooter && (
           <div className={styles.footerActions}>
             {currentStep !== 4 && (
               <Button

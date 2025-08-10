@@ -16,6 +16,7 @@ const DeleteDraftButton: React.FC<DeleteDraftButtonProps> = ({
   campaignId,
   className,
 }) => {
+  const [messageApi, contextHolder] = message.useMessage();
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -27,10 +28,10 @@ const DeleteDraftButton: React.FC<DeleteDraftButtonProps> = ({
     setLoading(true);
     try {
       await fetcher.delete(`/api/campaigns/${campaignId}/draft`);
-      message.success("Draft campaign deleted");
+      messageApi.success("Draft campaign deleted");
       router.push(ROUTES.APP_HOMEPAGE);
     } catch (err: any) {
-      message.error(err?.message || "Failed to delete draft");
+      messageApi.error(err?.message || "Failed to delete draft");
     } finally {
       setLoading(false);
       setModalOpen(false);
@@ -39,6 +40,7 @@ const DeleteDraftButton: React.FC<DeleteDraftButtonProps> = ({
 
   return (
     <>
+      {contextHolder}
       <Button
         icon={<DeleteOutlined />}
         danger

@@ -10,9 +10,12 @@ export class FileService {
     private readonly awsService: AwsService,
   ) {}
 
-  async listFiles(userId: string) {
+  async listFiles(userId: string, type?: string) {
     return this.database.userUploadFile.findMany({
-      where: { userId },
+      where: {
+        userId,
+        ...(type ? { type } : {}), // Filter by type if provided
+      },
       orderBy: { uploadedAt: 'desc' },
     });
   }

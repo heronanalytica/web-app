@@ -91,7 +91,7 @@ const CustomerFileStep: React.FC = () => {
   useEffect(() => {
     setFetching(true);
     fetcher
-      .get<CustomerFile[]>("/api/file")
+      .get<CustomerFile[]>("/api/file?type=customer")
       .then((data) => {
         setFiles(Array.isArray(data) ? data : []);
         setFetching(false);

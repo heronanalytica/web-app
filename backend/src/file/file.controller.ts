@@ -2,15 +2,16 @@ import {
   Controller,
   Get,
   Post,
+  Delete,
   Body,
   Req,
-  UnauthorizedException,
-  UseGuards,
   Param,
-  Delete,
   Res,
+  UseGuards,
+  Query,
 } from '@nestjs/common';
-import { AwsService } from 'src/aws/aws.service';
+import { UnauthorizedException } from '@nestjs/common/exceptions';
+import { AwsService } from '../aws/aws.service';
 import { CreateUserUploadFileDto } from './dto/create-user-upload-file.dto';
 import { FileService } from './file.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -25,16 +26,16 @@ export class FileController {
     private readonly awsService: AwsService,
   ) {}
 
-  // GET /file - List all customer files for the current user
+  // GET /file - List files for the current user with optional type filter
   @Get()
-  async listFiles(@Req() req: Request) {
+  async listFiles(@Req() req: Request, @Query('type') type?: string) {
     const userId = req.user?.id;
     if (!userId) {
       throw new UnauthorizedException('User not authenticated');
     }
     return {
       error: 0,
-      data: await this.fileService.listFiles(userId),
+      data: await this.fileService.listFiles(userId, type),
     };
   }
 
