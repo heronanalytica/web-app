@@ -27,6 +27,7 @@ interface CampaignProgressCardProps {
     analysisSteps?: AnalysisStep[];
   };
   onStatusUpdate: (stepKey: string, status: string) => void;
+  onStepComplete?: () => void;
   updatingStep?: string;
 }
 
@@ -59,8 +60,12 @@ const getStepIcon = (status: string) => {
 const CampaignProgressCard: React.FC<CampaignProgressCardProps> = ({
   campaign,
   onStatusUpdate,
+  onStepComplete,
   updatingStep,
 }) => {
+  const allStepsDone =
+    campaign.analysisSteps?.every((step) => step.status === "done") || false;
+  const atAnalysisStep = campaign.currentStep === 3;
   const getStatusMenuItems = (): MenuProps["items"] => [
     {
       key: "waiting",
@@ -99,7 +104,7 @@ const CampaignProgressCard: React.FC<CampaignProgressCardProps> = ({
           </Text>
         </div>
 
-        {campaign.currentStep === 3 && campaign.analysisSteps && (
+        {atAnalysisStep && campaign.analysisSteps && (
           <div className={styles.analysisSteps}>
             <Text strong>Analysis Progress:</Text>
             <div className={styles.stepsContainer}>
@@ -145,6 +150,33 @@ const CampaignProgressCard: React.FC<CampaignProgressCardProps> = ({
                   );
                 })}
               </Steps>
+              {onStepComplete && atAnalysisStep && (
+                <div style={{ marginTop: 24 }}>
+                  <Button
+                    type="primary"
+                    onClick={onStepComplete}
+                    disabled={
+                      !allStepsDone || updatingStep === "complete_analysis"
+                    }
+                    loading={updatingStep === "complete_analysis"}
+                  >
+                    {updatingStep === "complete_analysis"
+                      ? "Processing..."
+                      : "Proceed to next step"}
+                  </Button>
+                  {!allStepsDone && (
+                    <div
+                      style={{
+                        marginTop: 8,
+                        color: "rgba(0, 0, 0, 0.45)",
+                        fontSize: 12,
+                      }}
+                    >
+                      Complete all analysis steps to proceed
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}

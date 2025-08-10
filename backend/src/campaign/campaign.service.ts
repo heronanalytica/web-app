@@ -10,6 +10,11 @@ import { instanceToPlain } from 'class-transformer';
 import { isJsonObject, omit } from 'src/utils';
 import { CompanyProfileDto } from './dto/campaign-step-state.dto';
 
+const campaignInclude = {
+  user: { select: { id: true, email: true } },
+  companyProfile: true,
+} as const;
+
 @Injectable()
 export class CampaignService {
   constructor(private dbService: DatabaseService) {}
@@ -56,14 +61,7 @@ export class CampaignService {
     const [total, items] = await Promise.all([
       this.dbService.campaign.count(),
       this.dbService.campaign.findMany({
-        include: {
-          user: {
-            select: {
-              email: true,
-            },
-          },
-          companyProfile: true,
-        },
+        include: campaignInclude,
         orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
@@ -112,8 +110,10 @@ export class CampaignService {
   async updateDraftCampaign(userId: string, dto: UpdateDraftCampaignDto) {
     const { id, name, currentStep, status } = dto;
 
-    let companyProfileId: string | undefined;
+    // ensure the row belongs to the user (and keep update()'s where unique)
+    await this.dbService.campaign.findFirstOrThrow({ where: { id, userId } });
 
+    let companyProfileId: string | undefined;
     if (dto.stepState && typeof dto.stepState === 'object') {
       const rawState = instanceToPlain(dto.stepState);
       if ((rawState?.companyProfile as CompanyProfileDto)?.id) {
@@ -122,7 +122,7 @@ export class CampaignService {
     }
 
     return this.dbService.campaign.update({
-      where: { id, userId },
+      where: { id },
       data: {
         ...(name !== undefined ? { name } : {}),
         ...(currentStep !== undefined ? { currentStep } : {}),
@@ -148,6 +148,7 @@ export class CampaignService {
           : { companyProfileId: null }),
         lastSavedAt: new Date(),
       },
+      include: campaignInclude,
     });
   }
 
@@ -196,6 +197,7 @@ export class CampaignService {
         analysisSteps: updatedSteps as Prisma.InputJsonValue,
         updatedAt: new Date(),
       },
+      include: campaignInclude,
     });
   }
 
@@ -232,6 +234,7 @@ export class CampaignService {
         stepState: updatedState as Prisma.InputJsonValue,
         updatedAt: new Date(),
       },
+      include: campaignInclude,
     });
   }
 
@@ -256,6 +259,7 @@ export class CampaignService {
         stepState: updatedState,
         updatedAt: new Date(),
       },
+      include: campaignInclude,
     });
   }
 }

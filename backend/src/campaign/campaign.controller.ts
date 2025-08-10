@@ -11,9 +11,11 @@ import {
   Param,
   Query,
   BadRequestException,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { CampaignService } from './campaign.service';
 import {
+  AdminUpdateDraftCampaignDto,
   CreateDraftCampaignDto,
   UpdateDraftCampaignDto,
 } from './dto/campaign-draft.dto';
@@ -98,12 +100,28 @@ export class CampaignController {
 
   @Patch(':id/draft')
   async updateDraftCampaign(
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Req() req: Request,
     @Body() dto: UpdateDraftCampaignDto,
   ) {
     const userId = req.user?.id;
     if (!userId) throw new UnauthorizedException();
+    dto.id = id;
     const data = await this.campaignService.updateDraftCampaign(userId, dto);
+    return { error: 0, data };
+  }
+
+  @Patch(':id/admin/draft')
+  @UseGuards(AdminGuard)
+  async updateDraftCampaignAdmin(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() dto: AdminUpdateDraftCampaignDto,
+  ) {
+    dto.id = id;
+    const data = await this.campaignService.updateDraftCampaign(
+      dto.userId,
+      dto,
+    );
     return { error: 0, data };
   }
 

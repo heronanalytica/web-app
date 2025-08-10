@@ -54,6 +54,11 @@ export class UpdateDraftCampaignDto {
   analysisSteps?: AnalysisStepDto[];
 }
 
+export class AdminUpdateDraftCampaignDto extends UpdateDraftCampaignDto {
+  @IsUUID()
+  userId: string;
+}
+
 export class DeleteDraftCampaignDto {
   @IsUUID()
   id: string;

@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { Campaign } from "@/types/campaign";
 import { fetcher } from "@/lib/fetcher";
+import { CampaignStepState } from "@/types/campaignStepState";
 
 export interface PaginatedResponse<T> {
   items: T[];
@@ -50,30 +51,6 @@ export function useAdminCampaigns() {
     []
   );
 
-  const updateCampaignStatus = useCallback(
-    async (campaignId: string, status: string) => {
-      try {
-        const updatedCampaign = await fetcher.patch<Campaign>(
-          `/api/campaigns/${campaignId}/status`,
-          { status }
-        );
-
-        setCampaigns(
-          (prev) =>
-            prev?.map((campaign) =>
-              campaign.id === campaignId ? updatedCampaign : campaign
-            ) || null
-        );
-
-        return updatedCampaign;
-      } catch (err: any) {
-        setError(err?.message || "Failed to update campaign status");
-        throw err;
-      }
-    },
-    []
-  );
-
   const updateAnalysisStep = useCallback(
     async (
       campaignId: string,
@@ -112,14 +89,48 @@ export function useAdminCampaigns() {
     []
   );
 
+  const updateCampaignStep = useCallback(
+    async (
+      userId: string,
+      campaignId: string,
+      currentStep: number,
+      stepState: CampaignStepState
+    ) => {
+      try {
+        const updatedCampaign = await fetcher.patch(
+          `/api/campaigns/${campaignId}/admin/draft`,
+          {
+            userId,
+            currentStep,
+            stepState,
+          }
+        );
+
+        // Update the campaigns list if it exists
+        setCampaigns(
+          (prevCampaigns) =>
+            prevCampaigns?.map((campaign) =>
+              campaign.id === campaignId ? updatedCampaign : campaign
+            ) || null
+        );
+
+        return updatedCampaign;
+      } catch (err: any) {
+        setError(err?.message || "Failed to update campaign step");
+        throw err;
+      }
+    },
+    []
+  );
+
   return {
     campaigns,
     pagination,
     loading,
     error,
     fetchCampaigns,
-    updateCampaignStatus,
     updateAnalysisStep,
+    updateCampaignStep,
   };
 }
 
