@@ -46,6 +46,7 @@ export class FileController {
       fileType: string;
       contentType?: string;
       fileExtension?: string;
+      assignedUserId?: string;
     },
     @Req() req: Request,
   ) {
@@ -53,6 +54,7 @@ export class FileController {
       fileType,
       contentType = 'application/octet-stream',
       fileExtension,
+      assignedUserId,
     } = body;
     const userId = req.user?.id;
     if (!userId) {
@@ -64,7 +66,7 @@ export class FileController {
     return {
       error: 0,
       data: await this.awsService.getPresignedUploadUrl(
-        userId,
+        assignedUserId || userId,
         fileType,
         contentType,
         fileExtension,
@@ -83,7 +85,11 @@ export class FileController {
       throw new UnauthorizedException('User not authenticated');
     }
     const bucket = this.awsService.getS3BucketName();
-    const file = await this.fileService.saveFileMetadata(userId, dto, bucket);
+    const file = await this.fileService.saveFileMetadata(
+      dto.assignedUserId || userId,
+      dto,
+      bucket,
+    );
     return { error: 0, data: { id: file.id } };
   }
 
@@ -98,8 +104,10 @@ export class FileController {
     if (!userId) {
       throw new UnauthorizedException('User not authenticated');
     }
+    console.log(userId, fileId);
     // Find file and check ownership
     const file = await this.fileService.getFileByIdAndUser(fileId, userId);
+
     if (!file) {
       return res.status(404).send('File not found');
     }

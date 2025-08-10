@@ -64,10 +64,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       await fetcher.post("/api/auth/logout");
       // Clear user data
       setUser(null);
+      // Still redirect to homepage even if logout API call fails
+      window.location.href = ROUTES.LOGIN;
     } catch (error) {
       console.error("Logout failed:", error);
       // Still redirect to homepage even if logout API call fails
-      window.location.href = ROUTES.HOMEPAGE;
+      window.location.href = ROUTES.LOGIN;
     }
   }, []);
 

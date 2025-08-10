@@ -34,5 +34,14 @@ export interface Campaign {
   analysisSteps?: AnalysisStep[];
   companyProfile?: CompanyProfile;
   classifiedPersonaFileId?: string;
+  classifiedPersonaFile: ClassifiedPersonaFile;
   [key: string]: any; // For any additional fields that might come from the API
+}
+
+export interface ClassifiedPersonaFile {
+  id: string;
+  fileName: string;
+  storageUrl: string;
+  type: string;
+  uploadedAt: string;
 }

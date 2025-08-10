@@ -12,6 +12,7 @@ import Papa from "papaparse";
 import styles from "./CustomerPersonaUploader.module.scss";
 
 interface CustomerPersonaUploaderProps {
+  userId?: string;
   campaignId: string;
   initialFileId?: string;
   initialFileName?: string;
@@ -25,6 +26,7 @@ interface CsvPreviewData {
 }
 
 const CustomerPersonaUploader: React.FC<CustomerPersonaUploaderProps> = ({
+  userId,
   campaignId,
   initialFileId,
   initialFileName,
@@ -59,6 +61,7 @@ const CustomerPersonaUploader: React.FC<CustomerPersonaUploaderProps> = ({
         fileType: "customer-persona",
         fileExtension: fileExt,
         contentType,
+        assignedUserId: userId,
       });
 
       // 2. Upload file to S3
@@ -83,6 +86,7 @@ const CustomerPersonaUploader: React.FC<CustomerPersonaUploaderProps> = ({
         fileName: file.name,
         type: "customer-persona",
         campaignId,
+        assignedUserId: userId,
       });
 
       setFileId(meta.id);

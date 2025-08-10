@@ -13,6 +13,7 @@ import { CompanyProfileDto } from './dto/campaign-step-state.dto';
 const campaignInclude = {
   user: { select: { id: true, email: true } },
   companyProfile: true,
+  classifiedPersonaFile: true,
 } as const;
 
 @Injectable()

@@ -22,6 +22,7 @@ const ClassifiedPersonaCard: React.FC<ClassifiedPersonaCardProps> = ({
         </Text>
       </div>
       <CustomerPersonaUploader
+        userId={campaign.user?.id}
         campaignId={campaign.id}
         initialFileId={campaign.stepState?.classifiedPersonaFile?.fileId}
         initialFileName={campaign.stepState?.classifiedPersonaFile?.fileName}
