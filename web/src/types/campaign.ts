@@ -33,5 +33,6 @@ export interface Campaign {
   stepState?: CampaignStepState;
   analysisSteps?: AnalysisStep[];
   companyProfile?: CompanyProfile;
+  classifiedPersonaFileId?: string;
   [key: string]: any; // For any additional fields that might come from the API
 }

@@ -5,7 +5,7 @@ export const stepTitles = [
   "Connect Mail Service",
   "Company Profile",
   "Waiting for Analysis",
-  "Company & Personas",
+  "Company & Personas Review",
   "Review & Confirm",
   "Launch Campaign",
 ];
