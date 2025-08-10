@@ -13,7 +13,9 @@ import {
   MenuOutlined,
   TwitterCircleFilled,
   UserOutlined,
+  LogoutOutlined,
 } from "@ant-design/icons";
+import { Dropdown } from "antd";
 import { motion } from "framer-motion";
 import styles from "./clientLayout.module.scss";
 import { ROUTES } from "@/constants/routes";
@@ -29,7 +31,7 @@ export default function ClientLayout({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, logout } = useAuth();
   const appRoutes =
     pathname.startsWith(ROUTES.APP_HOMEPAGE) ||
     pathname.startsWith(ROUTES.ADMIN_HOMEPAGE);
@@ -93,14 +95,28 @@ export default function ClientLayout({
                 Login
               </Button>
             ) : (
-              <button
-                type="button"
-                aria-label="Go to homepage"
-                className={`${styles["desktop-only"]} ${styles.profileBtn}`}
-                onClick={() => router.push(ROUTES.APP_HOMEPAGE)}
+              <Dropdown
+                menu={{
+                  items: [
+                    {
+                      key: 'logout',
+                      label: 'Logout',
+                      icon: <LogoutOutlined />,
+                      onClick: () => logout(),
+                    },
+                  ],
+                }}
+                trigger={['hover']}
+                placement="bottomRight"
               >
-                <UserOutlined className={styles.profileIcon} />
-              </button>
+                <button
+                  type="button"
+                  aria-label="User menu"
+                  className={`${styles["desktop-only"]} ${styles.profileBtn}`}
+                >
+                  <UserOutlined className={styles.profileIcon} />
+                </button>
+              </Dropdown>
             )}
 
             {/* Mobile Hamburger Menu */}
@@ -125,7 +141,7 @@ export default function ClientLayout({
                 onClick={toggleDrawer}
                 className={styles.drawerLink}
               >
-                App Homepage
+                Dashboard
               </Link>
               <Divider style={{ margin: 0 }} />
               <Link
@@ -149,7 +165,7 @@ export default function ClientLayout({
               >
                 Contact
               </Link>
-              {!isAuthenticated && (
+              {!isAuthenticated ? (
                 <Link
                   href={ROUTES.LOGIN}
                   onClick={toggleDrawer}
@@ -157,6 +173,20 @@ export default function ClientLayout({
                 >
                   Login
                 </Link>
+              ) : (
+                <>
+                  <Divider style={{ margin: '8px 0' }} />
+                  <div
+                    onClick={() => {
+                      logout();
+                      toggleDrawer();
+                    }}
+                    className={styles.drawerLink}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    Logout
+                  </div>
+                </>
               )}
             </div>
           </Drawer>

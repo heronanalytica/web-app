@@ -12,6 +12,7 @@ type AuthContextValue = {
   isAdmin: boolean;
   loading: boolean;
   refresh: () => Promise<void>;
+  logout: () => Promise<void>;
 };
 
 const initialValue: AuthContextValue = {
@@ -20,6 +21,7 @@ const initialValue: AuthContextValue = {
   isAdmin: false,
   loading: false,
   refresh: async () => {},
+  logout: async () => {},
 };
 
 export const AuthContext = createContext<AuthContextValue>(initialValue);
@@ -57,6 +59,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const isAdmin = user?.role === "ADMIN";
 
+  const logout = useCallback(async () => {
+    try {
+      await fetcher.post("/api/auth/logout");
+      // Clear user data
+      setUser(null);
+    } catch (error) {
+      console.error("Logout failed:", error);
+      // Still redirect to homepage even if logout API call fails
+      window.location.href = ROUTES.HOMEPAGE;
+    }
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -65,6 +79,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         isAdmin,
         loading,
         refresh: fetchUser,
+        logout,
       }}
     >
       {children}
