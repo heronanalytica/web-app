@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { Button, Card, Modal, Spin, Typography } from "antd";
+import React, { useEffect, useState, useMemo } from "react";
+import { Card, Table, Spin } from "antd";
+import type { TableProps } from "antd";
 import { FileOutlined } from "@ant-design/icons";
 import { fetcher } from "@/lib/fetcher";
 import styles from "../../styles.module.scss";
-import { ClassifiedPersonaFile } from "@/types/campaign";
+import type { ClassifiedPersonaFile } from "@/types/campaign";
 
-const { Text } = Typography;
+type DataType = Record<string, string | number | boolean | null>;
+
+const PAGE_SIZE = 10;
 
 interface PersonaFilePreviewProps {
   file: ClassifiedPersonaFile;
@@ -13,10 +16,9 @@ interface PersonaFilePreviewProps {
 
 const PersonaFilePreview: React.FC<PersonaFilePreviewProps> = ({ file }) => {
   const [loading, setLoading] = useState(true);
-  const [previewData, setPreviewData] = useState<any[]>([]);
+  const [previewData, setPreviewData] = useState<DataType[]>([]);
   const [error, setError] = useState<string | null>(null);
-  // State for full screen preview modal
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const fetchPreview = async () => {
@@ -30,8 +32,12 @@ const PersonaFilePreview: React.FC<PersonaFilePreviewProps> = ({ file }) => {
         if (!response.ok) throw new Error("Failed to fetch file");
         const csvText = await response.text();
         const Papa = (await import("papaparse")).default;
-        const parsed = Papa.parse(csvText, { preview: 10 });
-        setPreviewData(parsed.data);
+        const parsed = Papa.parse<Record<string, string>>(csvText, { header: true, skipEmptyLines: true });
+        if (parsed.errors.length > 0) {
+          console.error('CSV parsing errors:', parsed.errors);
+          throw new Error('Failed to parse CSV data');
+        }
+        setPreviewData(parsed.data as DataType[]);
       } catch (err) {
         console.error("Error fetching persona preview:", err);
         setError("Failed to load persona data");
@@ -43,11 +49,32 @@ const PersonaFilePreview: React.FC<PersonaFilePreviewProps> = ({ file }) => {
     fetchPreview();
   }, [file]);
 
+  // Get column headers (first row of data)
+  const columns: TableProps<DataType>['columns'] = useMemo(() => {
+    if (previewData.length === 0) return [];
+    
+    return Object.keys(previewData[0]).map((key) => ({
+      title: key,
+      dataIndex: key,
+      key,
+      render: (value: unknown) => String(value || ""),
+    }));
+  }, [previewData]);
+
+  // Pagination config
+  const pagination = {
+    current: currentPage,
+    pageSize: PAGE_SIZE,
+    total: previewData.length,
+    onChange: (page: number) => setCurrentPage(page),
+    showSizeChanger: false,
+  };
+
   if (loading) {
     return (
       <div className={styles.personaPreviewLoading}>
         <Spin />
-        <Text style={{ marginLeft: 8 }}>Loading persona data...</Text>
+        <span style={{ marginLeft: 8 }}>Loading persona data...</span>
       </div>
     );
   }
@@ -55,7 +82,7 @@ const PersonaFilePreview: React.FC<PersonaFilePreviewProps> = ({ file }) => {
   if (error) {
     return (
       <Card className={styles.personaPreviewCard}>
-        <Text type="danger">{error}</Text>
+        <div style={{ color: '#ff4d4f' }}>{error}</div>
       </Card>
     );
   }
@@ -63,109 +90,35 @@ const PersonaFilePreview: React.FC<PersonaFilePreviewProps> = ({ file }) => {
   if (previewData.length === 0) {
     return (
       <Card className={styles.personaPreviewCard}>
-        <Text type="secondary">No persona data available</Text>
+        <div style={{ color: 'rgba(0, 0, 0, 0.45)' }}>No persona data available</div>
       </Card>
     );
   }
-
-  // Get column headers (first row of data)
-  const headers = previewData.length > 0 ? Object.keys(previewData[0]) : [];
-  const previewRows = previewData.slice(0, 5); // Show first 5 rows in preview
 
   return (
     <div className={styles.personaPreviewContainer}>
       <Card
         className={styles.personaPreviewCard}
         title={
-          <div style={{ display: "flex", alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", padding: "16px" }}>
             <FileOutlined style={{ marginRight: 8 }} />
             <span>Classified Persona Data</span>
           </div>
         }
-        extra={
-          <Button
-            type="link"
-            onClick={() => setIsModalVisible(true)}
-            disabled={previewData.length === 0}
-          >
-            View Full Data
-          </Button>
-        }
       >
         <div className={styles.personaPreviewTableWrapper}>
-          <table className={styles.personaPreviewTable}>
-            <thead>
-              <tr>
-                {headers.map((header, index) => (
-                  <th key={index} className={styles.personaPreviewHeader}>
-                    {header}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {previewRows.map((row, rowIndex) => (
-                <tr key={rowIndex} className={styles.personaPreviewRow}>
-                  {headers.map((header, colIndex) => (
-                    <td key={colIndex} className={styles.personaPreviewCell}>
-                      {String(row[header] || "")}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {previewData.length > 5 && (
-            <div className={styles.personaPreviewMore}>
-              + {previewData.length - 5} more rows
-            </div>
-          )}
+          <Table
+            dataSource={previewData}
+            columns={columns}
+            pagination={pagination}
+            loading={loading}
+            rowKey={(record, index) => `row-${index}`}
+            scroll={{ x: true }}
+            size="small"
+            className={styles.personaTable}
+          />
         </div>
       </Card>
-
-      {/* Full Screen Modal */}
-      <Modal
-        title={
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <FileOutlined style={{ marginRight: 8 }} />
-            <span>Full Persona Data</span>
-          </div>
-        }
-        open={isModalVisible}
-        onCancel={() => setIsModalVisible(false)}
-        width="90%"
-        style={{ top: 20 }}
-        footer={[
-          <Button key="close" onClick={() => setIsModalVisible(false)}>
-            Close
-          </Button>,
-        ]}
-      >
-        <div style={{ maxHeight: "70vh", overflowY: "auto" }}>
-          <table className={styles.personaPreviewTable}>
-            <thead>
-              <tr>
-                {headers.map((header, index) => (
-                  <th key={index} className={styles.personaPreviewHeader}>
-                    {header}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {previewData.map((row, rowIndex) => (
-                <tr key={rowIndex} className={styles.personaPreviewRow}>
-                  {headers.map((header, colIndex) => (
-                    <td key={colIndex} className={styles.personaPreviewCell}>
-                      {String(row[header] || "")}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Modal>
     </div>
   );
 };
