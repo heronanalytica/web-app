@@ -17,6 +17,7 @@ import { FontPoppins } from "@/assets/fonts/poppins";
 import { message } from "antd";
 import { Campaign } from "@/types/campaign";
 import { CAMPAIGN_TOTAL_STEPS, stepTitles } from "./constants";
+import CompanyAndPersonasStep from "../CompanyAndPersonasStep";
 
 interface CampaignBuilderProps {
   campaign: Campaign | null;
@@ -95,8 +96,10 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
         return (
           <AnalysisWaitingStep steps={campaign?.analysisSteps || undefined} />
         );
+      case 4:
+        return <CompanyAndPersonasStep />;
       default:
-        return <div />;
+        return <div>Step {currentStep + 1} is not implemented yet</div>;
     }
   };
 
@@ -136,14 +139,16 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
 
         {currentStep !== 3 && (
           <div className={styles.footerActions}>
-            <Button
-              onClick={() =>
-                setCurrentStep(currentStep > 0 ? currentStep - 1 : 0)
-              }
-              disabled={!canGoBack || saveLoading}
-            >
-              Back
-            </Button>
+            {currentStep !== 4 && (
+              <Button
+                onClick={() =>
+                  setCurrentStep(currentStep > 0 ? currentStep - 1 : 0)
+                }
+                disabled={!canGoBack || saveLoading}
+              >
+                Back
+              </Button>
+            )}
             {currentStep < totalSteps - 1 && (
               <Button
                 type="primary"

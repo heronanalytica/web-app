@@ -40,6 +40,7 @@ export class CampaignService {
     return this.dbService.campaign.findMany({
       where: { userId, status: CampaignStatus.DRAFT },
       orderBy: { lastSavedAt: 'desc' },
+      include: campaignInclude,
     });
   }
 
@@ -52,6 +53,7 @@ export class CampaignService {
   async getCampaignById(userId: string, id: string) {
     return this.dbService.campaign.findFirst({
       where: { id, userId },
+      include: campaignInclude,
     });
   }
 
