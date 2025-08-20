@@ -18,6 +18,7 @@ import { message } from "antd";
 import { Campaign } from "@/types/campaign";
 import { CAMPAIGN_TOTAL_STEPS, stepTitles } from "./constants";
 import CompanyAndPersonasStep from "../CompanyAndPersonasStep";
+import CampaignSetupStep from "../CampaignSetupStep";
 
 interface CampaignBuilderProps {
   campaign: Campaign | null;
@@ -29,7 +30,10 @@ export const CampaignBuilder: React.FC<CampaignBuilderProps> = ({
   loading,
 }) => {
   return (
-    <CampaignBuilderProvider campaign={campaign} totalSteps={CAMPAIGN_TOTAL_STEPS}>
+    <CampaignBuilderProvider
+      campaign={campaign}
+      totalSteps={CAMPAIGN_TOTAL_STEPS}
+    >
       <CampaignBuilderInner loading={loading} />
     </CampaignBuilderProvider>
   );
@@ -98,8 +102,15 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
         );
       case 4:
         return <CompanyAndPersonasStep />;
+      case 5:
+        return <CampaignSetupStep />;
       default:
-        return <div>Step {currentStep + 1} is not implemented yet</div>;
+        return (
+          <div>
+            Step {stepTitles[currentStep] || currentStep + 1} is not implemented
+            yet
+          </div>
+        );
     }
   };
 
