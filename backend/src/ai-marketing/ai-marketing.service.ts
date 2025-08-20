@@ -25,9 +25,18 @@ import {
 } from './validation/ai-marketing.schema';
 import { SYSTEM_PROMPTS } from './prompts/system-prompts';
 import { callOpenAiAndParse } from './helpers/openai.helper';
+import { DatabaseService } from 'src/database/database.service';
+import { GenerateVariantsDto } from './dto/generate-variants.dto';
+import { StepStateDto } from 'src/campaign/dto/campaign-step-state.dto';
+import { buildEmailFromBriefPrompt } from './prompts/email-from-brief.prompt';
+import { EmailVariantSchema } from './validation/email-variant.schema';
+import { Prisma } from 'generated/prisma';
+import { instanceToPlain } from 'class-transformer';
 
 @Injectable()
 export class AiMarketingService {
+  constructor(private readonly db: DatabaseService) {}
+
   async analyze(dto: SegmentAnalysisDto): Promise<MarketingAnalysisResult> {
     const personaSegments = await Promise.all(
       dto.segments.map((segment, idx) => this.parseSegment(segment, idx + 1)),
@@ -131,5 +140,164 @@ export class AiMarketingService {
       prompt: buildAdTemplatesPrompt(segment, company),
       schema: AdsTemplateSchema,
     });
+  }
+
+  /**
+   * Generate subject/html for a persona from the stored brief+companyProfile.
+   * Persists CampaignEmailVariant and links CampaignRecipient.variantId.
+   */
+  async generateCampaignEmailVariants(
+    userId: string,
+    campaignId: string,
+    dto: GenerateVariantsDto,
+  ) {
+    // 1) ownership + brief
+    const campaign = await this.db.campaign.findFirstOrThrow({
+      where: { id: campaignId, userId },
+      select: { stepState: true },
+    });
+    const ss = (campaign.stepState ?? {}) as StepStateDto;
+    const brief = ss.generator;
+    if (!brief)
+      throw new Error('Missing generator brief in stepState.generator');
+    const companyProfile = ss.companyProfile;
+
+    // 2) pick personas
+    let personaIds: string[] = dto.personaIds ?? [];
+    if (!personaIds.length) {
+      const distinct = await this.db.campaignRecipient.findMany({
+        where: { campaignId },
+        select: { personaId: true },
+        distinct: ['personaId'],
+      });
+      personaIds = distinct.map((d) => d.personaId);
+    }
+    if (!personaIds.length) {
+      return {
+        summary: { totalTargets: 0, generated: 0, skipped: 0, errors: 0 },
+        variants: [],
+      };
+    }
+
+    const personas = await this.db.persona.findMany({
+      where: { id: { in: personaIds } },
+      select: { id: true, code: true, name: true, description: true },
+    });
+    const existing = await this.db.campaignEmailVariant.findMany({
+      where: { campaignId, personaId: { in: personaIds } },
+      select: { id: true, personaId: true, status: true },
+    });
+    const existingByPersona = new Map(existing.map((v) => [v.personaId, v]));
+    const pById = new Map(personas.map((p) => [p.id, p]));
+    const results: {
+      personaId: string;
+      variantId?: string;
+      status: 'generated' | 'skipped' | 'error';
+      subject?: string | null;
+      error?: string;
+    }[] = [];
+
+    // 3) loop personas
+    for (const personaId of personaIds) {
+      const persona = pById.get(personaId);
+      if (!persona) {
+        results.push({
+          personaId,
+          status: 'error',
+          error: 'Persona not found',
+        });
+        continue;
+      }
+
+      const prev = existingByPersona.get(personaId);
+      if (prev && dto.overwrite !== true && prev.status !== 'ERROR') {
+        results.push({ personaId, variantId: prev.id, status: 'skipped' });
+        continue;
+      }
+
+      try {
+        const prompt = buildEmailFromBriefPrompt({
+          persona,
+          companyProfile,
+          brief,
+        });
+
+        const ai = await callOpenAiAndParse({
+          user: `email-variant-${campaignId}-${persona.code}`,
+          prompt,
+          schema: EmailVariantSchema,
+          systemPrompt:
+            'You are a world-class email copywriter and HTML email coder.',
+          model: 'gpt-4o',
+          temperature: 0.4,
+          maxTokens: 1200,
+        });
+
+        const briefPlain = instanceToPlain(brief) as Record<string, unknown>;
+        const promptPayload = {
+          persona: { id: personaId, code: persona.code },
+          brief: briefPlain,
+        };
+
+        const variant = await this.db.campaignEmailVariant.upsert({
+          where: { campaignId_personaId: { campaignId, personaId } },
+          create: {
+            campaignId,
+            personaId,
+            subject: ai.subject,
+            html: ai.html,
+            status: 'GENERATED',
+            aiModel: 'gpt-4o',
+            prompt: promptPayload as Prisma.InputJsonValue,
+          },
+          update: {
+            subject: ai.subject,
+            html: ai.html,
+            status: 'GENERATED',
+            aiModel: 'gpt-4o',
+            lastError: null,
+            prompt: promptPayload as Prisma.InputJsonValue,
+          },
+        });
+
+        await this.db.campaignRecipient.updateMany({
+          where: { campaignId, personaId },
+          data: { variantId: variant.id },
+        });
+
+        results.push({
+          personaId,
+          variantId: variant.id,
+          status: 'generated',
+          subject: variant.subject,
+        });
+      } catch (e: any) {
+        const v = await this.db.campaignEmailVariant.upsert({
+          where: { campaignId_personaId: { campaignId, personaId } },
+          create: {
+            campaignId,
+            personaId,
+            status: 'ERROR',
+            lastError: String(e),
+          },
+          update: { status: 'ERROR', lastError: String(e) },
+        });
+        results.push({
+          personaId,
+          variantId: v.id,
+          status: 'error',
+          error: String(e),
+        });
+      }
+    }
+
+    const summary = {
+      totalTargets: personaIds.length,
+      generated: results.filter((r) => r.status === 'generated').length,
+      skipped: results.filter((r) => r.status === 'skipped').length,
+      errors: results.filter((r) => r.status === 'error').length,
+    };
+
+    return { summary, variants: results };
   }
 }

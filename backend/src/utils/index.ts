@@ -16,3 +16,20 @@ export function omit<T extends object, K extends keyof T>(
   }
   return clone;
 }
+
+export const slug = (s: string) =>
+  s
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+
+export const getCol = (row: Record<string, any>, ...aliases: string[]) => {
+  for (const a of aliases) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const v: any = row[a];
+    if (v !== undefined && v !== null && String(v).length)
+      return String(v).trim();
+  }
+  return '';
+};

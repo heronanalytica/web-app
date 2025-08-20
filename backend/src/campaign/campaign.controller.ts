@@ -25,11 +25,17 @@ import { AdminGuard } from '../auth/guards/admin.guard';
 import { Request } from 'express';
 import { EAuthRole } from '../auth/auth.types';
 import { UpdateClassifiedPersonaDto } from './dto/update-classified-persona.dto';
+import { ImportClassifiedDto } from './dto/import-classified.dto';
+import { AiMarketingService } from 'src/ai-marketing/ai-marketing.service';
+import { GenerateVariantsDto } from 'src/ai-marketing/dto/generate-variants.dto';
 
 @Controller('campaigns')
 @UseGuards(JwtAuthGuard)
 export class CampaignController {
-  constructor(private readonly campaignService: CampaignService) {}
+  constructor(
+    private readonly campaignService: CampaignService,
+    private readonly aiMarketingService: AiMarketingService,
+  ) {}
 
   @Get()
   async getUserCampaigns(@Req() req: Request) {
@@ -178,6 +184,46 @@ export class CampaignController {
     if (!req.user?.id) throw new UnauthorizedException();
 
     const data = await this.campaignService.removeClassifiedPersona(id);
+    return { error: 0, data };
+  }
+
+  @Post(':id/prepare')
+  async prepareCampaign(@Req() req: Request, @Param('id') id: string) {
+    const userId = req.user?.id;
+    if (!userId) throw new UnauthorizedException();
+    const data = await this.campaignService.prepareCampaign(userId, id);
+    return { error: 0, data };
+  }
+
+  @Post(':id/recipients/import')
+  async importClassified(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body() dto: ImportClassifiedDto,
+  ) {
+    const userId = req.user?.id;
+    if (!userId) throw new UnauthorizedException();
+    const data = await this.campaignService.importClassifiedRecipients(
+      userId,
+      id,
+      dto,
+    );
+    return { error: 0, data };
+  }
+
+  @Post(':id/variants/generate')
+  async generateVariants(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body() dto: GenerateVariantsDto,
+  ) {
+    const userId = req.user?.id;
+    if (!userId) throw new UnauthorizedException();
+    const data = await this.aiMarketingService.generateCampaignEmailVariants(
+      userId,
+      id,
+      dto,
+    );
     return { error: 0, data };
   }
 }

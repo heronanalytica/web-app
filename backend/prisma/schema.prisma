@@ -203,7 +203,7 @@ model Contact {
 
   recipients CampaignRecipient[]
 
-  @@index([userId, email]) // fast upsert/lookup per owner
+  @@unique([userId, email], name: "userId_email")
 }
 
 model CampaignRecipient {
@@ -224,7 +224,7 @@ model CampaignRecipient {
   createdAt         DateTime              @default(now())
   updatedAt         DateTime              @updatedAt
 
-  @@unique([campaignId, contactId]) // prevent duplicates within a campaign
+  @@unique([campaignId, contactId], name: "campaignId_contactId")
   @@index([campaignId, personaId])
   @@index([campaignId, status])
 }
@@ -253,7 +253,7 @@ model CampaignEmailVariant {
   updatedAt         DateTime            @updatedAt
   CampaignRecipient CampaignRecipient[]
 
-  @@unique([campaignId, personaId]) // one email per persona per campaign
+  @@unique([campaignId, personaId], name: "campaignId_personaId")
 }
 
 model AudienceImport {
