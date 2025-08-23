@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+// web/src/app/app/campaign/components/CompanyProfileStep/FileUploader.tsx
+import React, { useMemo, useState } from "react";
 import { Upload, message, Modal } from "antd";
 import { UploadOutlined, LoadingOutlined } from "@ant-design/icons";
-import { fetcher } from "@/lib/fetcher";
 import styles from "./styles.module.scss";
+
+import { useS3Upload, type FileType } from "@/hooks/useS3Upload";
 
 interface FileInfo {
   id: string;
@@ -15,10 +17,18 @@ interface FileUploaderProps {
   form: any;
   fileIdField: string;
   fileNameField: string;
-  fileType: "company-marketing-content" | "company-design-asset";
-  accept?: string;
+  fileType: FileType; // ⬅️ now typed to your FILE_TYPES union
+  accept?: string; // e.g. ".pdf,.png,.jpg,.jpeg,.svg"
   showLabel?: boolean;
 }
+
+const EXT_TO_MIME: Record<string, string> = {
+  ".pdf": "application/pdf",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".svg": "image/svg+xml",
+};
 
 export const FileUploader: React.FC<FileUploaderProps> = ({
   name,
@@ -30,12 +40,39 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
   accept = ".pdf,.png,.jpg,.jpeg",
   showLabel = false,
 }) => {
-  const [loading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<FileInfo | null>(null);
   const [messageApi, contextHolder] = message.useMessage();
   const [, forceUpdate] = useState({});
+
+  // Derive MIME whitelist from the accept extensions
+  const acceptMimes = useMemo(
+    () =>
+      accept
+        .split(",")
+        .map((s) => s.trim().toLowerCase())
+        .map((ext) => EXT_TO_MIME[ext])
+        .filter(Boolean),
+    [accept]
+  ) as string[] | undefined;
+
+  const { uploading, beforeUpload, customRequest, deleteById } = useS3Upload({
+    fileType,
+    acceptMimes, // optional; still keep the input's accept= for the picker
+    maxSizeMB: 50,
+    onAfterRegister: (reg) => {
+      // Save uploaded file info into the form
+      form.setFieldsValue({
+        [fileIdField]: reg.id,
+        [fileNameField]: reg.fileName,
+        [name]: undefined, // keep Upload UI minimal; we render from form fields
+      });
+      messageApi.success("File uploaded successfully");
+      forceUpdate({});
+    },
+    onError: (e) => messageApi.error(e.message),
+  });
 
   const handleRemove = () => {
     const fileId = form.getFieldValue(fileIdField);
@@ -49,126 +86,22 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
 
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return;
-
     setDeletingId(deleteTarget.id);
     try {
-      await fetcher.delete(`/api/file/${deleteTarget.id}`);
-      form.setFieldsValue({
-        [fileIdField]: undefined,
-        [fileNameField]: undefined,
-      });
-      messageApi.success("File deleted successfully");
-    } catch (error) {
-      console.error("Failed to delete file:", error);
-      messageApi.error("Failed to delete file");
-    } finally {
-      setDeletingId(null);
-      setDeleteModalVisible(false);
-      setDeleteTarget(null);
-    }
-  };
-
-  const beforeUpload = (file: File) => {
-    const isLt50M = file.size / 1024 / 1024 < 50;
-    if (!isLt50M) {
-      messageApi.error("File must be smaller than 50MB!");
-    }
-    return isLt50M;
-  };
-
-  const getFileExtension = (filename: string): string => {
-    return filename.slice(((filename.lastIndexOf(".") - 1) >>> 0) + 2);
-  };
-
-  const handleCustomRequest = async (options: any) => {
-    const { file, onSuccess, onError } = options;
-    try {
-      // Get file extension
-      const fileExt = getFileExtension(file.name);
-      // Ensure we have a content type
-      const contentType = file.type || `application/octet-stream`;
-
-      // 1. Get presigned URL with file extension and content type
-      const { url, key } = await fetcher.post<{
-        url: string;
-        key: string;
-      }>("/api/file/upload", {
-        fileType,
-        contentType,
-        fileExtension: fileExt,
-      });
-
-      // 2. Upload to S3 with proper content type
-      const uploadResponse = await fetch(url, {
-        method: "PUT",
-        body: file,
-        headers: {
-          "Content-Type": contentType,
-          "Content-Disposition": `attachment; filename="${encodeURIComponent(
-            file.name
-          )}"`,
-        },
-      });
-
-      if (!uploadResponse.ok) {
-        const errorText = await uploadResponse.text();
-        console.error("S3 Upload Error:", {
-          status: uploadResponse.status,
-          statusText: uploadResponse.statusText,
-          headers: Object.fromEntries(uploadResponse.headers.entries()),
-          error: errorText,
-        });
-        throw new Error(
-          `Upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`
-        );
-      }
-
-      // 3. Send metadata to backend
-      try {
-        const metaRes = await fetcher.post<{ id: string }>("/api/file", {
-          key,
-          fileName: file.name,
-          type: fileType,
-        });
-
-        if (metaRes?.id) {
-          // 4. Save file info to form
-          form.setFieldsValue({
-            [fileIdField]: metaRes.id,
-            [fileNameField]: file.name,
-            [name]: file,
-          });
-          messageApi.success("File uploaded successfully");
-          forceUpdate({});
-          onSuccess({ key });
-        } else {
-          throw new Error("Failed to save file metadata: No ID returned");
-        }
-      } catch (metaError) {
-        console.error("Metadata save error:", metaError);
-        // Attempt to clean up the uploaded file if metadata save fails
-        try {
-          await fetcher.delete(`/api/file/${key}`);
-        } catch (cleanupError) {
-          console.error(
-            "Failed to clean up file after metadata save failed:",
-            cleanupError
-          );
-        }
-        throw new Error("Failed to save file information. Please try again.");
-      }
-    } catch (error: unknown) {
-      console.error("Upload failed:", error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to upload file";
-      messageApi.error(errorMessage);
-      // Clear the file from the upload component on error
+      await deleteById(deleteTarget.id);
       form.setFieldsValue({
         [fileIdField]: undefined,
         [fileNameField]: undefined,
         [name]: undefined,
       });
+      messageApi.success("File deleted successfully");
+    } catch {
+      messageApi.error("Failed to delete file");
+    } finally {
+      setDeletingId(null);
+      setDeleteModalVisible(false);
+      setDeleteTarget(null);
       forceUpdate({});
-      onError(new Error(errorMessage));
     }
   };
 
@@ -176,6 +109,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
     <div className={styles.fileUploader}>
       {contextHolder}
       {showLabel && <div className={styles.uploadLabel}>{label}</div>}
+
       <Modal
         open={deleteModalVisible}
         title="Delete this file?"
@@ -194,16 +128,17 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
           <b>{deleteTarget?.name}</b>
         </p>
       </Modal>
+
       <Upload.Dragger
         name={name}
         accept={accept}
         multiple={false}
         beforeUpload={beforeUpload}
-        customRequest={handleCustomRequest}
+        customRequest={customRequest}
         className={styles.uploadArea}
         onChange={({ file }) => {
-          // Clear the file from the uploader if there's an error
           if (file.status === "error") {
+            // Clear the file from the form on error
             form.setFieldsValue({
               [fileIdField]: undefined,
               [fileNameField]: undefined,
@@ -224,13 +159,13 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
               ]
             : []
         }
-        disabled={loading}
+        disabled={uploading}
       >
         <p className="ant-upload-drag-icon">
-          {loading ? <LoadingOutlined /> : <UploadOutlined />}
+          {uploading ? <LoadingOutlined /> : <UploadOutlined />}
         </p>
         <p className="ant-upload-text">
-          {loading
+          {uploading
             ? "Uploading..."
             : "Click or drag file to this area to upload"}
         </p>

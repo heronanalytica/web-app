@@ -206,13 +206,7 @@ export default function CompanyProfileStep() {
           >
             <Input />
           </Form.Item>
-          <Form.Item
-            name="marketingContentFile"
-            label="Marketing Content File"
-            rules={[
-              { required: true, message: "Please upload marketing content" },
-            ]}
-          >
+          <Form.Item label="Marketing Content File">
             <FileUploader
               name="marketingContentFile"
               label="Marketing Content File"
@@ -223,10 +217,21 @@ export default function CompanyProfileStep() {
               accept=".pdf,.png,.jpg,.jpeg"
             />
           </Form.Item>
+          {/* Hidden fields that actually store the values */}
           <Form.Item
-            name="designAssetFile"
-            label="Design Asset File (Optional)"
+            name="marketingContentFileId"
+            rules={[
+              { required: true, message: "Please upload marketing content" },
+            ]}
+            hidden
           >
+            <input type="hidden" />
+          </Form.Item>
+          <Form.Item name="marketingContentFileName" hidden>
+            <input type="hidden" />
+          </Form.Item>
+
+          <Form.Item label="Design Asset File (Optional)">
             <FileUploader
               name="designAssetFile"
               label="Design Asset File (Optional)"
@@ -237,6 +242,14 @@ export default function CompanyProfileStep() {
               accept=".png,.jpg,.jpeg,.svg"
             />
           </Form.Item>
+          {/* Hidden fields that actually store the values */}
+          <Form.Item name="designAssetFileId" hidden>
+            <input type="hidden" />
+          </Form.Item>
+          <Form.Item name="designAssetFileName" hidden>
+            <input type="hidden" />
+          </Form.Item>
+
           <Form.Item name="businessInfo" label="Additional Business Info">
             <Input.TextArea rows={3} />
           </Form.Item>

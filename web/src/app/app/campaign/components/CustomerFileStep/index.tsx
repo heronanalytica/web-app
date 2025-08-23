@@ -2,12 +2,11 @@ import React, { useState, useEffect } from "react";
 import { fetcher } from "@/lib/fetcher";
 import styles from "./style.module.scss";
 import { Upload, message, Spin, Modal, Divider } from "antd";
-import type { UploadProps } from "antd";
 import { InboxOutlined } from "@ant-design/icons";
 import FileList from "./FileList";
 import CsvPreviewModal from "./CsvPreviewModal";
 import { FileOutlined } from "@ant-design/icons";
-
+import { FILE_TYPES, useS3Upload } from "@/hooks/useS3Upload";
 import type { CustomerFile } from "./types";
 import { CampaignStepStateKey } from "@/types/campaignStepState";
 import {
@@ -19,13 +18,38 @@ const CustomerFileStep: React.FC = () => {
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<CustomerFile | null>(null);
   const [files, setFiles] = useState<CustomerFile[]>([]);
-  const [uploading, setUploading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [customerFile, setCustomerFile] = useStepState(
     CampaignStepStateKey.CustomerFile
   );
   const { setCanGoNext } = useCampaignBuilder();
+  const [msg, contextHolder] = message.useMessage();
+
+  const { uploading, beforeUpload, customRequest } = useS3Upload({
+    fileType: FILE_TYPES.CUSTOMER,
+    // browsers may report CSV as either of these:
+    acceptMimes: ["text/csv", "application/vnd.ms-excel"],
+    maxSizeMB: 50,
+    onAfterRegister: async (reg) => {
+      const uploadedFile: CustomerFile = {
+        id: reg.id,
+        fileName: reg.fileName,
+        uploadedAt: new Date().toISOString(),
+        storageUrl: reg.storageUrl,
+      };
+      setFiles((prev) => [
+        uploadedFile,
+        ...prev.filter((f) => f.id !== uploadedFile.id),
+      ]);
+
+      // Preview right after upload (unchanged logic)
+      await handlePreviewCsv(uploadedFile);
+    },
+    onSuccess: () => msg.success("File uploaded successfully"),
+    onError: (e, stage) =>
+      msg.error(stage ? `${stage}: ${e.message}` : e.message),
+  });
 
   // Ensure Next is enabled if a file is pre-selected from stepState
   useEffect(() => {
@@ -101,75 +125,9 @@ const CustomerFileStep: React.FC = () => {
       });
   }, []);
 
-  const getFileExtension = (filename: string): string => {
-    return filename.slice(((filename.lastIndexOf(".") - 1) >>> 0) + 2);
-  };
-
-  const customUpload: UploadProps["customRequest"] = async (options) => {
-    const { file, onSuccess, onError } = options;
-    setUploading(true);
-    try {
-      const fileExt = getFileExtension((file as File).name);
-      // 1. Get pre-signed S3 URL from backend
-      const { url, key } = await fetcher.post<{ url: string; key: string }>(
-        "/api/file/upload",
-        {
-          fileType: "customer",
-          contentType: (file as File).type || "text/csv",
-          fileExtension: fileExt,
-        }
-      );
-
-      // 2. Upload file to S3
-      await fetch(url, {
-        method: "PUT",
-        body: file,
-        headers: { "Content-Type": (file as File).type },
-      });
-
-      // 3. Send metadata to backend
-      const metaRes = await fetcher.post<unknown>("/api/file", {
-        key,
-        fileName: (file as File).name,
-        type: "customer",
-      });
-
-      setUploading(false);
-      if (metaRes) {
-        // Optimistically add new file to previous uploads
-        const uploadedFile: CustomerFile = {
-          id: key.split("/").pop() || "",
-          fileName: (file as File).name,
-          uploadedAt: new Date().toISOString(),
-          storageUrl: `s3://${key}`,
-        };
-        setFiles((prev) => [
-          uploadedFile,
-          ...prev.filter((f) => f.id !== uploadedFile.id),
-        ]);
-        // Show preview modal for the newly uploaded file before proceeding
-        await handlePreviewCsv(uploadedFile);
-        if (onSuccess) {
-          onSuccess(metaRes);
-        }
-        message.success("File uploaded successfully");
-      } else {
-        message.error("Upload failed");
-        if (onError) {
-          onError(new Error("Upload failed"));
-        }
-      }
-    } catch {
-      setUploading(false);
-      message.error("Upload failed");
-      if (onError) {
-        onError(new Error("Upload failed"));
-      }
-    }
-  };
-
   return (
     <div className={styles.container}>
+      {contextHolder}
       <div style={{ width: "100%", display: "flex", gap: 24 }}>
         <div style={{ flex: 1 }}>
           <label className={styles.uploadLabel}>
@@ -179,7 +137,8 @@ const CustomerFileStep: React.FC = () => {
             <Upload.Dragger
               name="file"
               accept=".csv"
-              customRequest={customUpload}
+              beforeUpload={beforeUpload}
+              customRequest={customRequest}
               showUploadList={false}
               multiple={false}
               disabled={uploading}
@@ -216,7 +175,7 @@ const CustomerFileStep: React.FC = () => {
                 `/api/file/download/${encodeURIComponent(file.id)}`
               );
               if (!response.ok) {
-                message.error("Failed to download file");
+                msg.error("Failed to download file");
                 return;
               }
               const blob = await response.blob();
@@ -251,7 +210,7 @@ const CustomerFileStep: React.FC = () => {
                 if (fileObj) {
                   handlePreviewCsv(fileObj);
                 } else {
-                  message.error("Full file info not found for preview.");
+                  msg.error("Full file info not found for preview.");
                 }
               }}
               style={{
@@ -291,9 +250,9 @@ const CustomerFileStep: React.FC = () => {
             setFiles((prev) =>
               prev.filter((file) => file.id !== deleteTarget.id)
             );
-            message.success("File deleted");
+            msg.success("File deleted");
           } catch {
-            message.error("Failed to delete file");
+            msg.error("Failed to delete file");
           } finally {
             setDeletingId(null);
             setDeleteModalVisible(false);
