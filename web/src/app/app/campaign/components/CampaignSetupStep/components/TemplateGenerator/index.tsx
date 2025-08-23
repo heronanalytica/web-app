@@ -16,6 +16,7 @@ import {
 } from "@/types/campaignStepState";
 import { useS3Upload, FILE_TYPES } from "@/hooks/useS3Upload";
 import ImagePreviewButton from "./ImagePreviewButton";
+import { BASE_URL } from "@/lib/fetcher";
 
 const { Text } = Typography;
 
@@ -101,9 +102,29 @@ const TemplateGenerator: React.FC<TemplateGeneratorProps> = ({
       );
 
       // 2) keep local preview UX as-is
+      const imgSrc = generator?.photoFileId
+        ? new URL(
+            `${BASE_URL}/api/file/download/${encodeURIComponent(
+              generator.photoFileId
+            )}`
+          )
+        : null;
+
+      const photoHtml = imgSrc
+        ? `
+          <div style="margin:16px 0; text-align:center;">
+            <img
+              src="${imgSrc}"
+              alt="Campaign photo"
+              style="max-width:100%;height:auto;border-radius:8px;display:inline-block"
+            />
+          </div>
+        `
+        : "";
+
       const html = `
         <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto; padding: 24px;">
-          <h2 style="margin:0 0 12px 0">Campaign draft</h2>
+          ${photoHtml}
           <p style="margin:0 0 6px 0"><strong>Objective:</strong> ${
             values.objective
           }</p>
@@ -118,13 +139,14 @@ const TemplateGenerator: React.FC<TemplateGeneratorProps> = ({
           ${
             values.cta
               ? `<div style="text-align:center;margin:24px 0">
-                  <a href="#" style="display:inline-block;padding:12px 20px;border-radius:6px;background:#6759ff;color:#fff;text-decoration:none;font-weight:600">${values.cta}</a>
-                </div>`
+                    <a href="#" style="display:inline-block;padding:12px 20px;border-radius:6px;background:#6759ff;color:#fff;text-decoration:none;font-weight:600">${values.cta}</a>
+                  </div>`
               : ""
           }
           <p style="color:#8c8c8c;font-size:12px;margin-top:24px">This is a quick preview generated from your answers.</p>
         </div>
       `;
+
       onTemplateGenerated(html);
 
       // 3) allow Next

@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL;
+export const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL;
 
 type RequestOptions = RequestInit & {
   params?: Record<string, any>;
