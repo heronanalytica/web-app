@@ -20,8 +20,9 @@ const UploadTemplate = () => (
 );
 
 const GenerateTemplateTab = () => {
-  const [generatedTemplate, setGeneratedTemplate] = useState<string | null>(null);
-  const [templateName, setTemplateName] = useState("My Email Template");
+  const [generatedTemplate, setGeneratedTemplate] = useState<string | null>(
+    null
+  );
 
   const handleTemplateGenerated = (template: string) => {
     setGeneratedTemplate(template);
@@ -29,11 +30,7 @@ const GenerateTemplateTab = () => {
 
   const handleUseTemplate = () => {
     // TODO: Implement template usage logic
-    console.log("Using template:", { name: templateName, content: generatedTemplate });
-  };
-
-  const handleTemplateNameChange = (name: string) => {
-    setTemplateName(name);
+    console.log("Using template:", { content: generatedTemplate });
   };
 
   return (
@@ -43,8 +40,6 @@ const GenerateTemplateTab = () => {
       ) : (
         <TemplatePreview
           template={generatedTemplate}
-          templateName={templateName}
-          onTemplateNameChange={handleTemplateNameChange}
           onRegenerate={() => setGeneratedTemplate(null)}
           onUseTemplate={handleUseTemplate}
         />

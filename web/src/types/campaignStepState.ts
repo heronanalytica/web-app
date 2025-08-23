@@ -4,6 +4,7 @@ export enum CampaignStepStateKey {
   ClassifiedPersonaFile = "classifiedPersonaFile",
   CompanyProfile = "companyProfile",
   Launched = "launched",
+  Generator = "generator",
 }
 
 export interface CustomerFileDto {
@@ -52,10 +53,21 @@ export interface CompanyProfileDto {
   createdAt?: string;
 }
 
+export interface GeneratorBriefDto {
+  objective: string;
+  tone: string;
+  businessResults: string;
+  keyMessages: string;
+  cta: string;
+  photoFileId?: string;   // optional: if you later pipe the uploaded image to backend
+  templateName?: string;  // optional: if user names the template in preview
+}
+
 export interface CampaignStepState {
   customerFile?: CustomerFileDto;
   mailService?: MailServiceDto;
   classifiedPersonaFile?: ClassifiedPersonaFileDto;
   companyProfile?: CompanyProfileDto;
   launched?: boolean;
+  generator?: GeneratorBriefDto;
 }

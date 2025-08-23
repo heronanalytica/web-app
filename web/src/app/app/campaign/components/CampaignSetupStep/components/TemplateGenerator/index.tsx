@@ -2,6 +2,11 @@ import React from "react";
 import { Form, Input, Button, Upload, Radio, message, Typography } from "antd";
 import { PlusCircleOutlined, RocketOutlined } from "@ant-design/icons";
 import styles from "../../styles.module.scss";
+import {
+  useCampaignBuilder,
+  useStepState,
+} from "../../../CampaignBuilder/CampaignBuilderContext";
+import { CampaignStepStateKey } from "@/types/campaignStepState";
 
 const { Text } = Typography;
 
@@ -12,12 +17,44 @@ interface TemplateGeneratorProps {
 const TemplateGenerator: React.FC<TemplateGeneratorProps> = ({
   onTemplateGenerated,
 }) => {
+  const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
+  const [generator, setGenerator] = useStepState(
+    CampaignStepStateKey.Generator
+  );
+  const { setCanGoNext } = useCampaignBuilder();
+
+  React.useEffect(() => {
+    if (generator) {
+      form.setFieldsValue({
+        objective: generator.objective,
+        tone: generator.tone,
+        businessResults: generator.businessResults,
+        keyMessages: generator.keyMessages,
+        cta: generator.cta,
+        // photo not prefilled (Upload shows custom UI); hook up when you store a file id
+      });
+      setCanGoNext(true);
+    }
+  }, [generator, form, setCanGoNext]);
 
   const onFinish = async (values: any) => {
     try {
-      // you can send values + (optional) file to backend here
-      // keep parent flow by generating a simple preview
+      // 1) save into stepState so backend can read it later
+      setGenerator(
+        {
+          objective: values.objective,
+          tone: values.tone,
+          businessResults: values.businessResults,
+          keyMessages: values.keyMessages,
+          cta: values.cta,
+          // If you later upload a photo to the backend, store its fileId here:
+          // photoFileId: values.photo?.[0]?.response?.id,
+        },
+        true
+      );
+
+      // 2) keep local preview UX as-is
       const html = `
         <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto; padding: 24px;">
           <h2 style="margin:0 0 12px 0">Campaign draft</h2>
@@ -43,9 +80,12 @@ const TemplateGenerator: React.FC<TemplateGeneratorProps> = ({
         </div>
       `;
       onTemplateGenerated(html);
-      message.success("Saved. Moving to preview…");
+
+      // 3) allow Next
+      setCanGoNext(true);
+      messageApi.success("Saved. Moving to preview…");
     } catch {
-      message.error("Something went wrong");
+      messageApi.error("Something went wrong");
     }
   };
 
@@ -53,21 +93,26 @@ const TemplateGenerator: React.FC<TemplateGeneratorProps> = ({
 
   return (
     <div className={styles.templateGenerator}>
+      {contextHolder}
       <Form
         form={form}
         layout="vertical"
         onFinish={onFinish}
         initialValues={{
-          objective: "Sales generation",
-          tone: "Professional",
+          objective: generator?.objective ?? "Sales generation",
+          tone: generator?.tone ?? "Professional",
+          businessResults: generator?.businessResults,
+          keyMessages: generator?.keyMessages,
+          cta: generator?.cta,
         }}
       >
+        {/* … the rest of your form stays the same … */}
+        {/* (unchanged markup below) */}
         <div className={styles.formSection}>
           <Text strong style={{ display: "block", marginBottom: 16 }}>
             Let’s create a template for the campaign
           </Text>
 
-          {/* two-column radios */}
           <div className={styles.twoCol}>
             <Form.Item
               name="objective"
@@ -85,14 +130,12 @@ const TemplateGenerator: React.FC<TemplateGeneratorProps> = ({
                 { required: true, message: "Please choose one objective" },
               ]}
             >
-              <div className={styles.radioBox}>
-                <Radio.Group>
-                  <Radio value="Sales generation">Sales generation</Radio>
-                  <Radio value="Lead nurturing">Lead nuturing</Radio>
-                  <Radio value="Client retention">Client retention</Radio>
-                  <Radio value="Brand awareness">Brand awareness</Radio>
-                </Radio.Group>
-              </div>
+              <Radio.Group className={styles.radioBox}>
+                <Radio value="Sales generation">Sales generation</Radio>
+                <Radio value="Lead nurturing">Lead nuturing</Radio>
+                <Radio value="Client retention">Client retention</Radio>
+                <Radio value="Brand awareness">Brand awareness</Radio>
+              </Radio.Group>
             </Form.Item>
 
             <Form.Item
@@ -101,18 +144,15 @@ const TemplateGenerator: React.FC<TemplateGeneratorProps> = ({
               label="What is campaign tone?*"
               rules={[{ required: true, message: "Please choose a tone" }]}
             >
-              <div className={styles.radioBox}>
-                <Radio.Group>
-                  <Radio value="Professional">Professional</Radio>
-                  <Radio value="Friendly">Friendly</Radio>
-                  <Radio value="Playful">Playful</Radio>
-                  <Radio value="Empathetic">Empathetic</Radio>
-                </Radio.Group>
-              </div>
+              <Radio.Group className={styles.radioBox}>
+                <Radio value="Professional">Professional</Radio>
+                <Radio value="Friendly">Friendly</Radio>
+                <Radio value="Playful">Playful</Radio>
+                <Radio value="Empathetic">Empathetic</Radio>
+              </Radio.Group>
             </Form.Item>
           </div>
 
-          {/* text inputs */}
           <Form.Item
             name="businessResults"
             label="What business results do you want to see?*:"
@@ -137,7 +177,6 @@ const TemplateGenerator: React.FC<TemplateGeneratorProps> = ({
             />
           </Form.Item>
 
-          {/* photo upload */}
           <Form.Item
             name="photo"
             label="Campaign photo:"
@@ -151,12 +190,12 @@ const TemplateGenerator: React.FC<TemplateGeneratorProps> = ({
               beforeUpload={(file) => {
                 const isImage = file.type.startsWith("image/");
                 const isLt5M = file.size / 1024 / 1024 < 5;
-                if (!isImage) message.error("Please upload an image file");
-                if (!isLt5M) message.error("Image must be smaller than 5MB");
-                return false; // still prevent auto-upload
+                if (!isImage) messageApi.error("Please upload an image file");
+                if (!isLt5M) messageApi.error("Image must be smaller than 5MB");
+                return false; // prevent auto-upload for now
               }}
               maxCount={1}
-              showUploadList={false} // custom display
+              showUploadList={false}
             >
               <div className={styles.uploadInputBox}>
                 <span>{photoList?.[0]?.name || "Upload image here"}</span>

@@ -19,7 +19,8 @@ export interface CampaignBuilderContextType {
   setStepState: (s: CampaignStepState) => void;
   updateStepState: <K extends keyof CampaignStepState>(
     key: K,
-    value: CampaignStepState[K]
+    value: CampaignStepState[K],
+    saveAfter?: boolean
   ) => void;
   removeStepState: <K extends keyof CampaignStepState>(key: K) => void;
 }
@@ -42,7 +43,8 @@ export function useStepState<K extends keyof CampaignStepState>(key: K) {
   const { stepState, updateStepState, removeStepState } = useCampaignBuilder();
   return [
     stepState[key],
-    (value: CampaignStepState[K]) => updateStepState(key, value),
+    (value: CampaignStepState[K], saveAfter?: boolean) =>
+      updateStepState(key, value, saveAfter),
     () => removeStepState(key),
   ] as const;
 }
@@ -85,22 +87,40 @@ export const CampaignBuilderProvider: React.FC<{
     setDiscardModalVisible(false);
   }, []);
 
-  const save = useCallback(async () => {
-    if (!campaign?.id) return;
-    // Save currentStep and stepState to backend
-    await fetcher.patch(`/api/campaigns/${campaign.id}/draft`, {
-      id: campaign.id,
-      currentStep,
-      stepState,
-    });
-  }, [campaign, currentStep, stepState]);
+  const saveDraft = useCallback(
+    async (payload: { currentStep: number; stepState: CampaignStepState }) => {
+      if (!campaign?.id) return;
+      await fetcher.patch(`/api/campaigns/${campaign.id}/draft`, {
+        id: campaign.id,
+        currentStep: payload.currentStep,
+        stepState: payload.stepState,
+      });
+    },
+    [campaign]
+  );
 
-  const updateStepState = <K extends keyof CampaignStepState>(
-    key: K,
-    value: CampaignStepState[K]
-  ) => {
-    setStepState((prev) => ({ ...prev, [key]: value }));
-  };
+  const save = useCallback(async () => {
+    await saveDraft({ currentStep, stepState });
+  }, [currentStep, stepState, saveDraft]);
+
+  // add saveAfter?: boolean here
+  const updateStepState = useCallback(
+    <K extends keyof CampaignStepState>(
+      key: K,
+      value: CampaignStepState[K],
+      saveAfter?: boolean
+    ) => {
+      setStepState((prev) => {
+        const next = { ...prev, [key]: value };
+        if (saveAfter) {
+          // save using the freshly computed state to avoid race conditions
+          void saveDraft({ currentStep, stepState: next });
+        }
+        return next;
+      });
+    },
+    [currentStep, saveDraft]
+  );
 
   const removeStepState = <K extends keyof CampaignStepState>(key: K) => {
     setStepState((prev) => {
