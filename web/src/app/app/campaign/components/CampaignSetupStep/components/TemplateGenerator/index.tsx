@@ -1,12 +1,21 @@
 import React from "react";
 import { Form, Input, Button, Upload, Radio, message, Typography } from "antd";
-import { PlusCircleOutlined, RocketOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  PlusCircleOutlined,
+  RocketOutlined,
+} from "@ant-design/icons";
 import styles from "../../styles.module.scss";
 import {
   useCampaignBuilder,
   useStepState,
 } from "../../../CampaignBuilder/CampaignBuilderContext";
-import { CampaignStepStateKey } from "@/types/campaignStepState";
+import {
+  CampaignStepStateKey,
+  GeneratorBriefDto,
+} from "@/types/campaignStepState";
+import { useS3Upload, FILE_TYPES } from "@/hooks/useS3Upload";
+import ImagePreviewButton from "./ImagePreviewButton";
 
 const { Text } = Typography;
 
@@ -32,25 +41,62 @@ const TemplateGenerator: React.FC<TemplateGeneratorProps> = ({
         businessResults: generator.businessResults,
         keyMessages: generator.keyMessages,
         cta: generator.cta,
-        // photo not prefilled (Upload shows custom UI); hook up when you store a file id
       });
       setCanGoNext(true);
     }
   }, [generator, form, setCanGoNext]);
 
+  // Helper: ensure we always pass a full GeneratorBriefDto to setGenerator
+  const asFullGenerator = (
+    patch: Partial<GeneratorBriefDto>
+  ): GeneratorBriefDto => ({
+    // required fields with sensible defaults matching your initialValues
+    objective: generator?.objective ?? "Sales generation",
+    tone: generator?.tone ?? "Professional",
+    // optional fields – keep previous if any
+    businessResults: generator?.businessResults ?? "",
+    keyMessages: generator?.keyMessages ?? "",
+    cta: generator?.cta ?? "",
+    photoFileId: generator?.photoFileId,
+    // apply patch last
+    ...patch,
+  });
+
+  // Photo upload via shared hook — only persist photoId
+  const { uploading, beforeUpload, customRequest, deleteById } = useS3Upload({
+    fileType: FILE_TYPES.CAMPAIGN_PHOTO,
+    maxSizeMB: 5,
+    acceptMimes: ["image/"], // any image/*
+    onAfterRegister: (reg) => {
+      setGenerator(asFullGenerator({ photoFileId: reg.id }), true);
+      messageApi.success("Photo uploaded");
+    },
+    onError: (e) => messageApi.error(e.message),
+  });
+
+  const handleRemovePhoto = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const id = generator?.photoFileId;
+    try {
+      if (id) await deleteById(id);
+    } finally {
+      setGenerator(asFullGenerator({ photoFileId: undefined }), true);
+      messageApi.success("Photo removed");
+    }
+  };
+
   const onFinish = async (values: any) => {
     try {
       // 1) save into stepState so backend can read it later
       setGenerator(
-        {
+        asFullGenerator({
           objective: values.objective,
           tone: values.tone,
           businessResults: values.businessResults,
           keyMessages: values.keyMessages,
           cta: values.cta,
-          // If you later upload a photo to the backend, store its fileId here:
-          // photoFileId: values.photo?.[0]?.response?.id,
-        },
+        }),
         true
       );
 
@@ -89,8 +135,6 @@ const TemplateGenerator: React.FC<TemplateGeneratorProps> = ({
     }
   };
 
-  const photoList = Form.useWatch("photo", form);
-
   return (
     <div className={styles.templateGenerator}>
       {contextHolder}
@@ -106,8 +150,6 @@ const TemplateGenerator: React.FC<TemplateGeneratorProps> = ({
           cta: generator?.cta,
         }}
       >
-        {/* … the rest of your form stays the same … */}
-        {/* (unchanged markup below) */}
         <div className={styles.formSection}>
           <Text strong style={{ display: "block", marginBottom: 16 }}>
             Let’s create a template for the campaign
@@ -177,31 +219,45 @@ const TemplateGenerator: React.FC<TemplateGeneratorProps> = ({
             />
           </Form.Item>
 
-          <Form.Item
-            name="photo"
-            label="Campaign photo:"
-            valuePropName="fileList"
-            getValueFromEvent={(e) =>
-              (Array.isArray(e) ? e : e?.fileList)?.slice(0, 1) || []
-            }
-          >
+          {/* Campaign photo via shared S3 uploader — only photoId in step state */}
+          <Form.Item label="Campaign photo:">
             <Upload
               accept="image/*"
-              beforeUpload={(file) => {
-                const isImage = file.type.startsWith("image/");
-                const isLt5M = file.size / 1024 / 1024 < 5;
-                if (!isImage) messageApi.error("Please upload an image file");
-                if (!isLt5M) messageApi.error("Image must be smaller than 5MB");
-                return false; // prevent auto-upload for now
-              }}
+              beforeUpload={beforeUpload}
+              customRequest={customRequest}
               maxCount={1}
               showUploadList={false}
+              disabled={uploading}
             >
               <div className={styles.uploadInputBox}>
-                <span>{photoList?.[0]?.name || "Upload image here"}</span>
-                <PlusCircleOutlined className={styles.uploadPlus} />
+                <span>
+                  {generator?.photoFileId
+                    ? "Image uploaded"
+                    : "Upload image here"}
+                </span>
+                {generator?.photoFileId ? (
+                  <span>
+                    <Button
+                      type="link"
+                      size="small"
+                      onClick={handleRemovePhoto}
+                      danger
+                      icon={<DeleteOutlined />}
+                    />
+                  </span>
+                ) : (
+                  <PlusCircleOutlined className={styles.uploadPlus} />
+                )}
               </div>
             </Upload>
+            <ImagePreviewButton
+              fileId={generator?.photoFileId}
+              text="Preview"
+              modalTitle="Campaign photo"
+              // Optional: auto-open as soon as a new photo is uploaded
+              // autoOpenOnChange
+              buttonProps={{ type: "link", size: "small" }}
+            />
           </Form.Item>
 
           <Form.Item

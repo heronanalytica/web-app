@@ -59,8 +59,7 @@ export interface GeneratorBriefDto {
   businessResults: string;
   keyMessages: string;
   cta: string;
-  photoFileId?: string;   // optional: if you later pipe the uploaded image to backend
-  templateName?: string;  // optional: if user names the template in preview
+  photoFileId?: string;
 }
 
 export interface CampaignStepState {
