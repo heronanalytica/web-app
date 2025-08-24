@@ -29,6 +29,8 @@ import { DatabaseService } from 'src/database/database.service';
 import { GenerateVariantsDto } from './dto/generate-variants.dto';
 import {
   CommonTemplateDto,
+  CompanyProfileDto,
+  GeneratorBriefDto,
   StepStateDto,
 } from 'src/campaign/dto/campaign-step-state.dto';
 import { buildEmailFromBriefPrompt } from './prompts/email-from-brief.prompt';
@@ -36,7 +38,7 @@ import { EmailVariantSchema } from './validation/email-variant.schema';
 import { Prisma } from 'generated/prisma';
 import { instanceToPlain } from 'class-transformer';
 import { buildCommonTemplatePrompt } from './prompts/common-template.prompt';
-import { isJsonObject } from 'src/utils';
+import { sanitizeEmailHtml } from 'src/utils/sanitize';
 
 @Injectable()
 export class AiMarketingService {
@@ -157,13 +159,13 @@ export class AiMarketingService {
       select: { stepState: true },
     });
 
-    const ss = (campaign.stepState ?? {}) as StepStateDto;
-    const brief = ss.generator;
+    const ss = (campaign.stepState ?? {}) as Record<string, unknown>;
+    const brief = (ss?.generator ?? null) as GeneratorBriefDto;
     if (!brief)
       throw new Error('Missing generator brief in stepState.generator');
 
     const prompt = buildCommonTemplatePrompt({
-      companyProfile: ss.companyProfile,
+      companyProfile: ss.companyProfile as CompanyProfileDto,
       brief,
     });
 
@@ -178,36 +180,10 @@ export class AiMarketingService {
       maxTokens: 1200,
     });
 
-    const commonTemplateJson: Prisma.JsonObject = {
-      subject: ai.subject,
-      html: ai.html,
+    return {
+      subject: ai.subject ?? '',
+      html: sanitizeEmailHtml(ai.html ?? ''),
     };
-
-    const currentState: Prisma.JsonObject = isJsonObject(
-      campaign.stepState as unknown as Prisma.JsonValue,
-    )
-      ? (campaign.stepState as Prisma.JsonObject)
-      : {};
-
-    const nextState: Prisma.JsonObject = {
-      ...currentState,
-      commonTemplate: commonTemplateJson,
-    };
-
-    await this.db.campaign.update({
-      where: { id: campaignId },
-      data: {
-        stepState: nextState as Prisma.InputJsonValue,
-        lastSavedAt: new Date(),
-      },
-    });
-
-    // For callers that want typed data back
-    const result: CommonTemplateDto = {
-      subject: ai.subject,
-      html: ai.html,
-    };
-    return result;
   }
 
   /**

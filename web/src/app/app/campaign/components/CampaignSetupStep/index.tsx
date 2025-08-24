@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, Tabs, Typography } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import styles from "./styles.module.scss";
 import TemplateGenerator from "./components/TemplateGenerator";
 import TemplatePreview from "./components/TemplatePreview";
+import { useCampaignBuilder } from "../CampaignBuilder/CampaignBuilderContext";
+import { fetcher } from "@/lib/fetcher";
 
 const { Text } = Typography;
 
@@ -28,11 +30,6 @@ const GenerateTemplateTab = () => {
     setGeneratedTemplate(template);
   };
 
-  const handleUseTemplate = () => {
-    // TODO: Implement template usage logic
-    console.log("Using template:", { content: generatedTemplate });
-  };
-
   return (
     <div className={styles.templateGenerator}>
       {!generatedTemplate ? (
@@ -41,7 +38,6 @@ const GenerateTemplateTab = () => {
         <TemplatePreview
           template={generatedTemplate}
           onRegenerate={() => setGeneratedTemplate(null)}
-          onUseTemplate={handleUseTemplate}
         />
       )}
     </div>
@@ -61,6 +57,17 @@ const CampaignSetupStep: React.FC = () => {
       children: <UploadTemplate />,
     },
   ];
+
+  const { campaign, registerBeforeNext, save } = useCampaignBuilder();
+  useEffect(() => {
+    registerBeforeNext(async () => {
+      // ensure latest brief is persisted before the server reads stepState
+      await save();
+      if (!campaign?.id) return;
+      await fetcher.post(`/api/campaigns/${campaign.id}/common-template`);
+    });
+    return () => registerBeforeNext(null);
+  }, [campaign?.id, registerBeforeNext, save]);
 
   return (
     <div className={styles.container}>

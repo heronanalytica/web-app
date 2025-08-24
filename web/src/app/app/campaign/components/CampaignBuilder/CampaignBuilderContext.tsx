@@ -23,6 +23,8 @@ export interface CampaignBuilderContextType {
     saveAfter?: boolean
   ) => void;
   removeStepState: <K extends keyof CampaignStepState>(key: K) => void;
+  registerBeforeNext: (fn: (() => Promise<void>) | null) => void;
+  runBeforeNext: () => Promise<void>;
 }
 
 const CampaignBuilderContext = createContext<
@@ -65,12 +67,22 @@ export const CampaignBuilderProvider: React.FC<{
       : 0
   );
   const [canGoNext, setCanGoNext] = useState(false);
-
   const [stepState, setStepState] = useState<CampaignStepState>(
     (campaign && (campaign as any).stepState) || {}
   );
-
   const canGoBack = currentStep > 0;
+  const beforeNextRef = React.useRef<null | (() => Promise<void>)>(null);
+  const registerBeforeNext = React.useCallback(
+    (fn: (() => Promise<void>) | null) => {
+      beforeNextRef.current = fn;
+    },
+    []
+  );
+  const runBeforeNext = React.useCallback(async () => {
+    if (beforeNextRef.current) {
+      await beforeNextRef.current();
+    }
+  }, []);
 
   // Implement discard: context-aware Modal
   const router = useRouter();
@@ -144,6 +156,8 @@ export const CampaignBuilderProvider: React.FC<{
     setStepState,
     updateStepState,
     removeStepState,
+    registerBeforeNext,
+    runBeforeNext,
   };
 
   return (

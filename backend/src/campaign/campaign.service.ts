@@ -6,12 +6,13 @@ import {
   UpdateDraftCampaignDto,
 } from './dto/campaign-draft.dto';
 import { Prisma } from 'generated/prisma';
-import { instanceToPlain } from 'class-transformer';
-import { getCol, isJsonObject, omit, slug } from 'src/utils';
-import { CompanyProfileDto, StepStateDto } from './dto/campaign-step-state.dto';
+import { getCol, isJsonObject, omit, slug, toJsonValue } from 'src/utils';
+import { StepStateDto } from './dto/campaign-step-state.dto';
 import { ImportClassifiedDto } from './dto/import-classified.dto';
 import * as Papa from 'papaparse';
 import { AiMarketingService } from 'src/ai-marketing/ai-marketing.service';
+import { merge } from 'lodash';
+import { sanitizeStepStateForStorage } from 'src/utils/sanitize';
 
 const campaignInclude = {
   user: { select: { id: true, email: true } },
@@ -121,16 +122,28 @@ export class CampaignService {
 
   async updateDraftCampaign(userId: string, dto: UpdateDraftCampaignDto) {
     const { id, name, currentStep, status } = dto;
-
-    // ensure the row belongs to the user (and keep update()'s where unique)
     await this.dbService.campaign.findFirstOrThrow({ where: { id, userId } });
 
-    let companyProfileId: string | undefined;
-    if (dto.stepState && typeof dto.stepState === 'object') {
-      const rawState = instanceToPlain(dto.stepState);
-      if ((rawState?.companyProfile as CompanyProfileDto)?.id) {
-        companyProfileId = (rawState?.companyProfile as CompanyProfileDto).id;
-      }
+    // read existing state
+    const current = await this.dbService.campaign.findUnique({
+      where: { id },
+      select: { stepState: true },
+    });
+
+    // compute merged state if stepState present in dto
+    let mergedSafe: Prisma.InputJsonValue | undefined;
+    if (dto.stepState !== undefined) {
+      const existing =
+        current && isJsonObject(current.stepState)
+          ? (current.stepState as Record<string, unknown>)
+          : {};
+      const incoming = isJsonObject(dto.stepState as any)
+        ? (dto.stepState as Record<string, unknown>)
+        : {};
+
+      const merged = merge({}, existing, incoming);
+      const sanitized = sanitizeStepStateForStorage(merged);
+      mergedSafe = toJsonValue(sanitized);
     }
 
     return this.dbService.campaign.update({
@@ -142,22 +155,13 @@ export class CampaignService {
         Object.values(CampaignStatus).includes(status as CampaignStatus)
           ? { status: status as CampaignStatus }
           : {}),
-        ...(dto.stepState !== undefined
-          ? {
-              stepState: instanceToPlain(
-                dto.stepState,
-              ) as Prisma.InputJsonValue,
-            }
-          : {}),
+        ...(mergedSafe !== undefined ? { stepState: mergedSafe } : {}),
         ...(dto.analysisSteps !== undefined
           ? {
               analysisSteps:
                 dto.analysisSteps as unknown as Prisma.InputJsonValue,
             }
           : {}),
-        ...(companyProfileId
-          ? { companyProfileId }
-          : { companyProfileId: null }),
         lastSavedAt: new Date(),
       },
       include: campaignInclude,
@@ -292,6 +296,50 @@ export class CampaignService {
       where: { id: campaignId },
       data: { analysisSteps: updated as Prisma.InputJsonValue },
     });
+  }
+
+  /**
+   * Single call used by the UI:
+   *  - ask AI for the common template (no writes)
+   *  - deep-merge into existing stepState
+   *  - persist
+   */
+  async generateAndPersistCommonTemplate(userId: string, campaignId: string) {
+    // 1) generate (returns {subject, html})
+    const tpl = await this.aiMarketing.generateCommonTemplate(
+      userId,
+      campaignId,
+    );
+
+    // 2) load current state
+    const row = await this.dbService.campaign.findFirstOrThrow({
+      where: { id: campaignId, userId },
+      select: { stepState: true },
+    });
+
+    const existing = isJsonObject(row.stepState)
+      ? (row.stepState as Record<string, unknown>)
+      : {};
+
+    // 3) merge (server is the source of truth; we preserve all prior keys)
+    const merged = merge({}, existing, {
+      commonTemplate: { subject: tpl.subject, html: tpl.html },
+    });
+
+    // 4) sanitize + coerce to JSON
+    const sanitized = sanitizeStepStateForStorage(merged);
+    const safe = toJsonValue(sanitized);
+
+    // 5) persist
+    await this.dbService.campaign.update({
+      where: { id: campaignId },
+      data: {
+        stepState: safe,
+        lastSavedAt: new Date(),
+      },
+    });
+
+    return tpl; // return the template to the client if you want to preview it
   }
 
   async prepareCampaign(userId: string, campaignId: string) {

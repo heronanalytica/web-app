@@ -49,6 +49,7 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
     canGoBack,
     discard,
     save,
+    runBeforeNext,
   } = useCampaignBuilder();
   const [saveLoading, setSaveLoading] = React.useState(false);
   const [messageApi, contextHolder] = message.useMessage();
@@ -65,12 +66,16 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
   const handleNext = async () => {
     if (canGoNext) {
       try {
+        setSaveLoading(true);
+        await runBeforeNext();
         setCurrentStep(currentStep + 1);
         setPendingSave(true);
       } catch (err: any) {
         messageApi.error(
           err?.message || "There was an error auto save the campaign"
         );
+      } finally {
+        setSaveLoading(false);
       }
     }
   };

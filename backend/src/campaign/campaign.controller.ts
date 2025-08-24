@@ -197,7 +197,7 @@ export class CampaignController {
   async generateCommonTemplate(@Req() req: Request, @Param('id') id: string) {
     const userId = req.user?.id;
     if (!userId) throw new UnauthorizedException();
-    const data = await this.aiMarketingService.generateCommonTemplate(
+    const data = await this.campaignService.generateAndPersistCommonTemplate(
       userId,
       id,
     );

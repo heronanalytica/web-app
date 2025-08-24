@@ -5,7 +5,6 @@ import styles from "../../styles.module.scss";
 interface TemplatePreviewProps {
   template: string;
   onRegenerate: () => void;
-  onUseTemplate: () => void;
 }
 
 const TemplatePreview: React.FC<TemplatePreviewProps> = ({
