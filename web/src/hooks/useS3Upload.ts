@@ -43,8 +43,11 @@ export interface UseS3UploadOptions {
   acceptMimes?: string[]; // e.g. ["image/png","image/jpeg","text/csv"] or ["image/"]
   onAfterRegister?: (file: RegisteredFile) => void | Promise<void>;
   getExtraMeta?: (file: File) => Record<string, unknown>;
-  onSuccess?: (file: RegisteredFile) => void; // <- NEW
-  onError?: (error: Error, stage?: UploadStage) => void; // <- NEW
+  onSuccess?: (file: RegisteredFile) => void;
+  onError?: (error: Error, stage?: UploadStage) => void;
+  extraUploadBody?: {
+    isPublic?: boolean;
+  };
 }
 
 const getFileExtension = (filename: string): string =>
@@ -59,6 +62,7 @@ export function useS3Upload({
   getExtraMeta,
   onSuccess,
   onError,
+  extraUploadBody,
 }: UseS3UploadOptions) {
   const [uploading, setUploading] = useState(false);
   const [lastFile, setLastFile] = useState<RegisteredFile | null>(null);
@@ -124,6 +128,7 @@ export function useS3Upload({
                 fileType,
                 contentType,
                 fileExtension: getFileExtension(filename),
+                ...(extraUploadBody ?? {}),
               }
             ));
           } catch (e: any) {
@@ -196,7 +201,14 @@ export function useS3Upload({
         }
       })();
     },
-    [fileType, getExtraMeta, onAfterRegister, onSuccess, onError]
+    [
+      fileType,
+      getExtraMeta,
+      onAfterRegister,
+      onSuccess,
+      onError,
+      extraUploadBody,
+    ]
   );
 
   const deleteById = useCallback(

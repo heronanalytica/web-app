@@ -73,6 +73,7 @@ const TemplateGenerator: React.FC<TemplateGeneratorProps> = ({
       messageApi.success("Photo uploaded");
     },
     onError: (e) => messageApi.error(e.message),
+    extraUploadBody: { isPublic: true },
   });
 
   const handleRemovePhoto = async (e: React.MouseEvent) => {

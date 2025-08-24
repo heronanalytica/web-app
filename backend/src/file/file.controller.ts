@@ -49,6 +49,7 @@ export class FileController {
       contentType?: string;
       fileExtension?: string;
       assignedUserId?: string;
+      isPublic?: boolean;
     },
     @Req() req: Request,
   ) {
@@ -57,6 +58,7 @@ export class FileController {
       contentType = 'application/octet-stream',
       fileExtension,
       assignedUserId,
+      isPublic,
     } = body;
     const userId = req.user?.id;
     if (!userId) {
@@ -72,6 +74,7 @@ export class FileController {
         fileType,
         contentType,
         fileExtension,
+        { isPublic },
       ),
     };
   }
