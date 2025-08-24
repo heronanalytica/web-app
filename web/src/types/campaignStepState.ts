@@ -5,6 +5,7 @@ export enum CampaignStepStateKey {
   CompanyProfile = "companyProfile",
   Launched = "launched",
   Generator = "generator",
+  CommonTemplate = "commonTemplate",
 }
 
 export interface CustomerFileDto {
@@ -41,6 +42,12 @@ export interface GeneratedMarketingTone {
   summary: string;
 }
 
+export interface CommonTemplateDto {
+  subject: string;
+  html: string;
+  preheader: string;
+}
+
 export interface CompanyProfileDto {
   id: string;
   name: string;
@@ -69,4 +76,5 @@ export interface CampaignStepState {
   companyProfile?: CompanyProfileDto;
   launched?: boolean;
   generator?: GeneratorBriefDto;
+  commonTemplate?: CommonTemplateDto;
 }

@@ -67,13 +67,21 @@ export function sanitizeEmailHtml(html: string): string {
   return sanitizeHtml(html, htmlPolicy);
 }
 
+export function sanitizePlainText(s: string): string {
+  return sanitizeHtml(s ?? '', {
+    allowedTags: [],
+    allowedAttributes: {},
+  }).trim();
+}
+
 export function sanitizeStepStateForStorage(input: StepStateDto): StepStateDto {
-  if (!input?.commonTemplate?.html) return input;
+  if (!input?.commonTemplate) return input;
   return {
     ...input,
     commonTemplate: {
       ...input.commonTemplate,
-      html: sanitizeEmailHtml(input.commonTemplate.html),
+      preheader: sanitizePlainText(input.commonTemplate.preheader), // <-- new
+      html: input.commonTemplate.html,
     },
   };
 }

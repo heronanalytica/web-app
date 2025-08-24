@@ -3,7 +3,7 @@
 import React from "react";
 import { Card, Empty, Tag } from "antd";
 import { useRouter } from "next/navigation";
-import styles from "./style.module.scss";
+import styles from "./styles.module.scss";
 
 import { Campaign } from "@/types/campaign";
 

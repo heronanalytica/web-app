@@ -323,7 +323,11 @@ export class CampaignService {
 
     // 3) merge (server is the source of truth; we preserve all prior keys)
     const merged = merge({}, existing, {
-      commonTemplate: { subject: tpl.subject, html: tpl.html },
+      commonTemplate: {
+        subject: tpl.subject,
+        html: tpl.html,
+        preheader: tpl.preheader,
+      },
     });
 
     // 4) sanitize + coerce to JSON

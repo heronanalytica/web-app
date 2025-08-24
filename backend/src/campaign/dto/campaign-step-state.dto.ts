@@ -156,6 +156,7 @@ export class CompanyProfileDto {
 
 export class CommonTemplateDto {
   @IsString() subject: string;
+  @IsString() preheader: string;
   @IsString() html: string;
 }
 

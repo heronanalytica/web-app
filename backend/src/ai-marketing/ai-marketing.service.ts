@@ -38,7 +38,7 @@ import { EmailVariantSchema } from './validation/email-variant.schema';
 import { Prisma } from 'generated/prisma';
 import { instanceToPlain } from 'class-transformer';
 import { buildCommonTemplatePrompt } from './prompts/common-template.prompt';
-import { sanitizeEmailHtml } from 'src/utils/sanitize';
+import { sanitizePlainText } from 'src/utils/sanitize';
 
 @Injectable()
 export class AiMarketingService {
@@ -180,9 +180,13 @@ export class AiMarketingService {
       maxTokens: 1200,
     });
 
+    // const cleanHtml = sanitizeEmailHtml(ai.html);
+    const cleanPreheader = sanitizePlainText(ai.preheader);
+
     return {
       subject: ai.subject ?? '',
-      html: sanitizeEmailHtml(ai.html ?? ''),
+      html: ai.html,
+      preheader: cleanPreheader,
     };
   }
 
@@ -263,6 +267,7 @@ export class AiMarketingService {
         const baseTemplate = ss.commonTemplate
           ? ({
               subject: ss.commonTemplate.subject,
+              preheader: ss.commonTemplate.preheader,
               html: ss.commonTemplate.html,
             } as CommonTemplateDto)
           : undefined;

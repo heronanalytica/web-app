@@ -19,6 +19,7 @@ import { Campaign } from "@/types/campaign";
 import { CAMPAIGN_TOTAL_STEPS, stepTitles } from "./constants";
 import CompanyAndPersonasStep from "../CompanyAndPersonasStep";
 import CampaignSetupStep from "../CampaignSetupStep";
+import ReviewTemplateConfirmStep from "../ReviewTemplateConfirmStep";
 
 interface CampaignBuilderProps {
   campaign: Campaign | null;
@@ -109,6 +110,8 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
         return <CompanyAndPersonasStep />;
       case 5:
         return <CampaignSetupStep />;
+      case 6:
+        return <ReviewTemplateConfirmStep />;
       default:
         return (
           <div>
