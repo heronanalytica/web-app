@@ -158,6 +158,9 @@ export class CampaignController {
     return { error: 0, data };
   }
 
+  /**
+   * Attach classified persona file to a campaign
+   */
   @Patch(':id/classified-persona')
   @UseGuards(AdminGuard)
   async updateClassifiedPersona(
@@ -175,6 +178,9 @@ export class CampaignController {
     return { error: 0, data };
   }
 
+  /**
+   * Remove classified persona file from a campaign
+   */
   @Delete(':id/classified-persona')
   @UseGuards(AdminGuard)
   async removeClassifiedPersona(
@@ -184,6 +190,17 @@ export class CampaignController {
     if (!req.user?.id) throw new UnauthorizedException();
 
     const data = await this.campaignService.removeClassifiedPersona(id);
+    return { error: 0, data };
+  }
+
+  @Post(':id/common-template')
+  async generateCommonTemplate(@Req() req: Request, @Param('id') id: string) {
+    const userId = req.user?.id;
+    if (!userId) throw new UnauthorizedException();
+    const data = await this.aiMarketingService.generateCommonTemplate(
+      userId,
+      id,
+    );
     return { error: 0, data };
   }
 

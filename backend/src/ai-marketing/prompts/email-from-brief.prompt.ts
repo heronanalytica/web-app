@@ -1,6 +1,12 @@
+import {
+  CommonTemplateDto,
+  CompanyProfileDto,
+} from 'src/campaign/dto/campaign-step-state.dto';
+
+// backend/src/ai-marketing/prompts/email-from-brief.prompt.ts
 export function buildEmailFromBriefPrompt(params: {
   persona: { name: string; code: string; description?: string | null };
-  companyProfile?: any;
+  companyProfile?: CompanyProfileDto;
   brief: {
     objective: string;
     tone: string;
@@ -8,12 +14,11 @@ export function buildEmailFromBriefPrompt(params: {
     businessResults?: string;
     cta?: string;
   };
+  baseTemplate?: CommonTemplateDto;
 }) {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const { persona, companyProfile, brief } = params;
+  const { persona, companyProfile, brief, baseTemplate } = params;
   return `
-    Return ONLY valid JSON:
-    { "subject": "string", "html": "<!doctype html>...single-CTA..." }
+    Return ONLY valid JSON: { "subject": "string", "html": "<!doctype html>..." }
 
     Persona:
     ${JSON.stringify(persona, null, 2)}
@@ -24,9 +29,11 @@ export function buildEmailFromBriefPrompt(params: {
     Brief:
     ${JSON.stringify(brief, null, 2)}
 
+    BaseTemplate (optional):
+    ${JSON.stringify(baseTemplate ?? null, null, 2)}
+
     Rules:
-    - Tone aligns with brief.tone and company profile.
-    - Skimmable HTML, inline styles, accessible, exactly 1 CTA button.
-    - No external CSS, no unsubscribe block.
+    - If BaseTemplate is provided, preserve its overall structure/sections and CTA style while adapting copy to the persona.
+    - Tone must match brief.tone and brand voice. One clear CTA. Inline styles. No external CSS/unsubscribe.
     `.trim();
 }

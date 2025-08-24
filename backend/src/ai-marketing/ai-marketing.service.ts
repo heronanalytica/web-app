@@ -27,11 +27,16 @@ import { SYSTEM_PROMPTS } from './prompts/system-prompts';
 import { callOpenAiAndParse } from './helpers/openai.helper';
 import { DatabaseService } from 'src/database/database.service';
 import { GenerateVariantsDto } from './dto/generate-variants.dto';
-import { StepStateDto } from 'src/campaign/dto/campaign-step-state.dto';
+import {
+  CommonTemplateDto,
+  StepStateDto,
+} from 'src/campaign/dto/campaign-step-state.dto';
 import { buildEmailFromBriefPrompt } from './prompts/email-from-brief.prompt';
 import { EmailVariantSchema } from './validation/email-variant.schema';
 import { Prisma } from 'generated/prisma';
 import { instanceToPlain } from 'class-transformer';
+import { buildCommonTemplatePrompt } from './prompts/common-template.prompt';
+import { isJsonObject } from 'src/utils';
 
 @Injectable()
 export class AiMarketingService {
@@ -143,6 +148,69 @@ export class AiMarketingService {
   }
 
   /**
+   * Generate a "common" (non-persona) email template from the stored brief (+companyProfile),
+   * save it into campaign.stepState.commonTemplate, and return it.
+   */
+  async generateCommonTemplate(userId: string, campaignId: string) {
+    const campaign = await this.db.campaign.findFirstOrThrow({
+      where: { id: campaignId, userId },
+      select: { stepState: true },
+    });
+
+    const ss = (campaign.stepState ?? {}) as StepStateDto;
+    const brief = ss.generator;
+    if (!brief)
+      throw new Error('Missing generator brief in stepState.generator');
+
+    const prompt = buildCommonTemplatePrompt({
+      companyProfile: ss.companyProfile,
+      brief,
+    });
+
+    const ai = await callOpenAiAndParse({
+      user: `common-template-${campaignId}`,
+      prompt,
+      schema: EmailVariantSchema, // { subject, html }
+      systemPrompt:
+        'You are a world-class email copywriter and HTML email coder.',
+      model: 'gpt-4o',
+      temperature: 0.4,
+      maxTokens: 1200,
+    });
+
+    const commonTemplateJson: Prisma.JsonObject = {
+      subject: ai.subject,
+      html: ai.html,
+    };
+
+    const currentState: Prisma.JsonObject = isJsonObject(
+      campaign.stepState as unknown as Prisma.JsonValue,
+    )
+      ? (campaign.stepState as Prisma.JsonObject)
+      : {};
+
+    const nextState: Prisma.JsonObject = {
+      ...currentState,
+      commonTemplate: commonTemplateJson,
+    };
+
+    await this.db.campaign.update({
+      where: { id: campaignId },
+      data: {
+        stepState: nextState as Prisma.InputJsonValue,
+        lastSavedAt: new Date(),
+      },
+    });
+
+    // For callers that want typed data back
+    const result: CommonTemplateDto = {
+      subject: ai.subject,
+      html: ai.html,
+    };
+    return result;
+  }
+
+  /**
    * Generate subject/html for a persona from the stored brief+companyProfile.
    * Persists CampaignEmailVariant and links CampaignRecipient.variantId.
    */
@@ -216,10 +284,18 @@ export class AiMarketingService {
       }
 
       try {
+        const baseTemplate = ss.commonTemplate
+          ? ({
+              subject: ss.commonTemplate.subject,
+              html: ss.commonTemplate.html,
+            } as CommonTemplateDto)
+          : undefined;
+
         const prompt = buildEmailFromBriefPrompt({
           persona,
           companyProfile,
           brief,
+          baseTemplate, // use the common template
         });
 
         const ai = await callOpenAiAndParse({

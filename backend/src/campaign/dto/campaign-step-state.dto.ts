@@ -154,6 +154,11 @@ export class CompanyProfileDto {
   marketingContentFileId?: string | null;
 }
 
+export class CommonTemplateDto {
+  @IsString() subject: string;
+  @IsString() html: string;
+}
+
 export class StepStateDto {
   @IsOptional()
   @ValidateNested()
@@ -179,6 +184,11 @@ export class StepStateDto {
   @ValidateNested()
   @Type(() => CompanyProfileDto)
   companyProfile?: CompanyProfileDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => CommonTemplateDto)
+  commonTemplate?: CommonTemplateDto;
 
   @IsOptional()
   @ValidateNested()
