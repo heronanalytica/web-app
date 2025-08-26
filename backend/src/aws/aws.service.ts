@@ -46,9 +46,13 @@ export class AwsService {
     return this.s3Bucket;
   }
 
-  private publicHttpUrlForKey(key: string) {
-    // virtual-hosted–style URL
+  public buildPublicHttpUrl(key: string) {
     return `https://${this.s3Bucket}.s3.${this.region}.amazonaws.com/${encodeURI(key)}`;
+  }
+
+  public async getPresignedViewUrl(key: string, expiresIn = 3600 * 24 * 7) {
+    const cmd = new GetObjectCommand({ Bucket: this.s3Bucket, Key: key });
+    return getSignedUrl(this.s3Service, cmd, { expiresIn });
   }
 
   /**

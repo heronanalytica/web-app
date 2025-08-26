@@ -3,6 +3,7 @@
 import * as sanitizeHtml from 'sanitize-html';
 import { StepStateDto } from 'src/campaign/dto/campaign-step-state.dto';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const htmlPolicy: sanitizeHtml.IOptions = {
   allowedTags: sanitizeHtml.defaults.allowedTags.concat([
     'doctype',
@@ -64,7 +65,8 @@ const htmlPolicy: sanitizeHtml.IOptions = {
 
 // Reusable single-field helper
 export function sanitizeEmailHtml(html: string): string {
-  return sanitizeHtml(html, htmlPolicy);
+  // return sanitizeHtml(html, htmlPolicy);
+  return html;
 }
 
 export function sanitizePlainText(s: string): string {

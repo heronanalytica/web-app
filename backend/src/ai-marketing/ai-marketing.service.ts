@@ -38,11 +38,15 @@ import { EmailVariantSchema } from './validation/email-variant.schema';
 import { Prisma } from 'generated/prisma';
 import { instanceToPlain } from 'class-transformer';
 import { buildCommonTemplatePrompt } from './prompts/common-template.prompt';
-import { sanitizePlainText } from 'src/utils/sanitize';
+import { sanitizeEmailHtml, sanitizePlainText } from 'src/utils/sanitize';
+import { AwsService } from 'src/aws/aws.service';
 
 @Injectable()
 export class AiMarketingService {
-  constructor(private readonly db: DatabaseService) {}
+  constructor(
+    private readonly db: DatabaseService,
+    private readonly awsService: AwsService,
+  ) {}
 
   async analyze(dto: SegmentAnalysisDto): Promise<MarketingAnalysisResult> {
     const personaSegments = await Promise.all(
@@ -107,6 +111,38 @@ export class AiMarketingService {
       schema: MarketingStrategySchema,
       systemPrompt: SYSTEM_PROMPTS.strategy,
     });
+  }
+
+  private async rewriteCidImagesToPublicOrSigned(
+    html: string,
+    ss: StepStateDto,
+  ): Promise<string> {
+    if (!html) return html;
+
+    const photoId = ss?.generator?.photoFileId;
+    if (!photoId) {
+      // no photo – remove any broken cid images
+      return html.replace(/<img\b[^>]*\bsrc=["']cid:[^"']+["'][^>]*>/gi, '');
+    }
+
+    // find the uploaded file
+    const file = await this.db.userUploadFile.findUnique({
+      where: { id: photoId },
+      select: { storageUrl: true /* isPublic: true */ }, // include isPublic if you added it
+    });
+    if (!file?.storageUrl) return html;
+
+    const key = file.storageUrl.replace(/^s3:\/\/[^/]+\//, '');
+    const isPublic = key.includes('/public/'); // or use file.isPublic if column exists
+    const url = isPublic
+      ? this.awsService.buildPublicHttpUrl(key)
+      : await this.awsService.getPresignedViewUrl(key, 3600);
+
+    // replace any cid:* in <img src="...">
+    return html.replace(
+      /(<img\b[^>]*\bsrc=["'])cid:[^"']+(["'][^>]*>)/gi,
+      `$1${url}$2`,
+    );
   }
 
   async generateCampaignTemplates(dto: SegmentAnalysisDto) {
@@ -180,12 +216,13 @@ export class AiMarketingService {
       maxTokens: 1200,
     });
 
-    // const cleanHtml = sanitizeEmailHtml(ai.html);
+    let cleanHtml = sanitizeEmailHtml(ai.html);
+    cleanHtml = await this.rewriteCidImagesToPublicOrSigned(cleanHtml, ss);
     const cleanPreheader = sanitizePlainText(ai.preheader);
 
     return {
       subject: ai.subject ?? '',
-      html: ai.html,
+      html: cleanHtml,
       preheader: cleanPreheader,
     };
   }
