@@ -125,6 +125,7 @@ const TemplateGenerator: React.FC<TemplateGeneratorProps> = ({
 
       const html = `
         <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto; padding: 24px;">
+          <p style="margin:0 0 12px 0"><strong>Campaign Image:</strong></p>
           ${photoHtml}
           <p style="margin:0 0 6px 0"><strong>Objective:</strong> ${
             values.objective
@@ -137,9 +138,10 @@ const TemplateGenerator: React.FC<TemplateGeneratorProps> = ({
             /\n/g,
             "<br/>"
           )}</p>
+          <p style="margin:0 0 12px 0"><strong>Call to action:</strong></p>
           ${
             values.cta
-              ? `<div style="text-align:center;margin:24px 0">
+              ? `<div style="margin:24px 0">
                     <a href="#" style="display:inline-block;padding:12px 20px;border-radius:6px;background:#6759ff;color:#fff;text-decoration:none;font-weight:600">${values.cta}</a>
                   </div>`
               : ""

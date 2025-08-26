@@ -64,10 +64,16 @@ const CampaignSetupStep: React.FC = () => {
       // ensure latest brief is persisted before the server reads stepState
       await save();
       if (!campaign?.id) return;
+      if (campaign.stepState?.commonTemplate?.html) return;
       await fetcher.post(`/api/campaigns/${campaign.id}/common-template`);
     });
     return () => registerBeforeNext(null);
-  }, [campaign?.id, registerBeforeNext, save]);
+  }, [
+    campaign?.id,
+    campaign?.stepState?.commonTemplate?.html,
+    registerBeforeNext,
+    save,
+  ]);
 
   return (
     <div className={styles.container}>
