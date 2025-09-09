@@ -1,0 +1,91 @@
+[
+  {
+    "code": "young_urban_professional",
+    "name": "Young Urban Professional",
+    "demographics": {
+      "Age": "25",
+      "Education": "Bachelor’s degree",
+      "Gender": "Female",
+      "Location": "US",
+      "Income": "$100,000 - $150,000"
+    },
+    "bio": {
+      "Bio": "Olivia is a 32 year old U.S. professional scaling the corporate ladder and proudly owning her first suburban home. Weeknights revolve around streaming dramas and planning her next promotion. She’s ambitious but spontaneously treats herself when a reward feels deserved."
+    },
+    "psychographics": {
+      "Belief": "Believes success and influence (Power, Achievement) are benchmarks of a life well lived.",
+      "Lifestyle": "No daily/never flags—routine is varied but screen-centric after work.",
+      "Value": "She’s driven by career success and status, not leisure or social causes.",
+      "Attitude": "Neutral overall"
+    },
+    "media_engagement_purchase_behavior": {
+      "Most-consumed channel": "Social media and YouTube (primary news source)",
+      "Least-consumed channel": "Podcasts/audio (not used)",
+      "Research": "Turns to online reviews for trusted information."
+    },
+    "Personality": {
+      "Personality": "Low Conscientiousness hints at a flexible, sometimes impulsive approach despite career ambitions; other traits are moderate."
+    },
+    "toneGuidelines": "Friendly, straightforward, reassuring",
+    "ctaExamples": [
+      "Get a free quote",
+      "Book now"
+    ],
+    "channelHints": [
+      "Email",
+      "Search ads",
+      "Local Maps"
+    ],
+    "tags": [
+      "price-sensitive",
+      "local",
+      "trust-seeking"
+    ],
+    "version": "1.0.0"
+  },
+  {
+    "code": "retired_traditionalist",
+    "name": "Retired Traditionalist",
+    "demographics": {
+      "Age": "68",
+      "Education": "High school diploma",
+      "Gender": "Male",
+      "Location": "Midwest US (suburban)",
+      "Income": "Fixed retirement income (pension + savings)"
+    },
+    "bio": {
+      "Bio": "Richard is a 68-year-old retired factory supervisor who enjoys a slower pace of life. He values family dinners, gardening, and the comfort of long-standing routines. He prefers in-person interactions and trusts companies that have been around for decades."
+    },
+    "psychographics": {
+      "Belief": "Believes tradition, reliability, and respect for authority are guiding principles.",
+      "Lifestyle": "Daily routines centered on home, church, and family. Leisure time is spent watching TV news, caring for the yard, and occasional travel to visit relatives.",
+      "Value": "Stability, trustworthiness, and proven quality are more important than novelty or status.",
+      "Attitude": "Conservative, cautious decision-maker who avoids unnecessary risks."
+    },
+    "media_engagement_purchase_behavior": {
+      "Most-consumed channel": "Television and local newspapers",
+      "Least-consumed channel": "Social media (rarely used)",
+      "Research": "Relies on word-of-mouth, family recommendations, and recognizable brand names."
+    },
+    "Personality": {
+      "Personality": "High Conscientiousness and Agreeableness, with lower Openness to new experiences. Prefers clear, simple options without too many choices."
+    },
+    "toneGuidelines": "Respectful, simple, reassuring, trustworthy",
+    "ctaExamples": [
+      "Call today",
+      "Learn more",
+      "Visit us"
+    ],
+    "channelHints": [
+      "Direct mail",
+      "TV ads",
+      "Local newspaper"
+    ],
+    "tags": [
+      "conservative",
+      "risk-averse",
+      "brand-loyal"
+    ],
+    "version": "1.0.0"
+  }
+]

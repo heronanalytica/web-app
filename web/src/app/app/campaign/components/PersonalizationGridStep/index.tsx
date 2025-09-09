@@ -1,15 +1,5 @@
-import React, { useMemo, useState } from "react";
-import {
-  Input,
-  List,
-  Tag,
-  Typography,
-  Card,
-  Space,
-  Skeleton,
-  Empty,
-  Button,
-} from "antd";
+import { useMemo, useState } from "react";
+import { Button, Card, Empty, Input, List, Space, Typography, Tag, Skeleton } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import { useCampaignBuilder } from "../CampaignBuilder/CampaignBuilderContext";
 import {
@@ -18,6 +8,7 @@ import {
 } from "@/hooks/useRenderedEmails";
 import styles from "./styles.module.scss";
 import EmailPreviewFrame from "@/app/app/components/EmailPreviewFrame";
+import PersonaDetails from "./PersonaDetails";
 
 const { Text } = Typography;
 
@@ -63,10 +54,20 @@ const PersonalizationGridStep: React.FC = () => {
     useRenderedEmails(campaignId);
 
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [viewingPersona, setViewingPersona] = useState<boolean>(false);
+
   const activeItem = useMemo(
     () => items.find((x) => x.id === activeId) ?? items[0],
     [items, activeId]
   );
+
+  const handleViewPersona = () => {
+    setViewingPersona(true);
+  };
+
+  const handleClosePersona = () => {
+    setViewingPersona(false);
+  };
 
   return (
     <div className={styles.grid}>
@@ -152,7 +153,12 @@ const PersonalizationGridStep: React.FC = () => {
               <div className={styles.headerRow}>
                 <RecipientCardHeader item={activeItem} />
                 <div>
-                  <Button>View Full Persona</Button>
+                  <Button
+                    onClick={handleViewPersona}
+                    disabled={!activeItem?.personaCode}
+                  >
+                    View Full Persona
+                  </Button>
                 </div>
               </div>
             </Card>
@@ -184,6 +190,12 @@ const PersonalizationGridStep: React.FC = () => {
           </>
         )}
       </div>
+
+      <PersonaDetails
+        visible={viewingPersona}
+        onClose={handleClosePersona}
+        personaCode={activeItem?.personaCode || null}
+      />
     </div>
   );
 };
