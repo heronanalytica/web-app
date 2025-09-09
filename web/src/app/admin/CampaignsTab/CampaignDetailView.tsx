@@ -92,6 +92,27 @@ export const CampaignDetailView: React.FC<CampaignDetailViewProps> = ({
     }
   }, [campaign, messageApi, updateCampaignStep]);
 
+  const handleNextFromTemplate = useCallback(async () => {
+    if (!campaign.id || !campaign.user?.id) return;
+    try {
+      setUpdatingStep("advance_template");
+      const nextStep = (campaign.currentStep ?? 0) + 1; // move to next
+      const updatedCampaign = await updateCampaignStep(
+        campaign.user.id,
+        campaign.id,
+        nextStep,
+        campaign.stepState || {}
+      );
+      setCampaign(updatedCampaign);
+      messageApi.success("Moved to next step");
+    } catch (error) {
+      console.error("Failed to advance step:", error);
+      messageApi.error("Failed to advance step");
+    } finally {
+      setUpdatingStep(undefined);
+    }
+  }, [campaign, messageApi, updateCampaignStep]);
+
   return (
     <div className={styles.container}>
       {contextHolder}
@@ -114,6 +135,7 @@ export const CampaignDetailView: React.FC<CampaignDetailViewProps> = ({
         onStepComplete={
           campaign.currentStep === 3 ? handleStepComplete : undefined
         }
+        onNextFromTemplate={handleNextFromTemplate}
         updatingStep={updatingStep}
       />
 

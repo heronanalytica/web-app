@@ -28,6 +28,7 @@ interface CampaignProgressCardProps {
   };
   onStatusUpdate: (stepKey: string, status: string) => void;
   onStepComplete?: () => void;
+  onNextFromTemplate?: () => void;
   updatingStep?: string;
 }
 
@@ -61,11 +62,13 @@ const CampaignProgressCard: React.FC<CampaignProgressCardProps> = ({
   campaign,
   onStatusUpdate,
   onStepComplete,
+  onNextFromTemplate,
   updatingStep,
 }) => {
   const allStepsDone =
     campaign.analysisSteps?.every((step) => step.status === "done") || false;
   const atAnalysisStep = campaign.currentStep === 3;
+  const atTemplateWaitingStep = campaign.currentStep === 7;
   const getStatusMenuItems = (): MenuProps["items"] => [
     {
       key: "waiting",
@@ -178,6 +181,18 @@ const CampaignProgressCard: React.FC<CampaignProgressCardProps> = ({
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {atTemplateWaitingStep && onNextFromTemplate && (
+          <div style={{ marginTop: 8 }}>
+            <Button
+              type="primary"
+              onClick={onNextFromTemplate}
+              loading={updatingStep === "advance_template"}
+            >
+              Next Step
+            </Button>
           </div>
         )}
       </Space>
