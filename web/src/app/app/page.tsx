@@ -4,59 +4,82 @@ import { ROUTES } from "@/constants/routes";
 import useAuth from "@/hooks/useAuth";
 import { Spin } from "antd";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import styles from "./styles.module.scss";
-import Steps from "./components/Steps";
-import IntakeQuestionStep from "./components/IntakeQuestionStep";
-import SurveyPreview from "./components/SurveyPreview";
-
-import { useSearchParams } from "next/navigation";
-import TestTableau from "./components/TestTableau";
+import CampaignList from "./components/CampaignList";
+import { useCampaign } from "@/hooks/useCampaign";
+import { Button, Modal, Input, message } from "antd";
 
 const App = () => {
+  const [messageApi, contextHolder] = message.useMessage();
+  const [modalOpen, setModalOpen] = React.useState(false);
+  const [campaignName, setCampaignName] = React.useState("");
+  const { createCampaign } = useCampaign();
   const router = useRouter();
   const { isAuthenticated, loading } = useAuth();
-  const [currentStep, setCurrentStep] = useState<number>(0);
-  const searchParams = useSearchParams();
-
-  const isTestingTableau = searchParams.get("test_tableau") === "true";
+  const { campaigns, loading: campaignLoading, fetchCampaigns } = useCampaign();
 
   useEffect(() => {
-    if (isTestingTableau) {
-      setCurrentStep(4);
+    if (isAuthenticated) {
+      fetchCampaigns();
     }
-  }, [isTestingTableau]);
-
-  if (loading) {
+  }, [fetchCampaigns, isAuthenticated]);
+  if (loading || campaignLoading) {
     return <Spin fullscreen />;
   }
-  if (!isTestingTableau && !isAuthenticated) {
+
+  if (!isAuthenticated) {
     router.push(ROUTES.LOGIN);
     return;
   }
 
-  const renderStepComponent = () => {
-    if (isTestingTableau) {
-      return <TestTableau />;
-    }
-
-    switch (currentStep) {
-      case 1:
-        return <SurveyPreview />;
-      default:
-        return (
-          <IntakeQuestionStep
-            onSuccess={() => setCurrentStep((value) => value + 1)}
-          />
-        );
+  const handleCreateCampaign = async () => {
+    if (!campaignName.trim()) return;
+    try {
+      const newCampaign = await createCampaign({ name: campaignName.trim() });
+      setModalOpen(false);
+      setCampaignName("");
+      messageApi.success("Campaign created!");
+      router.push(`/app/campaign/${newCampaign.id}`);
+    } catch {
+      messageApi.error("Failed to create campaign");
     }
   };
 
   return (
-    <div className={styles.appContainer}>
-      <Steps totalSteps={5} active={currentStep} />
-      <div className={styles.componentContainer}>{renderStepComponent()}</div>
-    </div>
+    <>
+      {contextHolder}
+      <div className={styles.appContainer}>
+        <div className={styles.headerRow}>
+          <h2 className={styles.headerTitle}>Campaigns</h2>
+          <Button
+            type="primary"
+            className={styles.newCampaignButton}
+            onClick={() => setModalOpen(true)}
+          >
+            New Campaign
+          </Button>
+          <Modal
+            title="Name your campaign"
+            open={modalOpen}
+            onOk={handleCreateCampaign}
+            onCancel={() => setModalOpen(false)}
+            okText="Create"
+            okButtonProps={{ disabled: !campaignName.trim() }}
+          >
+            <Input
+              placeholder="Campaign name"
+              value={campaignName}
+              onChange={(e) => setCampaignName(e.target.value)}
+              onPressEnter={handleCreateCampaign}
+              maxLength={100}
+              autoFocus
+            />
+          </Modal>
+        </div>
+        <CampaignList campaigns={campaigns || []} />
+      </div>
+    </>
   );
 };
 

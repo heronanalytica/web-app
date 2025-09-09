@@ -1,0 +1,49 @@
+.tableHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.error {
+  margin: 12px 0;
+  color: #ff4d4f;
+  font-weight: 500;
+}
+
+.table {
+  margin-top: 20px;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+}
+
+// These styles need to be moved to a global CSS file
+// as they target global Ant Design classes
+
+.analysisSteps {
+  margin-top: 16px;
+  width: 100%;
+}
+
+.stepsContainer {
+  margin-top: 16px;
+  padding: 0 16px;
+}
+
+// These styles need to be moved to a global CSS file
+// as they target global Ant Design classes
+.stepTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.stepLabel {
+  flex: 0 0 250px; // 👈 fixed width
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import { AntdRegistry } from "@ant-design/nextjs-registry";
-import { Drawer, Button, Flex } from "antd";
+import { Drawer, Button, Flex, Divider } from "antd";
 import HeronLogo from "./components/icons/HeronLogo";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -12,9 +12,15 @@ import {
   LinkedinFilled,
   MenuOutlined,
   TwitterCircleFilled,
+  UserOutlined,
+  LogoutOutlined,
 } from "@ant-design/icons";
+import { Dropdown } from "antd";
 import { motion } from "framer-motion";
+import styles from "./clientLayout.module.scss";
 import { ROUTES } from "@/constants/routes";
+import useAuth from "@/hooks/useAuth";
+import LoadingSession from "./components/LoadingSession";
 
 export default function ClientLayout({
   children,
@@ -25,13 +31,20 @@ export default function ClientLayout({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-  const showFooter = !pathname.startsWith("/app");
+  const { isAuthenticated, loading, logout } = useAuth();
+  const appRoutes =
+    pathname.startsWith(ROUTES.APP_HOMEPAGE) ||
+    pathname.startsWith(ROUTES.ADMIN_HOMEPAGE);
+  const showFooter = !appRoutes;
 
   useEffect(() => {
     const url = `${pathname}${searchParams ? `?${searchParams}` : ""}`;
     trackPageView(url); // Track the current page view
   }, [pathname, searchParams]);
+
+  if (loading) {
+    return <LoadingSession />;
+  }
 
   const toggleDrawer = () => {
     setIsDrawerOpen(!isDrawerOpen);
@@ -39,86 +52,77 @@ export default function ClientLayout({
 
   return (
     <AntdRegistry>
-      <Flex justify="space-between" vertical style={{ minHeight: "100vh" }}>
-        <div style={{ zIndex: 100 }}>
-          <div
-            style={{
-              height: "80px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "0 20px",
-              backgroundColor: "transparent",
-            }}
-          >
+      <Flex justify="space-between" vertical className={styles.layoutRoot}>
+        <div className={styles.headerWrap}>
+          <div className={styles.header}>
             {/* Dummy Mobile Hamburger Menu to style */}
-            <Button type="text" style={{ visibility: "hidden" }} />
+            <Button type="text" className={styles.hamburgerDummy} />
 
             {/* Logo */}
             <div
-              style={{
-                position: "absolute",
-                top: "0px",
-                left: "10px",
-              }}
+              className={styles.logoWrap}
               onClick={() => router.push(ROUTES.HOMEPAGE)}
             >
               <HeronLogo />
             </div>
 
             {/* Desktop Navigation */}
-            <div className="desktop-menu">
-              <Link
-                href={ROUTES.HOMEPAGE}
-                style={{
-                  color: "#000",
-                  margin: "0 15px",
-                  textDecoration: "unset",
-                }}
-              >
-                Home
-              </Link>
-              <Link
-                href={ROUTES.PRICING}
-                style={{
-                  color: "#000",
-                  margin: "0 15px",
-                  textDecoration: "unset",
-                }}
-              >
-                Pricing
-              </Link>
-              <Link
-                href={ROUTES.CONTACT}
-                style={{
-                  color: "#000",
-                  margin: "0 15px",
-                  textDecoration: "unset",
-                }}
-              >
-                Contact
-              </Link>
-            </div>
+            {!appRoutes && (
+              <div className={styles.desktopMenu}>
+                <Link href={ROUTES.HOMEPAGE} className={styles.navLink}>
+                  Home
+                </Link>
+                <Link href={ROUTES.PRICING} className={styles.navLink}>
+                  Pricing
+                </Link>
+                <Link href={ROUTES.CONTACT} className={styles.navLink}>
+                  Contact
+                </Link>
+              </div>
+            )}
 
-            {/* Login Button Desktop */}
-            <Button
-              className="desktop-login-btn"
-              color="default"
-              variant="solid"
-              size="large"
-              onClick={() => {
-                router.push(ROUTES.LOGIN);
-              }}
-            >
-              Login
-            </Button>
+            {/* Profile Icon Desktop */}
+            {!isAuthenticated ? (
+              <Button
+                className="desktop-login-btn"
+                color="default"
+                variant="solid"
+                size="large"
+                onClick={() => {
+                  router.push(ROUTES.LOGIN);
+                }}
+              >
+                Login
+              </Button>
+            ) : (
+              <Dropdown
+                menu={{
+                  items: [
+                    {
+                      key: 'logout',
+                      label: 'Logout',
+                      icon: <LogoutOutlined />,
+                      onClick: () => logout(),
+                    },
+                  ],
+                }}
+                trigger={['hover']}
+                placement="bottomRight"
+              >
+                <button
+                  type="button"
+                  aria-label="User menu"
+                  className={`${styles["desktop-only"]} ${styles.profileBtn}`}
+                >
+                  <UserOutlined className={styles.profileIcon} />
+                </button>
+              </Dropdown>
+            )}
 
             {/* Mobile Hamburger Menu */}
             <Button
               type="text"
-              icon={
-                <MenuOutlined style={{ fontSize: "24px", color: "#505F98" }} />
-              }
+              icon={<MenuOutlined className={styles.menuIcon} />}
               onClick={toggleDrawer}
               className="mobile-menu"
             />
@@ -131,38 +135,59 @@ export default function ClientLayout({
             onClose={toggleDrawer}
             open={isDrawerOpen}
           >
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "20px" }}
-            >
+            <div className={styles.drawerContent}>
+              <Link
+                href={ROUTES.APP_HOMEPAGE}
+                onClick={toggleDrawer}
+                className={styles.drawerLink}
+              >
+                Dashboard
+              </Link>
+              <Divider style={{ margin: 0 }} />
               <Link
                 href={ROUTES.HOMEPAGE}
                 onClick={toggleDrawer}
-                style={{ color: "#505F98" }}
+                className={styles.drawerLink}
               >
                 Home
               </Link>
               <Link
                 href={ROUTES.PRICING}
                 onClick={toggleDrawer}
-                style={{ color: "#505F98" }}
+                className={styles.drawerLink}
               >
                 Pricing
               </Link>
               <Link
                 href={ROUTES.CONTACT}
                 onClick={toggleDrawer}
-                style={{ color: "#505F98" }}
+                className={styles.drawerLink}
               >
                 Contact
               </Link>
-
-              <Link
-                href={ROUTES.LOGIN}
-                onClick={toggleDrawer}
-                style={{ color: "#505F98" }}
-              >
-                Login
-              </Link>
+              {!isAuthenticated ? (
+                <Link
+                  href={ROUTES.LOGIN}
+                  onClick={toggleDrawer}
+                  className={styles.drawerLink}
+                >
+                  Login
+                </Link>
+              ) : (
+                <>
+                  <Divider style={{ margin: '8px 0' }} />
+                  <div
+                    onClick={() => {
+                      logout();
+                      toggleDrawer();
+                    }}
+                    className={styles.drawerLink}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    Logout
+                  </div>
+                </>
+              )}
             </div>
           </Drawer>
         </div>
@@ -176,44 +201,33 @@ export default function ClientLayout({
           <Flex
             justify="space-between"
             align="center"
-            gap={"20px"}
-            style={{
-              margin: "30px 0",
-              padding: "30px 10%",
-              flexWrap: "wrap",
-              height: "100px",
-              zIndex: 100,
-            }}
+            gap="20px"
+            className={styles.footerContainer}
           >
             {/* Footer Logo */}
-            <HeronLogo
-              style={{
-                display: "none", // Default hidden
-              }}
-              className="footer-logo"
-            />
+            <HeronLogo className={styles.footerLogo} />
 
             <Flex justify="space-between" align="center">
-              <Flex align="center" gap={"20px"} justify="center">
-                <Link href={ROUTES.HOMEPAGE} style={{ color: "#000" }}>
+              <Flex align="center" gap="20px" justify="center">
+                <Link href={ROUTES.HOMEPAGE} className={styles.footerLink}>
                   Home
                 </Link>
-                <Link href={ROUTES.PRICING} style={{ color: "#000" }}>
+                <Link href={ROUTES.PRICING} className={styles.footerLink}>
                   Pricing
                 </Link>
-                <Link href={"#"} style={{ color: "#000" }}>
+                <Link href="#" className={styles.footerLink}>
                   Company
                 </Link>
-                <Link href={"#"} style={{ color: "#000" }}>
+                <Link href="#" className={styles.footerLink}>
                   Resources
                 </Link>
-                <Link href={ROUTES.CONTACT} style={{ color: "#000" }}>
+                <Link href={ROUTES.CONTACT} className={styles.footerLink}>
                   Contact
                 </Link>
               </Flex>
             </Flex>
 
-            <Flex align="center" gap={"20px"}>
+            <Flex align="center" gap="20px">
               {[
                 { icon: <FacebookFilled />, color: "#1877F2" },
                 { icon: <LinkedinFilled />, color: "#0077B5" },
@@ -223,11 +237,8 @@ export default function ClientLayout({
                   key={index}
                   whileHover={{ scale: 1.2, rotate: 10 }}
                   transition={{ duration: 0.3 }}
-                  style={{
-                    fontSize: "24px",
-                    color: social.color,
-                    cursor: "pointer",
-                  }}
+                  className={styles.socialIcon}
+                  style={{ color: social.color }}
                 >
                   {social.icon}
                 </motion.div>

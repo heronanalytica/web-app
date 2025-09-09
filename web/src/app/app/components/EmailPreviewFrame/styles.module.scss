@@ -1,0 +1,245 @@
+/* Using global CSS variables from globals.css */
+
+/* Container that holds the whole preview area */
+.previewContainer {
+  width: 100%;
+  flex: 1;
+  overflow: auto;
+  background: radial-gradient(
+        1000px 300px at 50% -200px,
+        #eef2ff 0%,
+        transparent 40%
+      )
+      no-repeat,
+    var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter,
+    "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", sans-serif;
+  color: var(--text);
+  line-height: 1.65;
+
+  /* Subtle custom scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: #c7cbd1 transparent;
+
+  &::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #c7cbd1;
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* Card-like email container */
+  .emailContainer {
+    max-width: var(--max-email-width);
+    margin: 0 auto;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    transition: box-shadow 160ms ease;
+
+    &:focus-within {
+      box-shadow: 0 0 0 6px var(--ring), var(--shadow-md);
+      outline: none;
+    }
+  }
+
+  /* Inner padding around injected HTML */
+  .emailInner {
+    padding: clamp(var(--space-6), 2.5vw, var(--space-10));
+  }
+
+  /* Type scale */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: #0f172a; /* slate-900 */
+    margin: 0 0 var(--space-4);
+    line-height: 1.25;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  h1 {
+    font-size: clamp(24px, 2.6vw, 32px);
+  }
+  h2 {
+    font-size: clamp(20px, 2.2vw, 28px);
+  }
+  h3 {
+    font-size: clamp(18px, 2vw, 22px);
+  }
+  p,
+  ul,
+  ol,
+  blockquote {
+    margin: 0 0 var(--space-4);
+    color: #374151;
+  } /* slate-700 */
+
+  /* Links & buttons */
+  a {
+    color: var(--link);
+    text-decoration: none;
+    transition: color 0.18s ease, opacity 0.18s ease;
+
+    &:hover {
+      color: var(--link-hover);
+      text-decoration: underline;
+    }
+  }
+
+  .btn,
+  a.btn {
+    display: inline-block;
+    padding: 12px 20px;
+    background: var(--brand);
+    color: #fff !important;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s ease, transform 0.06s ease;
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.06);
+
+    &:hover {
+      background: var(--brand-hover);
+      text-decoration: none;
+    }
+    &:active {
+      transform: translateY(1px);
+    }
+  }
+
+  /* Media & layout helpers */
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 8px;
+  }
+
+  hr {
+    border: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: var(--space-6) 0;
+  }
+
+  blockquote {
+    padding: var(--space-4) var(--space-6);
+    background: #f3f4f6; /* gray-100 */
+    border-left: 4px solid #d1d5db; /* gray-300 */
+    border-radius: 8px;
+    color: #4b5563; /* gray-600 */
+    margin: var(--space-6) 0;
+  }
+
+  ul,
+  ol {
+    padding-left: 1.25rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--space-6) 0;
+    font-size: 0.95rem;
+
+    th,
+    td {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+    }
+    th {
+      background: #f8fafc; /* slate-50 */
+      text-align: left;
+      font-weight: 600;
+    }
+    tr:nth-child(even) td {
+      background: #fbfdff;
+    }
+  }
+
+  code,
+  pre {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      "Liberation Mono", "Courier New", monospace;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+  }
+  code {
+    padding: 2px 6px;
+  }
+  pre {
+    padding: var(--space-4);
+    overflow: auto;
+  }
+
+  /* Empty state */
+  .emptyState {
+    padding: clamp(var(--space-8), 6vw, 72px)
+      clamp(var(--space-4), 4vw, var(--space-8));
+    text-align: center;
+
+    h3 {
+      font-size: 1.1rem;
+      margin-bottom: var(--space-2);
+      color: #111827;
+    }
+    p {
+      color: var(--text-muted);
+      margin: 0;
+    }
+  }
+}
+
+/* Optional: a subtle dark mode tweak if your app toggles a `dark` class on body */
+:global(.dark) .previewContainer {
+  --bg: #0b1220;
+  --bg-card: #0f172a; /* slate-900 */
+  --border: #1f2937; /* gray-800 */
+  --text: #e5e7eb;
+  --text-muted: #9ca3af;
+  --link: #60a5fa;
+  --link-hover: #93c5fd;
+
+  background: radial-gradient(
+        1000px 300px at 50% -200px,
+        rgba(37, 99, 235, 0.15) 0%,
+        transparent 40%
+      )
+      no-repeat,
+    var(--bg);
+
+  .emailContainer {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  }
+  blockquote {
+    background: #111827;
+    border-left-color: #374151;
+  }
+  table th {
+    background: #0b1220;
+  }
+  code,
+  pre {
+    background: #0b1220;
+    border-color: #111827;
+  }
+}

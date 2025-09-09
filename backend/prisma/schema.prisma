@@ -14,6 +14,30 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ENUM
+enum UserRole {
+  ADMIN
+  CLIENT
+}
+
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+}
+
+enum RecipientStatus {
+  PENDING
+  STAGED
+  QUEUED
+  SENT
+  OPENED
+  CLICKED
+  BOUNCED
+  ERROR
+}
+
 // Feature Flag
 model FeatureFlag {
   id        String   @id @default(uuid())
@@ -31,11 +55,54 @@ model User {
   role                       UserRole                     @default(CLIENT)
   createdAt                  DateTime                     @default(now())
   SurveyIntakeQuestionAnswer SurveyIntakeQuestionAnswer[]
+  campaigns                  Campaign[]
+  uploadFiles                UserUploadFile[]
+  mailProviderTokens         MailProviderToken[]
+  companyProfiles            CompanyProfile[]
+  Contact                    Contact[]
 }
 
-enum UserRole {
-  ADMIN
-  CLIENT
+model CompanyProfile {
+  id                      String          @id @default(uuid())
+  user                    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                  String
+  name                    String
+  website                 String?
+  marketingContentFileId  String?
+  marketingContentFile    UserUploadFile? @relation("MarketingContentFile", fields: [marketingContentFileId], references: [id])
+  designAssetFileId       String?
+  designAssetFile         UserUploadFile? @relation("DesignAssetFile", fields: [designAssetFileId], references: [id])
+  businessInfo            String?
+  generatedOverallProfile Json?
+  generatedMarketingTone  Json?
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
+  campaigns               Campaign[]
+}
+
+// Campaign
+model Campaign {
+  id            String         @id @default(uuid())
+  analysisSteps Json?
+  name          String
+  status        CampaignStatus @default(DRAFT)
+  currentStep   Int? // Step user left off at (nullable for legacy)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  lastSavedAt   DateTime?
+  stepState     Json?
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  classifiedPersonaFileId String?         @unique
+  classifiedPersonaFile   UserUploadFile? @relation("ClassifiedPersonaFile", fields: [classifiedPersonaFileId], references: [id], onDelete: SetNull)
+
+  companyProfileId      String?
+  companyProfile        CompanyProfile?         @relation(fields: [companyProfileId], references: [id], onDelete: SetNull)
+  CampaignRecipient     CampaignRecipient[]
+  AudienceImport        AudienceImport[]
+  CampaignRenderedEmail CampaignRenderedEmail[]
 }
 
 // Survey
@@ -47,6 +114,35 @@ model SurveyIntakeQuestions {
   options   Json? // Only for SINGLE or MULTIPLE
   createdAt DateTime           @default(now())
   updatedAt DateTime           @updatedAt
+}
+
+model UserUploadFile {
+  id                        String           @id @default(uuid())
+  userId                    String
+  user                      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fileName                  String
+  storageUrl                String
+  type                      String
+  uploadedAt                DateTime         @default(now())
+  classifiedPersonaCampaign Campaign?        @relation("ClassifiedPersonaFile")
+  marketingContentProfiles  CompanyProfile[] @relation("MarketingContentFile")
+  designAssetProfiles       CompanyProfile[] @relation("DesignAssetFile")
+  AudienceImport            AudienceImport[]
+}
+
+model MailProviderToken {
+  id           String    @id @default(uuid())
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  provider     String
+  accessToken  String
+  refreshToken String?
+  expiresAt    DateTime?
+  meta         Json?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([userId, provider])
 }
 
 enum IntakeQuestionType {
@@ -70,4 +166,81 @@ model SurveyIntakeQuestionAnswer {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   response  String // JSON string of the full response array
   createdAt DateTime @default(now())
+}
+
+model Contact {
+  id         String   @id @default(uuid())
+  userId     String // OWNER (your app user / tenant)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email      String?  @db.VarChar(320)
+  firstName  String?
+  lastName   String?
+  attributes Json?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  recipients CampaignRecipient[]
+
+  @@unique([userId, email], name: "userId_email")
+}
+
+model CampaignRecipient {
+  id                 String                 @id @default(uuid())
+  campaignId         String
+  campaign           Campaign               @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  contactId          String
+  contact            Contact                @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  personaCode        String?
+  personaDisplayName String?
+  personaConfidence  Int?
+  status             RecipientStatus        @default(PENDING)
+  mcMemberId         String?
+  mcSendId           String?
+  metrics            Json?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+  renderedEmail      CampaignRenderedEmail?
+
+  @@unique([campaignId, contactId], name: "campaignId_contactId")
+  @@index([campaignId, status])
+}
+
+model AudienceImport {
+  id           String         @id @default(uuid())
+  campaignId   String
+  campaign     Campaign       @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  sourceFileId String
+  sourceFile   UserUploadFile @relation(fields: [sourceFileId], references: [id])
+  total        Int
+  imported     Int
+  failed       Int
+  logUrl       String?
+  createdAt    DateTime       @default(now())
+}
+
+model CampaignRenderedEmail {
+  id         String   @id @default(uuid())
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  // tie to exactly one campaign recipient
+  campaignRecipientId String            @unique
+  recipient           CampaignRecipient @relation(fields: [campaignRecipientId], references: [id], onDelete: Cascade)
+
+  // provenance / meta
+  emailId     String? // from uploaded JSON "email_id"
+  fromAddress String
+  toAddress   String
+  subject     String
+  preheader   String
+  templateId  String?
+  rationaleId String?
+
+  // the final HTML
+  html String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([campaignId, emailId]) // allows idempotent imports when emailId present
 }

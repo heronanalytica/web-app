@@ -1,0 +1,112 @@
+.campaignList {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.campaignCard {
+  border-radius: 12px !important;
+  box-shadow: 0 6px 24px 0 rgba(116, 105, 249, 0.11);
+  border: 1.5px solid #e0e0ff !important;
+  background: #f7f8fa;
+  transition: box-shadow 0.2s, border-color 0.2s, background 0.2s;
+  padding: 24px 32px;
+  &:hover {
+    box-shadow: 0 12px 32px 0 rgba(116, 105, 249, 0.18);
+    border-color: #bcb7f8 !important;
+    background: #f3f1fd;
+  }
+  cursor: pointer;
+}
+
+
+.cardGrid {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.cardMainCol {
+  flex: 1 1 60%;
+  min-width: 0;
+}
+
+.cardActionsCol {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  min-width: 100px;
+  justify-content: flex-end;
+}
+
+.cardActionBtn {
+  background: #f3f4f6;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  color: #505f98;
+  font-size: 0.98rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+  margin-bottom: 2px;
+  outline: none;
+  box-shadow: 0 1px 3px rgba(80,95,152,0.04);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  &:hover,
+  &:focus {
+    background: #e7eaf3;
+    color: #312e81;
+    box-shadow: 0 2px 8px rgba(80,95,152,0.09);
+  }
+}
+
+.campaignHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.campaignName {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #312e81;
+}
+
+.campaignMeta {
+  font-size: 0.95rem;
+  color: #7c7c8a;
+  margin-top: 6px;
+}
+
+.statusTag {
+  font-size: 0.95rem;
+  border-radius: 6px;
+  padding: 2px 12px;
+  font-weight: 500;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.emptyState :global(.ant-empty-description) {
+  font-size: 1.1rem;
+  color: #7c7c8a;
+  font-weight: 500;
+  margin-top: 8px;
+}
+
+.emptyState :global(.ant-empty-image) {
+  margin-bottom: 10px;
+}
+

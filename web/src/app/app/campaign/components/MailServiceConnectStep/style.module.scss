@@ -1,0 +1,241 @@
+.glassCard {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(255, 255, 255, 0.13);
+  border-radius: 22px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1),
+    0 6px 32px 0 rgba(165, 141, 255, 0.1);
+  transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.18s;
+  min-width: 420px;
+  max-width: 440px;
+  min-height: 320px;
+  margin: 0 auto;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: fadeInScale 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  &:hover {
+    transform: translateY(-2px) scale(1.015);
+    box-shadow: 0 8px 32px rgba(165, 141, 255, 0.18),
+      0 4px 18px rgba(0, 0, 0, 0.12);
+  }
+  cursor: pointer;
+}
+
+.dimmedCard {
+  opacity: 0.64;
+  filter: grayscale(0.45);
+  pointer-events: auto;
+  position: relative;
+}
+
+.providerHeader {
+  background: linear-gradient(90deg, #ffe01b 0%, #ffe99f 100%);
+  padding: 28px 0 16px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+.providerLogo {
+  background: #fffbe6;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px 0 rgba(255, 224, 27, 0.15);
+  padding: 7px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.providerName {
+  font-size: 1.22rem;
+  font-weight: 700;
+  color: #2d2b1e;
+  letter-spacing: 0.01em;
+  margin-bottom: 2px;
+}
+.providerStatusPill {
+  display: inline-flex;
+  align-items: center;
+  background: #dcffe4;
+  color: #389e0d;
+  padding: 4px 14px 4px 10px;
+  border-radius: 16px;
+  font-weight: 500;
+  font-size: 12px;
+  margin-top: 7px;
+  margin-bottom: 2px;
+  box-shadow: 0 1px 4px 0 rgba(56, 158, 13, 0.06);
+  animation: pillIn 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes pillIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.pulsingCheck {
+  display: inline-flex;
+  margin-right: 5px;
+  animation: pulse 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.16);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.providerBody {
+  display: flex;
+  flex-direction: row;
+  padding: 24px 30px 20px 30px;
+  align-items: flex-start;
+  gap: 18px;
+}
+.providerDesc {
+  color: #3d3d29;
+  font-size: 1rem;
+  margin-bottom: 10px;
+  text-align: left;
+  font-weight: 400;
+}
+.providerMeta {
+  color: #b6b6a6;
+  font-size: 0.97rem;
+  margin-bottom: 4px;
+}
+.providerActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+  justify-content: space-between;
+  align-items: center;
+}
+@media (max-width: 600px) {
+  .glassCard {
+    min-width: unset;
+    max-width: 98vw;
+    padding: 0;
+  }
+  .providerBody {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 18px 6vw 18px 6vw;
+  }
+}
+
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.providerLogo {
+  margin-bottom: 18px;
+  margin-top: 6px;
+  height: 64px;
+  width: 64px;
+  border-radius: 16px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px 0 rgba(165, 141, 255, 0.08);
+}
+
+.providerTitle {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: #4b2995;
+  margin-bottom: 12px;
+  letter-spacing: 0.01em;
+  text-align: center;
+}
+
+.providerStepNotice {
+  color: #ad6800;
+  font-size: 1rem;
+  font-weight: 500;
+  font-style: italic;
+}
+
+.providerCardsRow {
+  display: flex;
+  margin-top: 80px;
+  justify-content: center;
+  gap: 32px;
+  flex-wrap: nowrap;
+}
+
+@media (max-width: 1600px) {
+  .providerCardsRow {
+    flex-wrap: wrap;
+    gap: 18px;
+    min-height: 0;
+  }
+}
+
+@media (max-width: 800px) {
+  .providerCardsRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 18px;
+    min-height: 0;
+  }
+  .glassCard {
+    min-width: 0;
+    max-width: 98vw;
+    width: 100%;
+    margin: 0 auto 16px auto;
+  }
+}
+
+.providerDescription {
+  color: #444;
+  font-size: 1.08rem;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.providerLink {
+  color: #a58dff;
+  font-weight: 500;
+  text-decoration: underline;
+  font-size: 1rem;
+  transition: color 0.2s;
+  &:hover {
+    color: #7a5fff;
+  }
+}
+
+.providerStatus {
+  margin-bottom: 12px;
+  font-size: 1.08rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.providerActions {
+  margin-top: 22px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}

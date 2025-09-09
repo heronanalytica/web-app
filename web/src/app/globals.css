@@ -1,3 +1,73 @@
+:root {
+  /* Design tokens */
+  --bg: #f6f7f9;
+  --bg-card: #ffffff;
+  --border: #e6e8eb;
+  --ring: rgba(59, 130, 246, 0.15);
+  --text: #111827;
+  --text-muted: #6b7280;
+  --link: #2563eb;
+  --link-hover: #1d4ed8;
+  --brand: #3b82f6;
+  --brand-hover: #2563eb;
+
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.08);
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  --max-email-width: 640px;
+}
+
+/* Ant Design Table Overrides */
+.waitingAnalysisRow {
+  background-color: #fffbe6;
+}
+
+.waitingAnalysisRow.ant-table-row:hover > td {
+  background-color: #fff1b8 !important;
+}
+
+.waitingAnalysisRow td.ant-table-cell-row-hover {
+  background-color: #fff1b8 !important;
+}
+
+/* Ant Design Steps Overrides */
+.ant-steps-item-title {
+  font-size: 14px !important;
+}
+
+.ant-steps-item-icon {
+  width: 24px !important;
+  height: 24px !important;
+  line-height: 24px !important;
+}
+
+.ant-steps-item-wait .ant-steps-item-icon {
+  border-color: #d9d9d9 !important;
+}
+
+.ant-steps-item-process .ant-steps-item-icon {
+  background: #1890ff !important;
+}
+
+.ant-steps-item-finish .ant-steps-item-icon {
+  border-color: #52c41a !important;
+}
+
+.ant-steps-item-error .ant-steps-item-icon {
+  border-color: #ff4d4f !important;
+}
+
 * {
   box-sizing: border-box;
   padding: 0;

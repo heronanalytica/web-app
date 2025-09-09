@@ -1,0 +1,32 @@
+import { useState, useCallback } from "react";
+import { Campaign } from "@/types/campaign";
+import { fetcher } from "@/lib/fetcher";
+
+export function useCampaign() {
+  const [campaigns, setCampaigns] = useState<Campaign[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchCampaigns = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await fetcher.get<Campaign[]>("/api/campaigns");
+      setCampaigns(data);
+    } catch (err: any) {
+      setCampaigns([]);
+      setError(err?.message || "Failed to fetch campaigns");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const createCampaign = useCallback(async ({ name }: { name: string }) => {
+    const newCampaign = await fetcher.post<Campaign>("/api/campaigns", { name });
+    setCampaigns(prev => (prev ? [newCampaign, ...prev] : [newCampaign]));
+    return newCampaign;
+  }, []);
+
+  return { campaigns, loading, error, fetchCampaigns, setCampaigns, createCampaign };
+
+}

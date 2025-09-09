@@ -1,0 +1,225 @@
+.container {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  padding: 2rem 2.5rem;
+  width: 90%;
+  max-width: 1200px;
+  margin: 2rem auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.uploadLabel {
+  font-weight: 600;
+  color: #7b2ff2;
+}
+
+.fileInput {
+  margin-bottom: 1.5rem;
+  border: 2px dashed #7b2ff2;
+  border-radius: 12px;
+  padding: 3rem 1rem;
+  background: #faf6ff;
+  transition: border 0.2s, box-shadow 0.2s;
+  width: 100%;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.fileInput:hover,
+.fileInput:focus {
+  border-color: #a259f7;
+  box-shadow: 0 0 0 2px #e0d2ff;
+}
+
+.fileInput:disabled {
+  opacity: 0.6;
+}
+
+.uploading {
+  color: #7b2ff2;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 1.5rem 0 0.5rem 0;
+  color: #333;
+}
+
+.fileList {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+}
+
+.fileItem {
+  margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.fileButton {
+  background: #f0e6ff;
+  color: #7b2ff2;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 1rem;
+  margin-right: 12px;
+}
+
+.fileButton:hover {
+  background: #e0d2ff;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.inboxIcon {
+  color: #7b2ff2;
+}
+
+.downloadIcon {
+  margin-right: 12px;
+  color: #1890ff;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+
+.uploadWrapper {
+  position: relative;
+  width: 100%;
+  margin-top: 12px;
+}
+
+.uploadOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255,255,255,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  border-radius: 12px;
+}
+
+.sectionTitleFlex {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: #333;
+}
+
+.sectionSpinner {
+  margin-left: 8px;
+}
+
+.fileMeta {
+  font-style: italic;
+  margin-right: 8px;
+}
+
+.fileMetaWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.deleteIcon {
+  color: #ff4d4f;
+  cursor: pointer;
+  font-size: 18px;
+  vertical-align: middle;
+  opacity: 1;
+  transition: opacity 0.2s;
+}
+
+.deleteIconDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.csvPreviewInfo {
+  margin: 12px 0;
+  font-size: 12px;
+  color: #888;
+}
+
+.csvPreviewLoading {
+  text-align: center;
+  padding: 24px;
+}
+
+.csvPreviewError {
+  color: red;
+}
+
+.selectedFileBox {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(245, 247, 255, 0.85);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(22, 119, 255, 0.06);
+  padding: 6px 16px 6px 10px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #222;
+  transition: box-shadow 0.2s;
+  border: 1px solid #e6f0ff;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(22, 119, 255, 0.12);
+    background: rgba(245, 247, 255, 0.97);
+  }
+}
+
+.selectedFileIcon {
+  font-size: 18px;
+  color: #1677ff;
+  margin-right: 8px;
+}
+
+.selectedFileName {
+  font-weight: 500;
+}
+
+.selectedFileClearBtn {
+  margin-left: 16px;
+  color: #da1818;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: color 0.2s;
+  &:hover {
+    color: #1677ff;
+    text-decoration: underline;
+  }
+}
+
+.csvPreviewTableWrapper {
+  max-height: 300px;
+  overflow: auto;
+  margin-bottom: 40px;
+}

@@ -2,11 +2,13 @@
 /* eslint-disable @next/next/no-sync-scripts */
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
-import { PropsWithChildren, Suspense } from "react"; // Import Suspense
+import { Suspense } from "react"; // Import Suspense
+import { ConfigProvider } from "antd";
 import "./globals.css";
 import ClientLayout from "./clientLayout";
 import { AuthProvider } from "@/context/AuthContext";
 import ComeBackSoonPage from "./components/ComeBackSoonPage";
+import LoadingSession from "./components/LoadingSession";
 
 const roboto = Roboto({
   variable: "--font-roboto",
@@ -19,7 +21,7 @@ export const metadata: Metadata = {
   description: "Unlock AI-Powered Psychographic Segmentation",
 };
 
-const displayComebackSoon = process.env.NEXT_PUBLIC_OFFLINE === 'true';
+const displayComebackSoon = process.env.NEXT_PUBLIC_OFFLINE === "true";
 
 export default function RootLayout({
   children,
@@ -51,21 +53,19 @@ export default function RootLayout({
         </script>
       </head>
       <body className={`${roboto.variable}`}>
-        {/* Wrap the client layout in Suspense */}
-        <Suspense fallback={<div>Loading...</div>}>
-          {displayComebackSoon ? (
-            <ComeBackSoonPage />
-          ) : (
-            <ClientLayout>
-              <ChildrenWithProviders>{children}</ChildrenWithProviders>
-            </ClientLayout>
-          )}
-        </Suspense>
+        {/* Set Ant Design primary color globally */}
+        <ConfigProvider theme={{ token: { colorPrimary: "#7a6def" } }}>
+          <Suspense fallback={<LoadingSession />}>
+            {displayComebackSoon ? (
+              <ComeBackSoonPage />
+            ) : (
+              <AuthProvider>
+                <ClientLayout>{children}</ClientLayout>
+              </AuthProvider>
+            )}
+          </Suspense>
+        </ConfigProvider>
       </body>
     </html>
   );
 }
-
-const ChildrenWithProviders: React.FC<PropsWithChildren> = ({ children }) => {
-  return <AuthProvider>{children}</AuthProvider>;
-};

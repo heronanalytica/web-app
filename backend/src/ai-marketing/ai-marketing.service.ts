@@ -11,6 +11,7 @@ import {
 import {
   buildAdTemplatesPrompt,
   buildCompanyPrompt,
+  buildCompanyPromptFromContent,
   buildEmailTemplatePrompt,
   buildPersonaPrompt,
   buildStrategyPrompt,
@@ -24,15 +25,23 @@ import {
 } from './validation/ai-marketing.schema';
 import { SYSTEM_PROMPTS } from './prompts/system-prompts';
 import { callOpenAiAndParse } from './helpers/openai.helper';
+import { DatabaseService } from 'src/database/database.service';
+import {
+  CompanyProfileDto,
+  GeneratorBriefDto,
+  StepStateDto,
+} from 'src/campaign/dto/campaign-step-state.dto';
+import { EmailVariantSchema } from './validation/email-variant.schema';
+import { buildCommonTemplatePrompt } from './prompts/common-template.prompt';
+import { sanitizeEmailHtml, sanitizePlainText } from 'src/utils/sanitize';
+import { AwsService } from 'src/aws/aws.service';
 
 @Injectable()
 export class AiMarketingService {
-  private extractJsonFromMarkdown(content: string): string {
-    return content
-      .replace(/^```(?:json)?\s*/i, '')
-      .replace(/```$/, '')
-      .trim();
-  }
+  constructor(
+    private readonly db: DatabaseService,
+    private readonly awsService: AwsService,
+  ) {}
 
   async analyze(dto: SegmentAnalysisDto): Promise<MarketingAnalysisResult> {
     const personaSegments = await Promise.all(
@@ -77,6 +86,16 @@ export class AiMarketingService {
     });
   }
 
+  async parseCompanyFromRawContent(content: string): Promise<CompanyProfile> {
+    return callOpenAiAndParse({
+      user: `company-profile-custom-input`,
+      prompt: buildCompanyPromptFromContent(content),
+      schema: CompanyProfileSchema,
+      systemPrompt: SYSTEM_PROMPTS.company,
+      temperature: 0.3,
+    });
+  }
+
   private async generateStrategy(
     segment: PersonaSegment,
     company: CompanyProfile,
@@ -87,6 +106,38 @@ export class AiMarketingService {
       schema: MarketingStrategySchema,
       systemPrompt: SYSTEM_PROMPTS.strategy,
     });
+  }
+
+  private async rewriteCidImagesToPublicOrSigned(
+    html: string,
+    ss: StepStateDto,
+  ): Promise<string> {
+    if (!html) return html;
+
+    const photoId = ss?.generator?.photoFileId;
+    if (!photoId) {
+      // no photo – remove any broken cid images
+      return html.replace(/<img\b[^>]*\bsrc=["']cid:[^"']+["'][^>]*>/gi, '');
+    }
+
+    // find the uploaded file
+    const file = await this.db.userUploadFile.findUnique({
+      where: { id: photoId },
+      select: { storageUrl: true /* isPublic: true */ }, // include isPublic if you added it
+    });
+    if (!file?.storageUrl) return html;
+
+    const key = file.storageUrl.replace(/^s3:\/\/[^/]+\//, '');
+    const isPublic = key.includes('/public/'); // or use file.isPublic if column exists
+    const url = isPublic
+      ? this.awsService.buildPublicHttpUrl(key)
+      : await this.awsService.getPresignedViewUrl(key, 3600);
+
+    // replace any cid:* in <img src="...">
+    return html.replace(
+      /(<img\b[^>]*\bsrc=["'])cid:[^"']+(["'][^>]*>)/gi,
+      `$1${url}$2`,
+    );
   }
 
   async generateCampaignTemplates(dto: SegmentAnalysisDto) {
@@ -127,5 +178,47 @@ export class AiMarketingService {
       prompt: buildAdTemplatesPrompt(segment, company),
       schema: AdsTemplateSchema,
     });
+  }
+
+  /**
+   * Generate a "common" (non-persona) email template from the stored brief (+companyProfile),
+   * save it into campaign.stepState.commonTemplate, and return it.
+   */
+  async generateCommonTemplate(userId: string, campaignId: string) {
+    const campaign = await this.db.campaign.findFirstOrThrow({
+      where: { id: campaignId, userId },
+      select: { stepState: true },
+    });
+
+    const ss = (campaign.stepState ?? {}) as Record<string, unknown>;
+    const brief = (ss?.generator ?? null) as GeneratorBriefDto;
+    if (!brief)
+      throw new Error('Missing generator brief in stepState.generator');
+
+    const prompt = buildCommonTemplatePrompt({
+      companyProfile: ss.companyProfile as CompanyProfileDto,
+      brief,
+    });
+
+    const ai = await callOpenAiAndParse({
+      user: `common-template-${campaignId}`,
+      prompt,
+      schema: EmailVariantSchema, // { subject, html }
+      systemPrompt:
+        'You are a world-class email copywriter and HTML email coder.',
+      model: 'gpt-4o',
+      temperature: 0.4,
+      maxTokens: 1200,
+    });
+
+    let cleanHtml = sanitizeEmailHtml(ai.html);
+    cleanHtml = await this.rewriteCidImagesToPublicOrSigned(cleanHtml, ss);
+    const cleanPreheader = sanitizePlainText(ai.preheader);
+
+    return {
+      subject: ai.subject ?? '',
+      html: cleanHtml,
+      preheader: cleanPreheader,
+    };
   }
 }
