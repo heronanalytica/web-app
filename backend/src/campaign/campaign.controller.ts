@@ -12,6 +12,7 @@ import {
   Query,
   BadRequestException,
   ParseUUIDPipe,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CampaignService } from './campaign.service';
 import {
@@ -226,6 +227,29 @@ export class CampaignController {
     const data = await this.campaignService.importRenderedEmailsFromFileAdmin(
       id,
       dto.fileId,
+    );
+    return { error: 0, data };
+  }
+
+  /**
+   * Client endpoint: list rendered emails for this campaign (owner only).
+   * Supports q (search), page, limit.
+   */
+  @Get(':id/rendered-emails')
+  async listRenderedEmailsForOwner(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Query('q') q?: string,
+    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+  ) {
+    const userId = req.user?.id;
+    if (!userId) throw new UnauthorizedException();
+
+    const data = await this.campaignService.listRenderedEmailsForCampaign(
+      userId,
+      id,
+      { q, page, limit },
     );
     return { error: 0, data };
   }

@@ -9,6 +9,6 @@ export const stepTitles = [
   "Campaign Setup",
   "Review & Confirm",
   "Waiting for Template",
-  "Recipients Email Review",
+  "Recipient Emails Review",
   "Launch Campaign",
 ];

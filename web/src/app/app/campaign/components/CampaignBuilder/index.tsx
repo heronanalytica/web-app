@@ -21,6 +21,7 @@ import CompanyAndPersonasStep from "../CompanyAndPersonasStep";
 import CampaignSetupStep from "../CampaignSetupStep";
 import ReviewTemplateConfirmStep from "../ReviewTemplateConfirmStep";
 import TemplateWaitingStep from "../TemplateWaitingStep";
+import PersonalizationGridStep from "../PersonalizationGridStep";
 
 interface CampaignBuilderProps {
   campaign: Campaign | null;
@@ -115,6 +116,8 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
         return <ReviewTemplateConfirmStep />;
       case 7:
         return <TemplateWaitingStep />;
+      case 8:
+        return <PersonalizationGridStep />;
       default:
         return (
           <div>
@@ -162,7 +165,7 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
 
         {!hideFooter && (
           <div className={styles.footerActions}>
-            {currentStep !== 4 && (
+            {(currentStep !== 4 && currentStep !== 8) && (
               <Button
                 onClick={() =>
                   setCurrentStep(currentStep > 0 ? currentStep - 1 : 0)

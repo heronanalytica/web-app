@@ -13,6 +13,7 @@ import { sanitizeStepStateForStorage } from 'src/utils/sanitize';
 import { RenderedEmailsImportDto } from './dto/rendered-emails.dto';
 import { AwsService } from 'src/aws/aws.service';
 import { Readable } from 'stream';
+import { ProcessedRecipient } from './campaign-types';
 
 const campaignInclude = {
   user: { select: { id: true, email: true } },
@@ -21,6 +22,7 @@ const campaignInclude = {
 } as const;
 
 type AnyObj = Record<string, any>;
+type ListOpts = { q?: string; page?: number; limit?: number };
 
 @Injectable()
 export class CampaignService {
@@ -589,5 +591,120 @@ export class CampaignService {
     });
 
     return result;
+  }
+
+  /**
+   * Owner-only read of rendered emails (with basic search + pagination).
+   */
+  async listRenderedEmailsForCampaign(
+    userId: string,
+    campaignId: string,
+    { q, page = 1, limit = 50 }: ListOpts = {},
+  ) {
+    // Ensure the campaign belongs to the user
+    await this.dbService.campaign.findFirstOrThrow({
+      where: { id: campaignId, userId },
+      select: { id: true },
+    });
+
+    const skip = Math.max(0, (page - 1) * limit);
+
+    // Build the where clause with proper typing
+    const where: Prisma.CampaignRecipientWhereInput = {
+      campaignId,
+      ...(q
+        ? {
+            OR: [
+              {
+                contact: {
+                  email: { contains: q, mode: 'insensitive' as const },
+                },
+              },
+              {
+                contact: {
+                  firstName: { contains: q, mode: 'insensitive' as const },
+                },
+              },
+              {
+                contact: {
+                  lastName: { contains: q, mode: 'insensitive' as const },
+                },
+              },
+              { personaCode: { contains: q, mode: 'insensitive' as const } },
+              {
+                personaDisplayName: {
+                  contains: q,
+                  mode: 'insensitive' as const,
+                },
+              },
+            ],
+          }
+        : {}),
+    };
+
+    const [total, rows] = await Promise.all([
+      this.dbService.campaignRecipient.count({ where }),
+      this.dbService.campaignRecipient.findMany({
+        where,
+        include: {
+          contact: true,
+          renderedEmail: true,
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+    ]);
+
+    // Process the rows to include related data
+    const processedRows: ProcessedRecipient[] = rows
+      .filter((row) => row.contact?.email !== null)
+      .map((row) => {
+        const contactData = row.contact
+          ? {
+              id: row.contact.id,
+              email: row.contact.email,
+              firstName: row.contact.firstName,
+              lastName: row.contact.lastName,
+              // Compute displayName from firstName and lastName if not null
+              displayName:
+                [row.contact.firstName, row.contact.lastName]
+                  .filter(Boolean)
+                  .join(' ') || row.contact.email,
+            }
+          : null;
+
+        const renderedEmailData = row.renderedEmail
+          ? {
+              id: row.renderedEmail.id,
+              subject: row.renderedEmail.subject,
+              preheader: row.renderedEmail.preheader,
+              html: row.renderedEmail.html,
+              from: row.renderedEmail.fromAddress,
+              to: row.renderedEmail.toAddress,
+            }
+          : null;
+
+        return {
+          id: row.id,
+          status: row.status,
+          createdAt: row.createdAt,
+          updatedAt: row.updatedAt,
+          campaignId: row.campaignId,
+          contact: contactData,
+          personaCode: row.personaCode,
+          personaDisplayName: row.personaDisplayName,
+          personaConfidence: row.personaConfidence,
+          renderedEmail: renderedEmailData,
+        };
+      });
+
+    return {
+      total,
+      rows: processedRows,
+      page,
+      totalPages: Math.ceil(total / limit),
+      limit,
+    };
   }
 }

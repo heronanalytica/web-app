@@ -185,22 +185,21 @@ model Contact {
 }
 
 model CampaignRecipient {
-  id                 String   @id @default(uuid())
+  id                 String                 @id @default(uuid())
   campaignId         String
-  campaign           Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  campaign           Campaign               @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   contactId          String
-  contact            Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  contact            Contact                @relation(fields: [contactId], references: [id], onDelete: Cascade)
   personaCode        String?
   personaDisplayName String?
-
-  personaConfidence Int?
-  status            RecipientStatus        @default(PENDING)
-  mcMemberId        String?
-  mcSendId          String?
-  metrics           Json?
-  createdAt         DateTime               @default(now())
-  updatedAt         DateTime               @updatedAt
-  renderedEmail     CampaignRenderedEmail?
+  personaConfidence  Int?
+  status             RecipientStatus        @default(PENDING)
+  mcMemberId         String?
+  mcSendId           String?
+  metrics            Json?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+  renderedEmail      CampaignRenderedEmail?
 
   @@unique([campaignId, contactId], name: "campaignId_contactId")
   @@index([campaignId, status])
