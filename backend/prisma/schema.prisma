@@ -38,15 +38,6 @@ enum RecipientStatus {
   ERROR
 }
 
-enum VariantStatus {
-  DRAFT
-  GENERATED
-  APPROVED
-  SCHEDULED
-  SENT
-  ERROR
-}
-
 // Feature Flag
 model FeatureFlag {
   id        String   @id @default(uuid())
@@ -107,11 +98,11 @@ model Campaign {
   classifiedPersonaFileId String?         @unique
   classifiedPersonaFile   UserUploadFile? @relation("ClassifiedPersonaFile", fields: [classifiedPersonaFileId], references: [id], onDelete: SetNull)
 
-  companyProfileId     String?
-  companyProfile       CompanyProfile?        @relation(fields: [companyProfileId], references: [id], onDelete: SetNull)
-  CampaignRecipient    CampaignRecipient[]
-  CampaignEmailVariant CampaignEmailVariant[]
-  AudienceImport       AudienceImport[]
+  companyProfileId      String?
+  companyProfile        CompanyProfile?         @relation(fields: [companyProfileId], references: [id], onDelete: SetNull)
+  CampaignRecipient     CampaignRecipient[]
+  AudienceImport        AudienceImport[]
+  CampaignRenderedEmail CampaignRenderedEmail[]
 }
 
 // Survey
@@ -177,19 +168,6 @@ model SurveyIntakeQuestionAnswer {
   createdAt DateTime @default(now())
 }
 
-model Persona {
-  id          String   @id @default(uuid())
-  code        String   @unique // e.g. "persona_1"
-  name        String // e.g. "Persona 1"
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  variants   CampaignEmailVariant[]
-  recipients CampaignRecipient[]
-}
-
 model Contact {
   id         String   @id @default(uuid())
   userId     String // OWNER (your app user / tenant)
@@ -207,53 +185,25 @@ model Contact {
 }
 
 model CampaignRecipient {
-  id                String                @id @default(uuid())
-  campaignId        String
-  campaign          Campaign              @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  contactId         String
-  contact           Contact               @relation(fields: [contactId], references: [id], onDelete: Cascade)
-  personaId         String
-  persona           Persona               @relation(fields: [personaId], references: [id])
-  variantId         String?
-  variant           CampaignEmailVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  id                 String   @id @default(uuid())
+  campaignId         String
+  campaign           Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  contactId          String
+  contact            Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  personaCode        String?
+  personaDisplayName String?
+
   personaConfidence Int?
-  status            RecipientStatus       @default(PENDING)
+  status            RecipientStatus        @default(PENDING)
   mcMemberId        String?
   mcSendId          String?
   metrics           Json?
-  createdAt         DateTime              @default(now())
-  updatedAt         DateTime              @updatedAt
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+  renderedEmail     CampaignRenderedEmail?
 
   @@unique([campaignId, contactId], name: "campaignId_contactId")
-  @@index([campaignId, personaId])
   @@index([campaignId, status])
-}
-
-model CampaignEmailVariant {
-  id         String   @id @default(uuid())
-  campaignId String
-  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  personaId  String
-  persona    Persona  @relation(fields: [personaId], references: [id])
-
-  subject String?
-  html    String?
-  status  VariantStatus @default(DRAFT)
-
-  // Mailchimp artifacts
-  templateExtId String?
-  campaignExtId String?
-
-  // (optional) AI audit
-  aiModel   String?
-  prompt    Json?
-  lastError String?
-
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  CampaignRecipient CampaignRecipient[]
-
-  @@unique([campaignId, personaId], name: "campaignId_personaId")
 }
 
 model AudienceImport {
@@ -267,4 +217,31 @@ model AudienceImport {
   failed       Int
   logUrl       String?
   createdAt    DateTime       @default(now())
+}
+
+model CampaignRenderedEmail {
+  id         String   @id @default(uuid())
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  // tie to exactly one campaign recipient
+  campaignRecipientId String            @unique
+  recipient           CampaignRecipient @relation(fields: [campaignRecipientId], references: [id], onDelete: Cascade)
+
+  // provenance / meta
+  emailId     String? // from uploaded JSON "email_id"
+  fromAddress String
+  toAddress   String
+  subject     String
+  preheader   String
+  templateId  String?
+  rationaleId String?
+
+  // the final HTML
+  html String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([campaignId, emailId]) // allows idempotent imports when emailId present
 }

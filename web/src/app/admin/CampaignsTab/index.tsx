@@ -39,15 +39,7 @@ const columns = [
     title: "Name",
     dataIndex: "name",
     key: "name",
-    render: (text: string, record: any) => (
-      <a
-        href={`/app/campaign/${record.id}`}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {text}
-      </a>
-    ),
+    render: (text: string) => text,
   },
   {
     title: "Status",
