@@ -25,9 +25,9 @@ import { AdminGuard } from '../auth/guards/admin.guard';
 import { Request } from 'express';
 import { EAuthRole } from '../auth/auth.types';
 import { UpdateClassifiedPersonaDto } from './dto/update-classified-persona.dto';
-import { ImportClassifiedDto } from './dto/import-classified.dto';
 import { AiMarketingService } from 'src/ai-marketing/ai-marketing.service';
-import { GenerateVariantsDto } from 'src/ai-marketing/dto/generate-variants.dto';
+import { RenderedEmailsImportDto } from './dto/rendered-emails.dto';
+import { ImportRenderedFromFileDto } from './dto/import-rendered-from-file.dto';
 
 @Controller('campaigns')
 @UseGuards(JwtAuthGuard)
@@ -204,42 +204,28 @@ export class CampaignController {
     return { error: 0, data };
   }
 
-  @Post(':id/prepare')
-  async prepareCampaign(@Req() req: Request, @Param('id') id: string) {
-    const userId = req.user?.id;
-    if (!userId) throw new UnauthorizedException();
-    const data = await this.campaignService.prepareCampaign(userId, id);
-    return { error: 0, data };
-  }
-
-  @Post(':id/recipients/import')
-  async importClassified(
-    @Req() req: Request,
-    @Param('id') id: string,
-    @Body() dto: ImportClassifiedDto,
+  @Post(':id/rendered-emails/import')
+  @UseGuards(AdminGuard)
+  async importRenderedEmailsForCampaign(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() dto: RenderedEmailsImportDto,
   ) {
-    const userId = req.user?.id;
-    if (!userId) throw new UnauthorizedException();
-    const data = await this.campaignService.importClassifiedRecipients(
-      userId,
+    const data = await this.campaignService.importRenderedEmailsFromJsonAdmin(
       id,
       dto,
     );
     return { error: 0, data };
   }
 
-  @Post(':id/variants/generate')
-  async generateVariants(
-    @Req() req: Request,
-    @Param('id') id: string,
-    @Body() dto: GenerateVariantsDto,
+  @Post(':id/rendered-emails/import-file')
+  @UseGuards(AdminGuard)
+  async importRenderedEmailsFromFile(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() dto: ImportRenderedFromFileDto,
   ) {
-    const userId = req.user?.id;
-    if (!userId) throw new UnauthorizedException();
-    const data = await this.aiMarketingService.generateCampaignEmailVariants(
-      userId,
+    const data = await this.campaignService.importRenderedEmailsFromFileAdmin(
       id,
-      dto,
+      dto.fileId,
     );
     return { error: 0, data };
   }

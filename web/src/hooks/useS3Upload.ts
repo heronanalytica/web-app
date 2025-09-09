@@ -11,6 +11,7 @@ export const FILE_TYPES = {
   COMPANY_MARKETING_CONTENT: "company-marketing-content",
   COMPANY_DESIGN_ASSET: "company-design-asset",
   CAMPAIGN_PHOTO: "campaign-photo",
+  RENDERED_EMAILS_JSON: "rendered-emails-json",
 } as const;
 
 export type FileType = (typeof FILE_TYPES)[keyof typeof FILE_TYPES];

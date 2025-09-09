@@ -8,6 +8,7 @@ import CampaignProgressCard from "./components/CampaignProgressCard";
 import ClassifiedPersonaCard from "./components/ClassifiedPersonaCard";
 import CompanyProfileCard from "./components/CompanyProfileCard";
 import styles from "./CampaignDetailView.module.scss";
+import RenderedEmailsUploader from "./components/RenderedEmailsUploader";
 
 interface CampaignDetailViewProps {
   campaign: Campaign;
@@ -122,6 +123,24 @@ export const CampaignDetailView: React.FC<CampaignDetailViewProps> = ({
       />
 
       <CompanyProfileCard campaign={campaign} onUpdate={handleCampaignUpdate} />
+
+      <RenderedEmailsUploader
+        campaignId={campaign.id}
+        onImported={(summary) => {
+          // When import finishes, refresh the campaign’s stepState summary in local UI:
+          setCampaign((prev) => ({
+            ...prev,
+            stepState: {
+              ...(prev.stepState || {}),
+              summary: {
+                totalRecipients: summary?.totalRecipients ?? 0,
+                byPersona: summary?.byPersona ?? {},
+              },
+            },
+            updatedAt: new Date().toISOString(),
+          }));
+        }}
+      />
     </div>
   );
 };
