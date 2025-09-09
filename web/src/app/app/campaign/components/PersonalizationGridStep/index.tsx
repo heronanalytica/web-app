@@ -1,5 +1,16 @@
-import { useMemo, useState } from "react";
-import { Button, Card, Empty, Input, List, Space, Typography, Tag, Skeleton } from "antd";
+import { useMemo, useState, useCallback, useRef, useEffect } from "react";
+import { throttle } from "lodash";
+import {
+  Button,
+  Card,
+  Empty,
+  Input,
+  List,
+  Space,
+  Typography,
+  Tag,
+  Skeleton,
+} from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import { useCampaignBuilder } from "../CampaignBuilder/CampaignBuilderContext";
 import {
@@ -55,6 +66,31 @@ const PersonalizationGridStep: React.FC = () => {
 
   const [activeId, setActiveId] = useState<string | null>(null);
   const [viewingPersona, setViewingPersona] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState(q);
+  const throttledRef = useRef(
+    throttle((value: string) => {
+      setQ(value);
+      refetch();
+    }, 500)
+  );
+
+  // Update the search query immediately for better UX
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setSearchQuery(value);
+      throttledRef.current(value);
+    },
+    []
+  );
+
+  // Clean up the throttle on unmount
+  useEffect(() => {
+    const throttled = throttledRef.current;
+    return () => {
+      throttled.cancel();
+    };
+  }, []);
 
   const activeItem = useMemo(
     () => items.find((x) => x.id === activeId) ?? items[0],
@@ -82,9 +118,12 @@ const PersonalizationGridStep: React.FC = () => {
             size="middle"
             prefix={<SearchOutlined />}
             placeholder="Search customers…"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            onPressEnter={() => refetch()}
+            value={searchQuery}
+            onChange={handleSearchChange}
+            onPressEnter={() => {
+              setQ(searchQuery);
+              refetch();
+            }}
           />
         </div>
 
