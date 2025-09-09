@@ -20,6 +20,7 @@ import { CAMPAIGN_TOTAL_STEPS, stepTitles } from "./constants";
 import CompanyAndPersonasStep from "../CompanyAndPersonasStep";
 import CampaignSetupStep from "../CampaignSetupStep";
 import ReviewTemplateConfirmStep from "../ReviewTemplateConfirmStep";
+import TemplateWaitingStep from "../TemplateWaitingStep";
 
 interface CampaignBuilderProps {
   campaign: Campaign | null;
@@ -112,6 +113,8 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
         return <CampaignSetupStep />;
       case 6:
         return <ReviewTemplateConfirmStep />;
+      case 7:
+        return <TemplateWaitingStep />;
       default:
         return (
           <div>
