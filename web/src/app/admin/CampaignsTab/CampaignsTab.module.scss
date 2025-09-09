@@ -19,18 +19,8 @@
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
 }
 
-.waitingAnalysisRow {
-  background-color: #fffbe6;
-}
-
-/* Correct global hover styles for AntD row when waiting */
-:global(.waitingAnalysisRow.ant-table-row:hover) > td {
-  background-color: #fff1b8 !important;
-}
-
-:global(.waitingAnalysisRow td.ant-table-cell-row-hover) {
-  background-color: #fff1b8 !important;
-}
+// These styles need to be moved to a global CSS file
+// as they target global Ant Design classes
 
 .analysisSteps {
   margin-top: 16px;
@@ -42,32 +32,8 @@
   padding: 0 16px;
 }
 
-/* Global overrides for Ant Steps */
-:global(.ant-steps-item-title) {
-  font-size: 14px;
-}
-
-:global(.ant-steps-item-icon) {
-  width: 24px;
-  height: 24px;
-  line-height: 24px;
-}
-
-:global(.ant-steps-item-wait .ant-steps-item-icon) {
-  border-color: #d9d9d9;
-}
-
-:global(.ant-steps-item-process .ant-steps-item-icon) {
-  background: #1890ff;
-}
-
-:global(.ant-steps-item-finish .ant-steps-item-icon) {
-  border-color: #52c41a;
-}
-
-:global(.ant-steps-item-error .ant-steps-item-icon) {
-  border-color: #ff4d4f;
-}
+// These styles need to be moved to a global CSS file
+// as they target global Ant Design classes
 .stepTitleRow {
   display: flex;
   align-items: center;

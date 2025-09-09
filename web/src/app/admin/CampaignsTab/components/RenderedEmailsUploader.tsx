@@ -92,9 +92,9 @@ const RenderedEmailsUploader: React.FC<Props> = ({
           </div>
           <div style={{ marginTop: 8 }}>
             <b>By persona:</b>{" "}
-            {Object.entries(result.byPersona || {}).map(([k, v]) => (
-              <span key={k} style={{ marginRight: 8 }}>
-                <>{k}: {v}</>
+            {Object.entries(result.byPersona || {}).map(([key, value]: [string, any]) => (
+              <span key={key} style={{ marginRight: 8 }}>
+                {key}: {value}
               </span>
             ))}
           </div>
