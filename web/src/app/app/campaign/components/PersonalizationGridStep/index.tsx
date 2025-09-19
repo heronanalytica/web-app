@@ -107,8 +107,12 @@ const PersonalizationGridStep: React.FC = () => {
     setViewingPersona(false);
   };
 
-  const handleOpenRationale = () => { setViewingRationale(true); };
-  const handleCloseRationale = () => { setViewingRationale(false); };
+  const handleOpenRationale = () => {
+    setViewingRationale(true);
+  };
+  const handleCloseRationale = () => {
+    setViewingRationale(false);
+  };
 
   return (
     <div className={styles.grid}>
@@ -228,22 +232,26 @@ const PersonalizationGridStep: React.FC = () => {
                   {activeItem.renderedEmail?.preheader || "—"}
                 </div>
               </div>
-
-              {/* Link like in your mock, sits just above the preview */}
-              <div className={styles.whyWrap}>
-                <button
-                  className={styles.whyLink}
-                  onClick={handleOpenRationale}
-                  disabled={!activeItem.renderedEmail?.rationale?.mapping?.length}
-                  aria-label="Why is this email personalized this way?"
-                  type="button"
-                >
-                  Why is this email personalized this way?
-                </button>
-              </div>
             </Card>
 
-            <EmailPreviewFrame html={activeItem.renderedEmail?.html || null} />
+            <EmailPreviewFrame
+              html={activeItem.renderedEmail?.html || null}
+              header={
+                <div className={styles.whyWrap}>
+                  <button
+                    className={styles.whyLink}
+                    onClick={handleOpenRationale}
+                    disabled={
+                      !activeItem.renderedEmail?.rationale?.mapping?.length
+                    }
+                    aria-label="Why is this email personalized this way?"
+                    type="button"
+                  >
+                    Why is this email personalized this way?
+                  </button>
+                </div>
+              }
+            />
           </>
         )}
       </div>
