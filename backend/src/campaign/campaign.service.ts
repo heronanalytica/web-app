@@ -450,6 +450,8 @@ export class CampaignService {
 
         // Upsert CampaignRenderedEmail by unique campaignRecipientId
         const m = row.email.meta;
+        const rationaleObj: Prisma.InputJsonValue =
+          row.personalization_rationale as unknown as Prisma.InputJsonValue;
         await this.dbService.campaignRenderedEmail.upsert({
           where: { campaignRecipientId: recipient.id },
           create: {
@@ -461,7 +463,7 @@ export class CampaignService {
             subject: m.subject,
             preheader: m.preheader || '',
             templateId: m.template_id || null,
-            rationaleId: row.rationale_id || null,
+            rationale: rationaleObj,
             html: row.email.html_body,
           },
           update: {
@@ -471,7 +473,7 @@ export class CampaignService {
             subject: m.subject,
             preheader: m.preheader || '',
             templateId: m.template_id || null,
-            rationaleId: row.rationale_id || null,
+            rationale: rationaleObj,
             html: row.email.html_body,
           },
         });
@@ -682,6 +684,7 @@ export class CampaignService {
               html: row.renderedEmail.html,
               from: row.renderedEmail.fromAddress,
               to: row.renderedEmail.toAddress,
+              rationale: row.renderedEmail.rationale,
             }
           : null;
 

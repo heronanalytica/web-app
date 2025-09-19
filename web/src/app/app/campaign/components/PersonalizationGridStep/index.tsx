@@ -20,6 +20,7 @@ import {
 import styles from "./styles.module.scss";
 import EmailPreviewFrame from "@/app/app/components/EmailPreviewFrame";
 import PersonaDetails from "./PersonaDetails";
+import PersonalizationRationaleModal from "./PersonalizationRationaleModal";
 
 const { Text } = Typography;
 
@@ -66,6 +67,7 @@ const PersonalizationGridStep: React.FC = () => {
 
   const [activeId, setActiveId] = useState<string | null>(null);
   const [viewingPersona, setViewingPersona] = useState<boolean>(false);
+  const [viewingRationale, setViewingRationale] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState(q);
   const throttledRef = useRef(
     throttle((value: string) => {
@@ -104,6 +106,9 @@ const PersonalizationGridStep: React.FC = () => {
   const handleClosePersona = () => {
     setViewingPersona(false);
   };
+
+  const handleOpenRationale = () => { setViewingRationale(true); };
+  const handleCloseRationale = () => { setViewingRationale(false); };
 
   return (
     <div className={styles.grid}>
@@ -223,6 +228,19 @@ const PersonalizationGridStep: React.FC = () => {
                   {activeItem.renderedEmail?.preheader || "—"}
                 </div>
               </div>
+
+              {/* Link like in your mock, sits just above the preview */}
+              <div className={styles.whyWrap}>
+                <button
+                  className={styles.whyLink}
+                  onClick={handleOpenRationale}
+                  disabled={!activeItem.renderedEmail?.rationale?.mapping?.length}
+                  aria-label="Why is this email personalized this way?"
+                  type="button"
+                >
+                  Why is this email personalized this way?
+                </button>
+              </div>
             </Card>
 
             <EmailPreviewFrame html={activeItem.renderedEmail?.html || null} />
@@ -234,6 +252,13 @@ const PersonalizationGridStep: React.FC = () => {
         visible={viewingPersona}
         onClose={handleClosePersona}
         personaCode={activeItem?.personaCode || null}
+      />
+
+      <PersonalizationRationaleModal
+        open={viewingRationale}
+        onClose={handleCloseRationale}
+        renderedEmail={activeItem?.renderedEmail ?? null}
+        recipientDisplayName={activeItem?.contact?.displayName}
       />
     </div>
   );

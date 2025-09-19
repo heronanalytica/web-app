@@ -36,6 +36,20 @@ class UiLinksDto {
   @IsOptional() @IsString() why_this_email?: string;
 }
 
+class PersonalizationMapItemDto {
+  @IsString() persona_insight!: string;
+  @IsString() copy_adjustment!: string;
+  @IsString() rationale!: string;
+}
+
+class PersonalizationRationaleDto {
+  @IsString() explanation_id!: string;
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PersonalizationMapItemDto)
+  mapping!: PersonalizationMapItemDto[];
+}
+
 export class RenderedEmailRowDto {
   @IsOptional() @IsString() email_id?: string;
 
@@ -43,8 +57,11 @@ export class RenderedEmailRowDto {
   @ValidateNested() @Type(() => PersonaDto) persona!: PersonaDto;
   @ValidateNested() @Type(() => EmailContentDto) email!: EmailContentDto;
 
-  @IsOptional() @IsString() rationale_id?: string;
   @IsOptional() @ValidateNested() @Type(() => UiLinksDto) ui_links?: UiLinksDto;
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => PersonalizationRationaleDto)
+  personalization_rationale?: PersonalizationRationaleDto;
 }
 
 export class RenderedEmailsImportDto {

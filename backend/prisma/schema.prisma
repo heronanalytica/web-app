@@ -234,7 +234,7 @@ model CampaignRenderedEmail {
   subject     String
   preheader   String
   templateId  String?
-  rationaleId String?
+  rationale   Json?
 
   // the final HTML
   html String

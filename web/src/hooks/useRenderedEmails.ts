@@ -25,6 +25,14 @@ export type RenderedEmailItem = {
     html: string | null;
     from: string | null;
     to: string | null;
+    rationale?: {
+      explanation_id: string;
+      mapping: Array<{
+        persona_insight: string;
+        copy_adjustment: string;
+        rationale: string;
+      }>;
+    } | null;
   };
 };
 
