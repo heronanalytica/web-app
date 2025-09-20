@@ -5,11 +5,12 @@ export const PROVIDERS = [
     key: "mailchimp",
     name: "MailChimp",
     description:
-      "MailChimp is a leading email marketing platform. Connect your account to send campaigns directly from HeronAnalytica.",
+      "MailChimp is coming soon. You'll be able to connect your MailChimp account to send campaigns from HeronAnalytica.",
     logo: "/images/mailchimp_logo.png",
     homepage: "https://mailchimp.com/",
     icon: <MailOutlined style={{ fontSize: 32, color: "#ffe01b" }} />,
     connectUrl: `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/mail/connect/mailchimp`,
+    comingSoon: true,
     headerBg: "linear-gradient(90deg, #ffe01b 0%, #ffe99f 100%)",
   },
   {

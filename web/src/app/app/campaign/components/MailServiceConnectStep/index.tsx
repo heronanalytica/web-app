@@ -51,33 +51,21 @@ export const MailServiceConnectStep: React.FC = () => {
     return () => window.removeEventListener("focus", fetchStatus);
   }, [fetchStatus]);
 
-  // Enforce at least one connected
+  // Set default mail service if none is selected
   useEffect(() => {
-    const connectedProvider = Object.entries(status).find(
-      ([, s]: any) => s?.connected
-    );
-    setCanGoNext(!!connectedProvider);
-
-    if (connectedProvider) {
-      const [providerKey, s] = connectedProvider;
-      const newMailService = {
-        provider: providerKey,
+    // If no mail service is selected, set a default one
+    if (!mailService) {
+      const defaultMailService = {
+        provider: "default",
         connected: true,
-        mailProviderId: s.mailProviderId || s.id || "",
+        mailProviderId: "default",
+        name: "HeronAnalytica Marketing Platform",
       };
-      // Only update if changed (deep compare)
-      if (
-        !lastMailServiceRef.current ||
-        lastMailServiceRef.current.provider !== newMailService.provider ||
-        lastMailServiceRef.current.mailProviderId !==
-          newMailService.mailProviderId
-      ) {
-        setMailService(newMailService);
-        lastMailServiceRef.current = newMailService;
-      }
-    } else if (lastMailServiceRef.current) {
-      setMailService(undefined);
-      lastMailServiceRef.current = undefined;
+      setMailService(defaultMailService);
+      lastMailServiceRef.current = defaultMailService;
+      setCanGoNext(true);
+    } else {
+      setCanGoNext(true);
     }
   }, [status, setCanGoNext, setMailService]);
 
@@ -143,11 +131,11 @@ export const MailServiceConnectStep: React.FC = () => {
   return (
     <>
       {contextHolder}
-      {PROVIDERS.every((p) => !status[p.key]?.connected) && (
-        <div className={styles.providerStepNotice}>
-          You must connect at least one email service before continuing.
-        </div>
-      )}
+      <div className={styles.providerStepNotice}>
+        Your campaign will be sent using the HeronAnalytica Marketing Platform
+        by default. You can optionally connect an external email service
+        provider below once it is available.
+      </div>
       <div className={styles.providerCardsRow}>
         {PROVIDERS.map((p) => (
           <MailServiceCard
