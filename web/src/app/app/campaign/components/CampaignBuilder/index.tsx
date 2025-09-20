@@ -53,10 +53,14 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
     discard,
     save,
     runBeforeNext,
+    launchCampaign,
   } = useCampaignBuilder();
   const [saveLoading, setSaveLoading] = React.useState(false);
   const [messageApi, contextHolder] = message.useMessage();
   const [pendingSave, setPendingSave] = React.useState(false);
+
+  const isAtPersonalizationGridStep = currentStep === 8;
+  const saveBtnText = isAtPersonalizationGridStep ? "Launch Campaign" : "Save";
 
   useEffect(() => {
     if (pendingSave) {
@@ -83,14 +87,28 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
     }
   };
 
-  // Handler for Save with loading and message
+  // Handler for Save/Launch campaign with loading and message
   const handleSave = async () => {
     setSaveLoading(true);
+
     try {
-      await save();
-      messageApi.success("Campaign saved successfully");
+      if (isAtPersonalizationGridStep) {
+        await launchCampaign();
+      } else {
+        await save();
+      }
+      messageApi.success(
+        isAtPersonalizationGridStep
+          ? "Campaign launched successfully"
+          : "Campaign saved successfully"
+      );
     } catch (err: any) {
-      messageApi.error(err?.message || "Failed to save campaign");
+      messageApi.error(
+        err?.message ||
+          (isAtPersonalizationGridStep
+            ? "Failed to launch campaign"
+            : "Failed to save campaign")
+      );
     } finally {
       setSaveLoading(false);
     }
@@ -157,7 +175,7 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
               loading={saveLoading}
               disabled={saveLoading || currentStep === 3}
             >
-              Save
+              {saveBtnText}
             </Button>
           </div>
         </div>
@@ -165,7 +183,7 @@ const CampaignBuilderInner: React.FC<{ loading: boolean }> = ({ loading }) => {
 
         {!hideFooter && (
           <div className={styles.footerActions}>
-            {(currentStep !== 4 && currentStep !== 8) && (
+            {currentStep !== 4 && currentStep !== 8 && (
               <Button
                 onClick={() =>
                   setCurrentStep(currentStep > 0 ? currentStep - 1 : 0)

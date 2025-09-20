@@ -710,4 +710,8 @@ export class CampaignService {
       limit,
     };
   }
+
+  async launchCampaign(id: string) {
+    // TODO: Later
+  }
 }
