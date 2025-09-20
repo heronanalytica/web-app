@@ -144,8 +144,16 @@ export const CampaignBuilderProvider: React.FC<{
   };
 
   const launchCampaign = useCallback(async () => {
-    // TODO: Implement later
-  }, []);
+    if (!campaign?.id) return;
+    await fetcher.post<Campaign>(
+      `/api/campaigns/${campaign.id}/launch`,
+      {
+        id: campaign.id,
+      }
+    );
+    // Refresh this page to load the latest campaign data
+    window.location.reload();
+  }, [campaign]);
 
   const value: CampaignBuilderContextType & { campaign: Campaign | null } = {
     currentStep,

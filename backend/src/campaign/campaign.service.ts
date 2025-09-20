@@ -712,6 +712,29 @@ export class CampaignService {
   }
 
   async launchCampaign(id: string) {
-    // TODO: Later
+    const campaign = await this.dbService.campaign.findUnique({
+      where: { id },
+    });
+
+    if (!campaign) {
+      throw new Error('Campaign not found');
+    }
+
+    if (campaign.status === CampaignStatus.ACTIVE) {
+      throw new Error('Campaign is already active');
+    }
+
+    if (!campaign.currentStep) {
+      throw new Error('Something went wrong, please try again');
+    }
+
+    return this.dbService.campaign.update({
+      where: { id },
+      data: {
+        status: CampaignStatus.ACTIVE,
+        launchedAt: new Date(),
+        currentStep: campaign.currentStep + 1,
+      },
+    });
   }
 }
