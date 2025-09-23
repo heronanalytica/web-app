@@ -1,6 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { CampaignStatus } from './campaign-status.enum';
+import { MailService } from '../mail/mail.service';
+import { MailProviderType } from '../mail/mail-provider.factory';
 import {
   CreateDraftCampaignDto,
   UpdateDraftCampaignDto,
@@ -14,6 +16,8 @@ import { RenderedEmailsImportDto } from './dto/rendered-emails.dto';
 import { AwsService } from 'src/aws/aws.service';
 import { Readable } from 'stream';
 import { ProcessedRecipient } from './campaign-types';
+import { StepStateDto } from './dto/campaign-step-state.dto';
+import { Recipient } from 'src/mail/mail-provider.interface';
 
 const campaignInclude = {
   user: { select: { id: true, email: true } },
@@ -26,10 +30,13 @@ type ListOpts = { q?: string; page?: number; limit?: number };
 
 @Injectable()
 export class CampaignService {
+  private readonly logger = new Logger(CampaignService.name);
+
   constructor(
     private dbService: DatabaseService,
     private aiMarketing: AiMarketingService,
     private aws: AwsService,
+    private mailService: MailService,
   ) {}
 
   private async streamToString(stream: Readable): Promise<string> {
@@ -712,29 +719,99 @@ export class CampaignService {
   }
 
   async launchCampaign(id: string) {
-    const campaign = await this.dbService.campaign.findUnique({
-      where: { id },
+    // Start a transaction to ensure data consistency
+    return this.dbService.$transaction(async (prisma) => {
+      const campaign = await prisma.campaign.findUnique({
+        where: { id },
+        include: {
+          companyProfile: true,
+        },
+      });
+
+      if (!campaign) {
+        throw new Error('Campaign not found');
+      }
+
+      if (campaign.status === CampaignStatus.ACTIVE) {
+        throw new Error('Campaign is already active');
+      }
+
+      if (!campaign.currentStep) {
+        throw new Error('Something went wrong, please try again');
+      }
+
+      // Update campaign status first
+      const updatedCampaign = await prisma.campaign.update({
+        where: { id },
+        data: {
+          status: CampaignStatus.ACTIVE,
+          launchedAt: new Date(),
+          currentStep: campaign.currentStep + 1,
+        },
+      });
+
+      try {
+        const recipients = await prisma.campaignRecipient.findMany({
+          where: { campaignId: id, status: 'STAGED' }, // only staged or queued
+          include: { contact: true, renderedEmail: true },
+        });
+
+        const mappedRecipients: Recipient[] = recipients
+          .filter((r) => r.contact?.email && r.renderedEmail)
+          .map((r) => ({
+            email: r.contact.email!,
+            name:
+              [r.contact.firstName, r.contact.lastName]
+                .filter(Boolean)
+                .join(' ') || undefined,
+            subject: r.renderedEmail?.subject as string,
+            html: r.renderedEmail?.html as string,
+            preheader: r.renderedEmail?.preheader,
+            fromEmail: process.env.SENDER_EMAIL!,
+            fromName: campaign.companyProfile?.name as string,
+          }));
+
+        // Determine the mail provider based on campaign settings or step state
+        const mailProvider = this.determineMailProvider(
+          campaign.stepState as StepStateDto,
+        );
+
+        // Send the campaign using the mail service
+        await this.mailService.sendCampaign(
+          campaign,
+          mappedRecipients,
+          mailProvider,
+        );
+
+        this.logger.log(`Successfully launched campaign ${campaign.id}`);
+        return updatedCampaign;
+      } catch (error) {
+        // Update the campaign status to indicate failure
+        await prisma.campaign.update({
+          where: { id },
+          data: { status: CampaignStatus.PAUSED },
+        });
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        throw new Error(`Failed to launch campaign: ${error.message}`);
+      }
     });
+  }
 
-    if (!campaign) {
-      throw new Error('Campaign not found');
+  private determineMailProvider(stepState: StepStateDto): MailProviderType {
+    // Default to SENDER_NET if no specific provider is set
+    if (!stepState?.mailService?.provider) {
+      return MailProviderType.SENDER_NET;
     }
 
-    if (campaign.status === CampaignStatus.ACTIVE) {
-      throw new Error('Campaign is already active');
+    // Map the provider from stepState to MailProviderType
+    switch (stepState.mailService.provider) {
+      case 'mailchimp':
+        return MailProviderType.MAILCHIMP;
+      case 'hubspot':
+        return MailProviderType.HUBSPOT;
+      case 'sender_net':
+      default:
+        return MailProviderType.SENDER_NET;
     }
-
-    if (!campaign.currentStep) {
-      throw new Error('Something went wrong, please try again');
-    }
-
-    return this.dbService.campaign.update({
-      where: { id },
-      data: {
-        status: CampaignStatus.ACTIVE,
-        launchedAt: new Date(),
-        currentStep: campaign.currentStep + 1,
-      },
-    });
   }
 }
