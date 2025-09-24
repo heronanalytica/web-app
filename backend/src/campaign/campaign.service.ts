@@ -719,28 +719,19 @@ export class CampaignService {
   }
 
   async launchCampaign(id: string) {
-    // Start a transaction to ensure data consistency
     return this.dbService.$transaction(async (prisma) => {
       const campaign = await prisma.campaign.findUnique({
         where: { id },
-        include: {
-          companyProfile: true,
-        },
+        include: { companyProfile: true },
       });
 
-      if (!campaign) {
-        throw new Error('Campaign not found');
-      }
-
-      if (campaign.status === CampaignStatus.ACTIVE) {
+      if (!campaign) throw new Error('Campaign not found');
+      if (campaign.status === CampaignStatus.ACTIVE)
         throw new Error('Campaign is already active');
-      }
-
-      if (!campaign.currentStep) {
+      if (!campaign.currentStep)
         throw new Error('Something went wrong, please try again');
-      }
 
-      // Update campaign status first
+      // ✅ Immediately mark campaign ACTIVE
       const updatedCampaign = await prisma.campaign.update({
         where: { id },
         data: {
@@ -750,50 +741,67 @@ export class CampaignService {
         },
       });
 
-      try {
-        const recipients = await prisma.campaignRecipient.findMany({
-          where: { campaignId: id, status: 'STAGED' }, // only staged or queued
-          include: { contact: true, renderedEmail: true },
-        });
+      // ✅ Kick off async send (fire-and-forget)
+      this.sendInBackground(campaign.id, campaign.companyProfile!.name);
 
-        const mappedRecipients: Recipient[] = recipients
-          .filter((r) => r.contact?.email && r.renderedEmail)
-          .map((r) => ({
-            email: r.contact.email!,
-            name:
-              [r.contact.firstName, r.contact.lastName]
-                .filter(Boolean)
-                .join(' ') || undefined,
-            subject: r.renderedEmail?.subject as string,
-            html: r.renderedEmail?.html as string,
-            preheader: r.renderedEmail?.preheader,
-            fromEmail: process.env.SENDER_EMAIL!,
-            fromName: campaign.companyProfile?.name as string,
-          }));
+      return updatedCampaign;
+    });
+  }
 
-        // Determine the mail provider based on campaign settings or step state
-        const mailProvider = this.determineMailProvider(
-          campaign.stepState as StepStateDto,
-        );
+  private sendInBackground(campaignId: string, fromName: string) {
+    setImmediate(() => {
+      void (async () => {
+        try {
+          const recipients = await this.dbService.campaignRecipient.findMany({
+            where: { campaignId, status: 'STAGED' },
+            include: { contact: true, renderedEmail: true },
+          });
 
-        // Send the campaign using the mail service
-        await this.mailService.sendCampaign(
-          campaign,
-          mappedRecipients,
-          mailProvider,
-        );
+          const mappedRecipients: Recipient[] = recipients
+            .filter((r) => r.contact?.email && r.renderedEmail)
+            .map((r) => ({
+              email: r.contact.email!,
+              name:
+                [r.contact.firstName, r.contact.lastName]
+                  .filter(Boolean)
+                  .join(' ') || undefined,
+              subject: r.renderedEmail?.subject as string,
+              html: r.renderedEmail?.html as string,
+              preheader: r.renderedEmail?.preheader,
+              fromEmail: process.env.SENDER_EMAIL!,
+              fromName,
+            }));
 
-        this.logger.log(`Successfully launched campaign ${campaign.id}`);
-        return updatedCampaign;
-      } catch (error) {
-        // Update the campaign status to indicate failure
-        await prisma.campaign.update({
-          where: { id },
-          data: { status: CampaignStatus.PAUSED },
-        });
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        throw new Error(`Failed to launch campaign: ${error.message}`);
-      }
+          const campaign = await this.dbService.campaign.findUnique({
+            where: { id: campaignId },
+          });
+          if (!campaign) throw new Error('Campaign not found');
+
+          const mailProvider = this.determineMailProvider(
+            campaign.stepState as StepStateDto,
+          );
+
+          await this.mailService.sendCampaign(
+            campaign,
+            mappedRecipients,
+            mailProvider,
+          );
+
+          this.logger.log(
+            `Background send complete for campaign ${campaign.id}`,
+          );
+        } catch (error) {
+          this.logger.error(
+            `Background send failed: ${error instanceof Error ? error.message : error}`,
+            error instanceof Error ? error.stack : undefined,
+          );
+
+          await this.dbService.campaign.update({
+            where: { id: campaignId },
+            data: { status: CampaignStatus.PAUSED },
+          });
+        }
+      })();
     });
   }
 
