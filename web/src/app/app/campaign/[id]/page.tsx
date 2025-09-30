@@ -7,6 +7,7 @@ import { fetcher } from "@/lib/fetcher";
 import { ROUTES } from "@/constants/routes";
 import { Campaign, CampaignStatus } from "@/types/campaign";
 import { CampaignBuilder } from "../components/CampaignBuilder";
+import { CampaignView } from '../components/CampaignView';
 
 const CampaignDetailPage = () => {
   const { id } = useParams();
@@ -41,7 +42,7 @@ const CampaignDetailPage = () => {
       {campaign.status === CampaignStatus.DRAFT ? (
         <CampaignBuilder campaign={campaign} loading={loading} />
       ) : (
-        <div>View campaign page coming soon.</div>
+        <CampaignView campaign={campaign} />
       )}
     </>
   );

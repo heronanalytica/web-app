@@ -5,12 +5,14 @@ interface Props {
   html?: string | null;
   height?: number | string;
   className?: string;
+  header?: React.ReactNode;
 }
 
 const EmailPreviewFrame: React.FC<Props> = ({
   html,
   height = "auto",
   className = "",
+  header,
 }) => {
   const emailContent = useMemo(() => {
     if (!html) {
@@ -33,6 +35,7 @@ const EmailPreviewFrame: React.FC<Props> = ({
       className={`${styles.previewContainer} ${className}`}
       style={{ height }}
     >
+      {header}
       <div className={styles.emailContainer}>{emailContent}</div>
     </div>
   );

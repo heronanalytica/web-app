@@ -1,6 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { CampaignStatus } from './campaign-status.enum';
+import { MailService } from '../mail/mail.service';
+import { MailProviderType } from '../mail/mail-provider.factory';
 import {
   CreateDraftCampaignDto,
   UpdateDraftCampaignDto,
@@ -14,6 +16,8 @@ import { RenderedEmailsImportDto } from './dto/rendered-emails.dto';
 import { AwsService } from 'src/aws/aws.service';
 import { Readable } from 'stream';
 import { ProcessedRecipient } from './campaign-types';
+import { StepStateDto } from './dto/campaign-step-state.dto';
+import { Recipient } from 'src/mail/mail-provider.interface';
 
 const campaignInclude = {
   user: { select: { id: true, email: true } },
@@ -26,10 +30,13 @@ type ListOpts = { q?: string; page?: number; limit?: number };
 
 @Injectable()
 export class CampaignService {
+  private readonly logger = new Logger(CampaignService.name);
+
   constructor(
     private dbService: DatabaseService,
     private aiMarketing: AiMarketingService,
     private aws: AwsService,
+    private mailService: MailService,
   ) {}
 
   private async streamToString(stream: Readable): Promise<string> {
@@ -450,6 +457,8 @@ export class CampaignService {
 
         // Upsert CampaignRenderedEmail by unique campaignRecipientId
         const m = row.email.meta;
+        const rationaleObj: Prisma.InputJsonValue =
+          row.personalization_rationale as unknown as Prisma.InputJsonValue;
         await this.dbService.campaignRenderedEmail.upsert({
           where: { campaignRecipientId: recipient.id },
           create: {
@@ -461,7 +470,7 @@ export class CampaignService {
             subject: m.subject,
             preheader: m.preheader || '',
             templateId: m.template_id || null,
-            rationaleId: row.rationale_id || null,
+            rationale: rationaleObj,
             html: row.email.html_body,
           },
           update: {
@@ -471,7 +480,7 @@ export class CampaignService {
             subject: m.subject,
             preheader: m.preheader || '',
             templateId: m.template_id || null,
-            rationaleId: row.rationale_id || null,
+            rationale: rationaleObj,
             html: row.email.html_body,
           },
         });
@@ -682,6 +691,7 @@ export class CampaignService {
               html: row.renderedEmail.html,
               from: row.renderedEmail.fromAddress,
               to: row.renderedEmail.toAddress,
+              rationale: row.renderedEmail.rationale,
             }
           : null;
 
@@ -706,5 +716,110 @@ export class CampaignService {
       totalPages: Math.ceil(total / limit),
       limit,
     };
+  }
+
+  async launchCampaign(id: string) {
+    return this.dbService.$transaction(async (prisma) => {
+      const campaign = await prisma.campaign.findUnique({
+        where: { id },
+        include: { companyProfile: true },
+      });
+
+      if (!campaign) throw new Error('Campaign not found');
+      if (campaign.status === CampaignStatus.ACTIVE)
+        throw new Error('Campaign is already active');
+      if (!campaign.currentStep)
+        throw new Error('Something went wrong, please try again');
+
+      // ✅ Immediately mark campaign ACTIVE
+      const updatedCampaign = await prisma.campaign.update({
+        where: { id },
+        data: {
+          status: CampaignStatus.ACTIVE,
+          launchedAt: new Date(),
+          currentStep: campaign.currentStep + 1,
+        },
+      });
+
+      // ✅ Kick off async send (fire-and-forget)
+      this.sendInBackground(campaign.id, campaign.companyProfile!.name);
+
+      return updatedCampaign;
+    });
+  }
+
+  private sendInBackground(campaignId: string, fromName: string) {
+    setImmediate(() => {
+      void (async () => {
+        try {
+          const recipients = await this.dbService.campaignRecipient.findMany({
+            where: { campaignId, status: 'STAGED' },
+            include: { contact: true, renderedEmail: true },
+          });
+
+          const mappedRecipients: Recipient[] = recipients
+            .filter((r) => r.contact?.email && r.renderedEmail)
+            .map((r) => ({
+              email: r.contact.email!,
+              name:
+                [r.contact.firstName, r.contact.lastName]
+                  .filter(Boolean)
+                  .join(' ') || undefined,
+              subject: r.renderedEmail?.subject as string,
+              html: r.renderedEmail?.html as string,
+              preheader: r.renderedEmail?.preheader,
+              fromEmail: process.env.SENDER_EMAIL!,
+              fromName,
+            }));
+
+          const campaign = await this.dbService.campaign.findUnique({
+            where: { id: campaignId },
+          });
+          if (!campaign) throw new Error('Campaign not found');
+
+          const mailProvider = this.determineMailProvider(
+            campaign.stepState as StepStateDto,
+          );
+
+          await this.mailService.sendCampaign(
+            campaign,
+            mappedRecipients,
+            mailProvider,
+          );
+
+          this.logger.log(
+            `Background send complete for campaign ${campaign.id}`,
+          );
+        } catch (error) {
+          this.logger.error(
+            `Background send failed: ${error instanceof Error ? error.message : error}`,
+            error instanceof Error ? error.stack : undefined,
+          );
+
+          await this.dbService.campaign.update({
+            where: { id: campaignId },
+            data: { status: CampaignStatus.PAUSED },
+          });
+        }
+      })();
+    });
+  }
+
+  private determineMailProvider(stepState: StepStateDto): MailProviderType {
+    // Default to SENDER_NET if no specific provider is set
+    if (!stepState?.mailService?.provider) {
+      return MailProviderType.SENDER_NET;
+    }
+
+    // Map the provider from stepState to MailProviderType
+    switch (stepState.mailService.provider) {
+      case 'mailchimp':
+        return MailProviderType.MAILCHIMP;
+      case 'hubspot':
+        return MailProviderType.HUBSPOT;
+      case 'sender_net':
+      default:
+        return MailProviderType.SENDER_NET;
+    }
   }
 }

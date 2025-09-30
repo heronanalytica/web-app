@@ -89,6 +89,7 @@ model Campaign {
   currentStep   Int? // Step user left off at (nullable for legacy)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+  launchedAt    DateTime?      // When the campaign was launched
   lastSavedAt   DateTime?
   stepState     Json?
 
@@ -234,7 +235,7 @@ model CampaignRenderedEmail {
   subject     String
   preheader   String
   templateId  String?
-  rationaleId String?
+  rationale   Json?
 
   // the final HTML
   html String

@@ -17,5 +17,9 @@ export interface ProcessedRecipient {
     id: string;
     subject: string | null;
     preheader: string | null;
+    html?: string | null;
+    from?: string | null;
+    to?: string | null;
+    rationale?: any;
   } | null;
 }

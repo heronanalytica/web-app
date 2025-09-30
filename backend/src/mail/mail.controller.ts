@@ -6,7 +6,6 @@ import {
   Res,
   Query,
   Post,
-  Body,
   UseGuards,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -21,39 +20,58 @@ import { Public } from 'src/auth/decorators/public.decorator';
 export class MailController {
   constructor(private readonly mailService: MailService) {}
 
+  /**
+   * Step 1: Redirect user to provider’s OAuth page
+   */
   @Get('connect/:provider')
   connect(
     @Param('provider') provider: string,
     @Res() res: Response,
     @Req() req: Request,
   ) {
-    if (!getMailProviders()[provider]) {
+    const providerConfig = getMailProviders()[provider];
+
+    if (!providerConfig) {
       return res.status(400).json({ error: 'Unsupported provider' });
     }
+
+    if (providerConfig.apiKeyOnly) {
+      return res
+        .status(400)
+        .json({ error: `${providerConfig.name} uses API key, not OAuth` });
+    }
+
     const url = this.mailService.getOAuthUrl(provider, req);
     return res.redirect(url);
   }
 
+  /**
+   * Step 2: Handle OAuth callback
+   */
   @Get('callback/:provider')
   @Public()
   async callback(
     @Param('provider') provider: string,
     @Query('code') code: string,
     @Query('state') state: string,
-    @Req() req: Request,
     @Res() res: Response,
   ) {
-    // Parse userId from state (format: userId:timestamp)
-    const userId = state?.split(':')[0];
-    if (!userId) {
-      throw new UnauthorizedException('Missing or invalid state (userId)');
-    }
-    if (!getMailProviders()[provider]) {
+    const providerConfig = getMailProviders()[provider];
+
+    if (!providerConfig) {
       return res.status(400).json({ error: 'Unsupported provider' });
     }
+
+    if (providerConfig.apiKeyOnly) {
+      return res
+        .status(400)
+        .json({ error: `${providerConfig.name} does not support OAuth` });
+    }
+
     try {
-      await this.mailService.handleOAuthCallback(provider, code, userId);
-      // Redirect back to frontend with success
+      await this.mailService.handleOAuthCallback(provider, code, state);
+
+      // ✅ Success response back to frontend popup
       return res.send(`
         <html>
           <body>
@@ -62,51 +80,52 @@ export class MailController {
                 window.opener.postMessage({ type: 'mail_connected', success: true }, '*');
                 window.close();
               } else {
-                // Fallback for browsers where window.opener is not set
                 window.location.href = '${process.env.WEBAPP_FRONTEND_URL}/app/campaign/new?mail_connected=1';
               }
             </script>
           </body>
         </html>
-        `);
-    } catch {
+      `);
+    } catch (err) {
       return res.send(`
         <html>
           <body>
             <script>
               if (window.opener) {
-                window.opener.postMessage({ type: 'mail_connected', success: false }, '*');
+                window.opener.postMessage({ type: 'mail_connected', success: false, error: "${(err as Error).message}" }, '*');
                 window.close();
               } else {
-                // Fallback for browsers where window.opener is not set
                 window.location.href = '${process.env.WEBAPP_FRONTEND_URL}/app/campaign/new?mail_connected=0';
               }
             </script>
           </body>
         </html>
-        `);
+      `);
     }
   }
 
+  /**
+   * Step 3: Check connected providers
+   */
   @Get('status')
   async status(@Req() req: Request) {
     const userId = req.user?.id;
-    if (!userId) {
-      throw new UnauthorizedException();
-    }
-    // Return connected providers for the user
+    if (!userId) throw new UnauthorizedException();
+
     return {
       error: 0,
       data: await this.mailService.getStatus(userId),
     };
   }
 
+  /**
+   * Step 4: Disconnect provider
+   */
   @Post('disconnect/:provider')
   async disconnect(@Param('provider') provider: string, @Req() req: Request) {
     const userId = req.user?.id;
-    if (!userId) {
-      throw new UnauthorizedException();
-    }
+    if (!userId) throw new UnauthorizedException();
+
     return this.mailService.disconnectProvider(provider, userId);
   }
 }

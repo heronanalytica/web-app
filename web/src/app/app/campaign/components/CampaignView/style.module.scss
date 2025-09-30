@@ -1,0 +1,56 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 70vh;
+  padding: 24px;
+  width: 100%;
+}
+
+.card {
+  width: 100%;
+  max-width: 800px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.successIcon {
+  font-size: 48px;
+  color: #52c41a;
+  margin-bottom: 16px;
+}
+
+.statsContainer {
+  margin: 32px 0;
+  padding: 24px;
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.statItem {
+  text-align: center;
+  padding: 16px;
+  
+  .label {
+    display: block;
+    color: rgba(0, 0, 0, 0.45);
+    margin-bottom: 8px;
+  }
+  
+  .value {
+    font-size: 16px;
+    font-weight: 500;
+  }
+}
+
+.message {
+  text-align: center;
+  margin-top: 24px;
+  padding: 16px;
+  background: #f6ffed;
+  border: 1px solid #b7eb8f;
+  border-radius: 4px;
+}

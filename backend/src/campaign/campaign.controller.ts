@@ -26,17 +26,13 @@ import { AdminGuard } from '../auth/guards/admin.guard';
 import { Request } from 'express';
 import { EAuthRole } from '../auth/auth.types';
 import { UpdateClassifiedPersonaDto } from './dto/update-classified-persona.dto';
-import { AiMarketingService } from 'src/ai-marketing/ai-marketing.service';
 import { RenderedEmailsImportDto } from './dto/rendered-emails.dto';
 import { ImportRenderedFromFileDto } from './dto/import-rendered-from-file.dto';
 
 @Controller('campaigns')
 @UseGuards(JwtAuthGuard)
 export class CampaignController {
-  constructor(
-    private readonly campaignService: CampaignService,
-    private readonly aiMarketingService: AiMarketingService,
-  ) {}
+  constructor(private readonly campaignService: CampaignService) {}
 
   @Get()
   async getUserCampaigns(@Req() req: Request) {
@@ -251,6 +247,12 @@ export class CampaignController {
       id,
       { q, page, limit },
     );
+    return { error: 0, data };
+  }
+
+  @Post(':id/launch')
+  async launchCampaign(@Param('id', new ParseUUIDPipe()) id: string) {
+    const data = await this.campaignService.launchCampaign(id);
     return { error: 0, data };
   }
 }

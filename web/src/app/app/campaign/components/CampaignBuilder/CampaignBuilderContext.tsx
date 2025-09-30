@@ -25,6 +25,7 @@ export interface CampaignBuilderContextType {
   removeStepState: <K extends keyof CampaignStepState>(key: K) => void;
   registerBeforeNext: (fn: (() => Promise<void>) | null) => void;
   runBeforeNext: () => Promise<void>;
+  launchCampaign: () => Promise<void>;
 }
 
 const CampaignBuilderContext = createContext<
@@ -142,6 +143,18 @@ export const CampaignBuilderProvider: React.FC<{
     });
   };
 
+  const launchCampaign = useCallback(async () => {
+    if (!campaign?.id) return;
+    await fetcher.post<Campaign>(
+      `/api/campaigns/${campaign.id}/launch`,
+      {
+        id: campaign.id,
+      }
+    );
+    // Refresh this page to load the latest campaign data
+    window.location.reload();
+  }, [campaign]);
+
   const value: CampaignBuilderContextType & { campaign: Campaign | null } = {
     currentStep,
     setCurrentStep,
@@ -158,6 +171,7 @@ export const CampaignBuilderProvider: React.FC<{
     removeStepState,
     registerBeforeNext,
     runBeforeNext,
+    launchCampaign,
   };
 
   return (
