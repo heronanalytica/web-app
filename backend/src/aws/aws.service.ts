@@ -20,6 +20,7 @@ export class AwsService {
   public readonly s3Service: S3Client;
   private readonly s3Bucket: string;
   private readonly region: string;
+  private readonly envPrefix: string;
 
   constructor(private readonly configService: ConfigService) {
     this.region = this.configService.get<string>('AWS_REGION')!;
@@ -40,6 +41,7 @@ export class AwsService {
       credentials: { accessKeyId, secretAccessKey },
     });
     this.s3Bucket = bucket;
+    this.envPrefix = process.env.NODE_ENV || 'development';
   }
 
   public getS3BucketName(): string {
@@ -50,8 +52,16 @@ export class AwsService {
     return `https://${this.s3Bucket}.s3.${this.region}.amazonaws.com/${encodeURI(key)}`;
   }
 
+  private ensureEnvPrefix(key: string): string {
+    return key.startsWith(this.envPrefix) ? key : `${this.envPrefix}/${key}`;
+  }
+
   public async getPresignedViewUrl(key: string, expiresIn = 3600 * 24 * 7) {
-    const cmd = new GetObjectCommand({ Bucket: this.s3Bucket, Key: key });
+    const prefixedKey = this.ensureEnvPrefix(key);
+    const cmd = new GetObjectCommand({
+      Bucket: this.s3Bucket,
+      Key: prefixedKey,
+    });
     return getSignedUrl(this.s3Service, cmd, { expiresIn });
   }
 
@@ -72,10 +82,10 @@ export class AwsService {
       throw new Error('userId and fileType are required');
     }
 
-    // Create a base key with user ID and file type
+    // Create a base key with environment prefix, user ID and file type
     const baseKey = isPublic
-      ? `${userId}/${fileType}/public/${uuidv4()}`
-      : `${userId}/${fileType}/${uuidv4()}`;
+      ? `${this.envPrefix}/${userId}/${fileType}/public/${uuidv4()}`
+      : `${this.envPrefix}/${userId}/${fileType}/${uuidv4()}`;
     // Append file extension if provided
     const key = fileExtension
       ? `${baseKey}.${fileExtension.replace(/^\./, '')}`
@@ -93,15 +103,20 @@ export class AwsService {
   }
 
   async deleteObjectFromS3(key: string): Promise<void> {
+    const prefixedKey = this.ensureEnvPrefix(key);
     const command = new DeleteObjectCommand({
       Bucket: this.s3Bucket,
-      Key: key,
+      Key: prefixedKey,
     });
     await this.s3Service.send(command);
   }
 
   async getObjectStreamFromS3(key: string): Promise<Readable> {
-    const command = new GetObjectCommand({ Bucket: this.s3Bucket, Key: key });
+    const prefixedKey = this.ensureEnvPrefix(key);
+    const command = new GetObjectCommand({
+      Bucket: this.s3Bucket,
+      Key: prefixedKey,
+    });
     const response = await this.s3Service.send(command);
     return response.Body as Readable;
   }
