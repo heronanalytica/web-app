@@ -67,7 +67,7 @@ export const MailServiceConnectStep: React.FC = () => {
     } else {
       setCanGoNext(true);
     }
-  }, [status, setCanGoNext, setMailService]);
+  }, [status, setCanGoNext, setMailService, mailService]);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -133,7 +133,7 @@ export const MailServiceConnectStep: React.FC = () => {
       {contextHolder}
       <div className={styles.providerStepNotice}>
         Your campaign will be sent using the HeronAnalytica Marketing Platform
-        by default. You can optionally connect an external email service
+        by default. <br />You can optionally connect an external email service
         provider below once it is available.
       </div>
       <div className={styles.providerCardsRow}>

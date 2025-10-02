@@ -196,10 +196,15 @@ const CustomerFileStep: React.FC = () => {
         </div>
       </div>
       <Divider />
-      <div style={{ marginTop: 16, minHeight: 32 }}>
-        <b>Selected File:</b>
-        <br />
-        <br />
+      <div
+        style={{
+          marginTop: 16,
+          minHeight: 32,
+          backgroundColor: customerFile ? "#f5f5f5" : "#fff",
+          padding: 8,
+          borderRadius: 4,
+        }}
+      >
         {customerFile ? (
           <span className={styles.selectedFileBox}>
             <span
@@ -236,7 +241,9 @@ const CustomerFileStep: React.FC = () => {
             </button>
           </span>
         ) : (
-          <span style={{ color: "#aaa" }}>None selected</span>
+          <span style={{ color: "#aaa", fontWeight: "bold" }}>
+            No file selected
+          </span>
         )}
       </div>
       <Modal
