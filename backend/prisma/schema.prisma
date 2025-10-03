@@ -54,7 +54,6 @@ model User {
   password                   String
   role                       UserRole                     @default(CLIENT)
   createdAt                  DateTime                     @default(now())
-  SurveyIntakeQuestionAnswer SurveyIntakeQuestionAnswer[]
   campaigns                  Campaign[]
   uploadFiles                UserUploadFile[]
   mailProviderTokens         MailProviderToken[]
@@ -106,17 +105,6 @@ model Campaign {
   CampaignRenderedEmail CampaignRenderedEmail[]
 }
 
-// Survey
-model SurveyIntakeQuestions {
-  id        String             @id @default(uuid())
-  code      String             @unique
-  question  String
-  type      IntakeQuestionType
-  options   Json? // Only for SINGLE or MULTIPLE
-  createdAt DateTime           @default(now())
-  updatedAt DateTime           @updatedAt
-}
-
 model UserUploadFile {
   id                        String           @id @default(uuid())
   userId                    String
@@ -144,29 +132,6 @@ model MailProviderToken {
   updatedAt    DateTime  @updatedAt
 
   @@unique([userId, provider])
-}
-
-enum IntakeQuestionType {
-  SINGLE
-  TEXT
-  MULTIPLE
-}
-
-model SurveyIntakeQuestionSet {
-  id          String   @id @default(uuid())
-  name        String   @unique
-  questionIds String[] // Stores UUIDs of SurveyIntakeQuestion
-  isActive    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model SurveyIntakeQuestionAnswer {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  response  String // JSON string of the full response array
-  createdAt DateTime @default(now())
 }
 
 model Contact {

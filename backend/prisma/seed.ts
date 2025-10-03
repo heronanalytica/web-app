@@ -1,10 +1,9 @@
 import { PrismaClient } from '../generated/prisma';
-import { seedSurveyIntakeQuestions } from './seeds/20250517_1553_add_intake_questions';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  await seedSurveyIntakeQuestions(prisma);
+  // TODO: Run seed scripts
 }
 
 main()

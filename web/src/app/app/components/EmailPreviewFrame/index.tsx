@@ -23,9 +23,18 @@ const EmailPreviewFrame: React.FC<Props> = ({
         </div>
       );
     }
+
+    // Remove the anchor tag containing unsubscribe_text with more permissive whitespace handling
+    const cleanHtml = html
+      .replace(
+        /<a[^>]*\{\{\s*unsubscribe_link\s*\}[^>]*>\s*\{\{\s*unsubscribe_text\s*\}\}\s*<\/a>/gi,
+        ""
+      )
+      .trim();
+
     return (
       <div className={styles.emailInner}>
-        <div dangerouslySetInnerHTML={{ __html: html }} />
+        <div dangerouslySetInnerHTML={{ __html: cleanHtml }} />
       </div>
     );
   }, [html]);

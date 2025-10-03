@@ -1,7 +1,7 @@
 import React from "react";
 import { Typography, Tag } from "antd";
 import { GlobalOutlined } from "@ant-design/icons";
-import { capitalizeFirstLetter, capitalizeWords } from "@/utils/stringUtils";
+import { capitalizeFirstLetter, capitalizeWords } from "@/lib";
 import styles from "../../styles.module.scss";
 
 const { Title, Text } = Typography;

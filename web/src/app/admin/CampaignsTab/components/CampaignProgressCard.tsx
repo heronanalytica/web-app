@@ -155,6 +155,12 @@ const CampaignProgressCard: React.FC<CampaignProgressCardProps> = ({
               </Steps>
               {onStepComplete && atAnalysisStep && (
                 <div style={{ marginTop: 24 }}>
+                  <div>
+                    <i>
+                      * Please upload Classified Customer Persona before
+                      proceeding
+                    </i>
+                  </div>
                   <Button
                     type="primary"
                     onClick={onStepComplete}
@@ -186,6 +192,11 @@ const CampaignProgressCard: React.FC<CampaignProgressCardProps> = ({
 
         {atTemplateWaitingStep && onNextFromTemplate && (
           <div style={{ marginTop: 8 }}>
+            <div>
+              <i>
+                * Please upload Rendered Emails JSON before proceeding
+              </i>
+            </div>
             <Button
               type="primary"
               onClick={onNextFromTemplate}

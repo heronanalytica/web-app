@@ -166,6 +166,9 @@ export class CampaignService {
       mergedSafe = toJsonValue(sanitized);
     }
 
+    const companyProfileId: string | undefined = (mergedSafe as StepStateDto)
+      ?.companyProfile?.id;
+
     return this.dbService.campaign.update({
       where: { id },
       data: {
@@ -182,6 +185,7 @@ export class CampaignService {
                 dto.analysisSteps as unknown as Prisma.InputJsonValue,
             }
           : {}),
+        ...(companyProfileId !== undefined ? { companyProfileId } : {}),
         lastSavedAt: new Date(),
       },
       include: campaignInclude,
