@@ -28,8 +28,6 @@ export const CompanyInfo: React.FC<CompanyInfoProps> = ({ companyProfile }) => {
   const brandPositioning =
     companyProfile.generatedOverallProfile?.brand_positioning ||
     "Not specified";
-  const toneOfVoice =
-    companyProfile.generatedOverallProfile?.tone_of_voice || "Not specified";
   const marketingTone =
     companyProfile.generatedMarketingTone?.summary || "Not specified";
 
