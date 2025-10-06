@@ -108,13 +108,6 @@ export const CompanyInfo: React.FC<CompanyInfoProps> = ({ companyProfile }) => {
 
         <div className={styles.infoCard}>
           <Title level={5} className={styles.sectionSubtitle}>
-            Tone of Voice
-          </Title>
-          <Text>{capitalizeFirstLetter(toneOfVoice)}</Text>
-        </div>
-
-        <div className={styles.infoCard}>
-          <Title level={5} className={styles.sectionSubtitle}>
             Marketing Tone
           </Title>
           <Text>{capitalizeFirstLetter(marketingTone)}</Text>

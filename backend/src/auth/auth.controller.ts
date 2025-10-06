@@ -41,8 +41,7 @@ export class AuthController {
     res.cookie('login_token', data.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      // API Backend and Frontend are on different domains
-      sameSite: 'none',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       path: '/',
       maxAge: 60 * 60 * 24 * 1000,
     });

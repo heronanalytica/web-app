@@ -220,9 +220,6 @@ export default function CompanyProfileStep() {
           {/* Hidden fields that actually store the values */}
           <Form.Item
             name="marketingContentFileId"
-            rules={[
-              { required: true, message: "Please upload marketing content" },
-            ]}
             hidden
           >
             <input type="hidden" />
