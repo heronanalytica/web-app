@@ -2,6 +2,7 @@
 
 import * as sanitizeHtml from 'sanitize-html';
 import { StepStateDto } from 'src/campaign/dto/campaign-step-state.dto';
+import { decode } from 'he';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const htmlPolicy: sanitizeHtml.IOptions = {
@@ -85,5 +86,53 @@ export function sanitizeStepStateForStorage(input: StepStateDto): StepStateDto {
       preheader: sanitizePlainText(input.commonTemplate.preheader), // <-- new
       html: input.commonTemplate.html,
     },
+  };
+}
+
+export interface ExtractedHtml {
+  subject: string;
+  preheader: string;
+  html: string;
+}
+
+export function extractUploadedHtml(uploadedHtml: string): ExtractedHtml {
+  let raw = (uploadedHtml ?? '').trim();
+
+  // Detect Cocoa wrapper (escaped HTML inside <p> wrappers)
+  const looksEscaped =
+    raw.includes('&lt;!DOCTYPE') || raw.includes('Cocoa HTML Writer');
+
+  if (looksEscaped) {
+    // Strip wrappers
+    raw = raw.replace(/<p[^>]*>/g, '').replace(/<\/p>/g, '');
+    raw = raw.replace(/<span[^>]*>.*?<\/span>/g, ' '); // remove Apple-converted-space
+
+    // 🔑 Decode entities into real HTML
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+    raw = decode(raw);
+  }
+
+  // 1. Extract Subject
+  const subjectMatch = raw.match(/<!--\s*subject:\s*([\s\S]*?)\s*-->/i);
+  const subject = subjectMatch?.[1].trim() ?? '';
+
+  // 2. Extract Preheader (prefer <div.preheader>)
+  const preheaderDiv = raw.match(
+    /<div[^>]*class=["']preheader["'][^>]*>(.*?)<\/div>/i,
+  );
+  const preheaderComment = raw.match(/<!--\s*preheader:\s*([\s\S]*?)\s*-->/i);
+  const preheader =
+    preheaderDiv?.[1].trim() ?? preheaderComment?.[1].trim() ?? '';
+
+  // 3. Remove subject/preheader comments so they don’t show up
+  const cleaned = raw
+    .replace(/<!--\s*subject:[\s\S]*?-->\s*/i, '')
+    .replace(/<!--\s*preheader:[\s\S]*?-->\s*/i, '')
+    .trim();
+
+  return {
+    subject,
+    preheader,
+    html: sanitizeEmailHtml(cleaned),
   };
 }

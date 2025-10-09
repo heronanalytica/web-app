@@ -12,7 +12,7 @@ import { isJsonObject, toJsonValue } from 'src/utils';
 import { AiMarketingService } from 'src/ai-marketing/ai-marketing.service';
 import { merge, omit } from 'lodash';
 import {
-  sanitizeEmailHtml,
+  extractUploadedHtml,
   sanitizeStepStateForStorage,
 } from 'src/utils/sanitize';
 import { RenderedEmailsImportDto } from './dto/rendered-emails.dto';
@@ -351,11 +351,7 @@ export class CampaignService {
 
     // 2) generate (returns {subject, html})
     const tpl = stepState.generator?.uploadedHtml
-      ? {
-          subject: '',
-          html: sanitizeEmailHtml(stepState.generator.uploadedHtml),
-          preheader: '',
-        }
+      ? extractUploadedHtml(stepState.generator.uploadedHtml)
       : await this.aiMarketing.generateCommonTemplate(userId, campaignId);
 
     // 3) merge (server is the source of truth; we preserve all prior keys)
