@@ -68,6 +68,10 @@ export class GeneratorBriefDto {
     message: 'photoFileId must be a UUID optionally followed by an extension',
   })
   photoFileId?: string;
+
+  @IsOptional()
+  @IsString()
+  uploadedHtml?: string;
 }
 
 export class StepSummaryDto {

@@ -92,7 +92,7 @@ const ReviewConfirmStep: React.FC = () => {
   React.useEffect(() => {
     const snap = normalize(template);
     setCanGoNext(Boolean(snap.subject && snap.preheader && snap.html));
-  }, [template?.subject, template?.preheader, template?.html, setCanGoNext]);
+  }, [setCanGoNext, template]);
 
   // Push local-only (no server) on change, and compute dirty vs baseline
   const onValuesChange = (_: any, values: any) => {

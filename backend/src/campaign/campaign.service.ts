@@ -11,7 +11,10 @@ import { Prisma } from 'generated/prisma';
 import { isJsonObject, toJsonValue } from 'src/utils';
 import { AiMarketingService } from 'src/ai-marketing/ai-marketing.service';
 import { merge, omit } from 'lodash';
-import { sanitizeStepStateForStorage } from 'src/utils/sanitize';
+import {
+  sanitizeEmailHtml,
+  sanitizeStepStateForStorage,
+} from 'src/utils/sanitize';
 import { RenderedEmailsImportDto } from './dto/rendered-emails.dto';
 import { AwsService } from 'src/aws/aws.service';
 import { Readable } from 'stream';
@@ -38,6 +41,14 @@ export class CampaignService {
     private aws: AwsService,
     private mailService: MailService,
   ) {}
+
+  private async _getStepState(campaignId: string): Promise<StepStateDto> {
+    const row = await this.dbService.campaign.findFirstOrThrow({
+      where: { id: campaignId },
+      select: { stepState: true },
+    });
+    return row.stepState as StepStateDto;
+  }
 
   private async streamToString(stream: Readable): Promise<string> {
     const chunks: Buffer[] = [];
@@ -329,24 +340,26 @@ export class CampaignService {
    *  - persist
    */
   async generateAndPersistCommonTemplate(userId: string, campaignId: string) {
-    // 1) generate (returns {subject, html})
-    const tpl = await this.aiMarketing.generateCommonTemplate(
-      userId,
-      campaignId,
-    );
-
-    // 2) load current state
+    // 1) Load current state
     const row = await this.dbService.campaign.findFirstOrThrow({
       where: { id: campaignId, userId },
       select: { stepState: true },
     });
-
-    const existing = isJsonObject(row.stepState)
-      ? (row.stepState as Record<string, unknown>)
+    const stepState = isJsonObject(row.stepState)
+      ? (row.stepState as StepStateDto)
       : {};
 
+    // 2) generate (returns {subject, html})
+    const tpl = stepState.generator?.uploadedHtml
+      ? {
+          subject: '',
+          html: sanitizeEmailHtml(stepState.generator.uploadedHtml),
+          preheader: '',
+        }
+      : await this.aiMarketing.generateCommonTemplate(userId, campaignId);
+
     // 3) merge (server is the source of truth; we preserve all prior keys)
-    const merged = merge({}, existing, {
+    const merged = merge({}, stepState, {
       commonTemplate: {
         subject: tpl.subject,
         html: tpl.html,
