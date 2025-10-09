@@ -1,6 +1,6 @@
 import { useCallback } from "react";
-import { UploadOutlined } from "@ant-design/icons";
-import { Typography, Upload, message } from "antd";
+import { RightOutlined, UploadOutlined } from "@ant-design/icons";
+import { Button, Typography, Upload, message } from "antd";
 import type { UploadProps } from "antd";
 import styles from "../../styles.module.scss";
 import {
@@ -17,7 +17,7 @@ interface UploadTemplateProps {
 
 const UploadTemplate = ({ loading = false }: UploadTemplateProps) => {
   const [, setGenerator] = useStepState(CampaignStepStateKey.Generator);
-  const { setCanGoNext } = useCampaignBuilder();
+  const { setCanGoNext, setCurrentStep, currentStep } = useCampaignBuilder();
   const [messageApi] = message.useMessage();
 
   const handleFileRead = useCallback((file: File): Promise<string> => {
@@ -90,6 +90,22 @@ const UploadTemplate = ({ loading = false }: UploadTemplateProps) => {
           Supported formats: .html
         </Text>
       </Upload.Dragger>
+      <Text style={{ fontSize: 14, marginTop: 40 }}>
+        You can also click move to next step to manually input your HTML code,
+        subject line, and preheader directly.
+        <br />
+        <div style={{ textAlign: "center" }}>
+          <Button
+            type="link"
+            onClick={() => {
+              setGenerator({ uploadedHtml: "" }, true);
+              setCurrentStep(currentStep + 1);
+            }}
+          >
+            Move to next step <RightOutlined />
+          </Button>
+        </div>
+      </Text>
     </div>
   );
 };

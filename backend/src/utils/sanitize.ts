@@ -98,25 +98,39 @@ export interface ExtractedHtml {
 export function extractUploadedHtml(uploadedHtml: string): ExtractedHtml {
   let raw = (uploadedHtml ?? '').trim();
 
-  // Detect Cocoa wrapper (escaped HTML inside <p> wrappers)
+  // Detect Cocoa wrapper or escaped entities
   const looksEscaped =
-    raw.includes('&lt;!DOCTYPE') || raw.includes('Cocoa HTML Writer');
+    raw.includes('&lt;!DOCTYPE') ||
+    raw.includes('&lt;html') ||
+    raw.includes('Cocoa HTML Writer');
 
   if (looksEscaped) {
-    // Strip wrappers
+    // Remove <p> wrappers (Cocoa HTML Writer)
     raw = raw.replace(/<p[^>]*>/g, '').replace(/<\/p>/g, '');
-    raw = raw.replace(/<span[^>]*>.*?<\/span>/g, ' '); // remove Apple-converted-space
+    raw = raw.replace(/<span[^>]*>.*?<\/span>/g, ' ');
 
-    // 🔑 Decode entities into real HTML
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-    raw = decode(raw);
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+      raw = decode(raw); // first decode
+      // if still looks escaped (contains &lt; / &gt;), decode again
+      if (raw.includes('&lt;') || raw.includes('&gt;')) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+        raw = decode(raw);
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.warn('Failed to decode HTML entities:', error.message);
+      } else {
+        console.warn('Failed to decode HTML entities, unknown error');
+      }
+    }
   }
 
-  // 1. Extract Subject
+  // Extract Subject from <!-- Subject: ... -->
   const subjectMatch = raw.match(/<!--\s*subject:\s*([\s\S]*?)\s*-->/i);
   const subject = subjectMatch?.[1].trim() ?? '';
 
-  // 2. Extract Preheader (prefer <div.preheader>)
+  // Extract Preheader (div.preheader has priority)
   const preheaderDiv = raw.match(
     /<div[^>]*class=["']preheader["'][^>]*>(.*?)<\/div>/i,
   );
@@ -124,7 +138,7 @@ export function extractUploadedHtml(uploadedHtml: string): ExtractedHtml {
   const preheader =
     preheaderDiv?.[1].trim() ?? preheaderComment?.[1].trim() ?? '';
 
-  // 3. Remove subject/preheader comments so they don’t show up
+  // Remove subject/preheader comments from HTML
   const cleaned = raw
     .replace(/<!--\s*subject:[\s\S]*?-->\s*/i, '')
     .replace(/<!--\s*preheader:[\s\S]*?-->\s*/i, '')
