@@ -92,7 +92,7 @@ const ReviewConfirmStep: React.FC = () => {
   React.useEffect(() => {
     const snap = normalize(template);
     setCanGoNext(Boolean(snap.subject && snap.preheader && snap.html));
-  }, [template?.subject, template?.preheader, template?.html, setCanGoNext]);
+  }, [setCanGoNext, template]);
 
   // Push local-only (no server) on change, and compute dirty vs baseline
   const onValuesChange = (_: any, values: any) => {
@@ -260,10 +260,19 @@ const ReviewConfirmStep: React.FC = () => {
                     </div>
                   )}
                 </div>
-                <div
+
+                {/* Render email HTML inside iframe */}
+                <iframe
+                  title="email-preview"
+                  srcDoc={form.getFieldValue("html") || ""}
                   className={styles.previewCanvas}
-                  dangerouslySetInnerHTML={{
-                    __html: form.getFieldValue("html") || "",
+                  sandbox="allow-same-origin allow-popups allow-forms allow-scripts"
+                  style={{
+                    width: "100%",
+                    minHeight: "600px",
+                    border: "1px solid #ddd",
+                    borderRadius: "8px",
+                    background: "white",
                   }}
                 />
               </div>

@@ -14,6 +14,7 @@ import {
   TwitterCircleFilled,
   UserOutlined,
   LogoutOutlined,
+  HomeOutlined,
 } from "@ant-design/icons";
 import { Dropdown } from "antd";
 import { motion } from "framer-motion";
@@ -31,7 +32,7 @@ export default function ClientLayout({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const { isAuthenticated, loading, logout } = useAuth();
+  const { isAuthenticated, loading, logout, isAdmin } = useAuth();
   const appRoutes =
     pathname.startsWith(ROUTES.APP_HOMEPAGE) ||
     pathname.startsWith(ROUTES.ADMIN_HOMEPAGE);
@@ -99,14 +100,23 @@ export default function ClientLayout({
                 menu={{
                   items: [
                     {
-                      key: 'logout',
-                      label: 'Logout',
+                      key: "dashboard",
+                      label: "Dashboard",
+                      icon: <HomeOutlined />,
+                      onClick: () =>
+                        router.push(
+                          isAdmin ? ROUTES.ADMIN_HOMEPAGE : ROUTES.APP_HOMEPAGE
+                        ),
+                    },
+                    {
+                      key: "logout",
+                      label: "Logout",
                       icon: <LogoutOutlined />,
                       onClick: () => logout(),
                     },
                   ],
                 }}
-                trigger={['hover']}
+                trigger={["hover"]}
                 placement="bottomRight"
               >
                 <button
@@ -175,14 +185,14 @@ export default function ClientLayout({
                 </Link>
               ) : (
                 <>
-                  <Divider style={{ margin: '8px 0' }} />
+                  <Divider style={{ margin: "8px 0" }} />
                   <div
                     onClick={() => {
                       logout();
                       toggleDrawer();
                     }}
                     className={styles.drawerLink}
-                    style={{ cursor: 'pointer' }}
+                    style={{ cursor: "pointer" }}
                   >
                     Logout
                   </div>

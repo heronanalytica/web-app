@@ -61,12 +61,13 @@ export interface CompanyProfileDto {
 }
 
 export interface GeneratorBriefDto {
-  objective: string;
-  tone: string;
-  businessResults: string;
-  keyMessages: string;
-  cta: string;
+  objective?: string;
+  tone?: string;
+  businessResults?: string;
+  keyMessages?: string;
+  cta?: string;
   photoFileId?: string;
+  uploadedHtml?: string;
 }
 
 export interface CampaignStepState {

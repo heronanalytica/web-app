@@ -1,25 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Card, Tabs, Typography } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import { Card, Tabs } from "antd";
 import styles from "./styles.module.scss";
 import TemplateGenerator from "./components/TemplateGenerator";
 import TemplatePreview from "./components/TemplatePreview";
 import { useCampaignBuilder } from "../CampaignBuilder/CampaignBuilderContext";
 import { fetcher } from "@/lib/fetcher";
-
-const { Text } = Typography;
-
-const UploadTemplate = () => (
-  <div className={styles.uploadTemplate}>
-    <div className={styles.uploadPlaceholder}>
-      <UploadOutlined style={{ fontSize: "32px", marginBottom: 16 }} />
-      <Text>Drag & drop your template file here or click to browse</Text>
-      <Text type="secondary" style={{ fontSize: 12, marginTop: 8 }}>
-        Supported formats: .html, .mjml
-      </Text>
-    </div>
-  </div>
-);
+import UploadTemplate from "./components/UploadTemplate";
 
 const GenerateTemplateTab = () => {
   const [generatedTemplate, setGeneratedTemplate] = useState<string | null>(
@@ -64,7 +50,6 @@ const CampaignSetupStep: React.FC = () => {
       // ensure latest brief is persisted before the server reads stepState
       await save();
       if (!campaign?.id) return;
-      if (campaign.stepState?.commonTemplate?.html) return;
       await fetcher.post(`/api/campaigns/${campaign.id}/common-template`);
     });
     return () => registerBeforeNext(null);

@@ -301,7 +301,7 @@ const TemplateGenerator: React.FC<TemplateGeneratorProps> = ({
               icon={<RocketOutlined />}
               className={styles.nextButton}
             >
-              Next
+              Generate
             </Button>
           </div>
         </div>
