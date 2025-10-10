@@ -147,6 +147,7 @@ export const CampaignDetailView: React.FC<CampaignDetailViewProps> = ({
       <CompanyProfileCard campaign={campaign} onUpdate={handleCampaignUpdate} />
 
       <RenderedEmailsUploader
+        commonTemplate={campaign.stepState?.commonTemplate}
         campaignId={campaign.id}
         onImported={(summary) => {
           // When import finishes, refresh the campaign’s stepState summary in local UI:
