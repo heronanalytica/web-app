@@ -1,6 +1,97 @@
+// Upload styles
+.uploadDragIcon {
+  margin-bottom: 8px;
+}
+
+.uploadText {
+  margin-bottom: 4px;
+}
+
+.uploadHint {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+// Result styles
 .result {
   margin-top: 12px;
   font-size: 13px;
   color: rgba(0, 0, 0, 0.65);
   white-space: pre-wrap;
+}
+
+// Modal styles
+.modalContent {
+  max-height: 60vh;
+  overflow: auto;
+}
+
+.section {
+  margin-bottom: 16px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.contentBox {
+  background-color: #f5f5f5;
+  padding: 12px;
+  border-radius: 4px;
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.htmlContent {
+  @extend .contentBox;
+  max-height: 300px;
+  overflow: auto;
+}
+
+.divider {
+  margin: 16px 0;
+}
+
+.copyButton {
+  color: #8c8c8c;
+  
+  &:hover {
+    color: #595959;
+  }
+}
+
+.uploadContainer {
+  margin-top: 12px;
+  position: relative;
+}
+
+.uploadOverlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+// Error text style
+.errorText {
+  color: #ff4d4f;
+  margin-top: 8px;
+}
+
+// Persona item style
+.personaItem {
+  margin-right: 8px;
+}
+
+// No template message
+.noCommonTemplate {
+  margin-left: 8px;
 }

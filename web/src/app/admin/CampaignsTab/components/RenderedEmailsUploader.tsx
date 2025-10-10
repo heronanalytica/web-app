@@ -1,24 +1,50 @@
 // web/src/app/admin/CampaignsTab/components/RenderedEmailsUploader.tsx
 import React, { useState } from "react";
-import { Card, Upload, message, Typography, Spin } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import {
+  Card,
+  Upload,
+  message,
+  Typography,
+  Spin,
+  Divider,
+  Button,
+  Modal,
+} from "antd";
+import { UploadOutlined, CodeOutlined, CopyOutlined } from "@ant-design/icons";
 import { fetcher } from "@/lib/fetcher";
 import styles from "./RenderedEmailsUploader.module.scss";
 import { FILE_TYPES, useS3Upload } from "@/hooks/useS3Upload";
+import { CommonTemplateDto } from "@/types/campaignStepState";
 
 const { Text } = Typography;
 
 interface Props {
   campaignId: string;
+  commonTemplate?: CommonTemplateDto;
   onImported?: (summary: any) => void;
 }
 
 const RenderedEmailsUploader: React.FC<Props> = ({
   campaignId,
+  commonTemplate,
   onImported,
 }) => {
-  const [msg, ctx] = message.useMessage();
+  const [msg, contextHolder] = message.useMessage();
   const [result, setResult] = useState<any>(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const handleCopy = (text: string, type: string) => {
+    navigator.clipboard.writeText(text);
+    msg.success(`${type} copied to clipboard`);
+  };
+
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+  };
 
   const { uploading, beforeUpload, customRequest } = useS3Upload({
     fileType: FILE_TYPES.RENDERED_EMAILS_JSON,
@@ -41,13 +67,104 @@ const RenderedEmailsUploader: React.FC<Props> = ({
   });
 
   return (
-    <Card title="Rendered Emails JSON (Admin Upload)" className={styles.root}>
-      {ctx}
+    <Card title="Rendered Emails JSON (Admin Upload)">
+      {contextHolder}
+      <div className={styles.section}>
+        <Button
+          type="primary"
+          onClick={showModal}
+          disabled={!commonTemplate}
+          icon={<CodeOutlined />}
+        >
+          View Common Template
+        </Button>
+        {!commonTemplate && (
+          <Text type="secondary" className={styles.noCommonTemplate}>
+            No common template available
+          </Text>
+        )}
+      </div>
+
+      <Modal
+        title="Common Template Details"
+        open={isModalVisible}
+        onCancel={handleCancel}
+        footer={[
+          <Button key="close" onClick={handleCancel}>
+            Close
+          </Button>,
+        ]}
+        width={800}
+      >
+        <div className={styles.modalContent}>
+          <div className={styles.section}>
+            <div className={styles.sectionHeader}>
+              <Text strong>Subject</Text>
+              {commonTemplate?.subject && (
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<CopyOutlined />}
+                  onClick={() => handleCopy(commonTemplate.subject, "Subject")}
+                  className={styles.copyButton}
+                  title="Copy subject"
+                />
+              )}
+            </div>
+            <div className={styles.contentBox}>
+              {commonTemplate?.subject || "No subject"}
+            </div>
+          </div>
+
+          <Divider className={styles.divider} />
+
+          <div className={styles.section}>
+            <div className={styles.sectionHeader}>
+              <Text strong>Preheader</Text>
+              {commonTemplate?.preheader && (
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<CopyOutlined />}
+                  onClick={() => handleCopy(commonTemplate.preheader, "Preheader")}
+                  className={styles.copyButton}
+                  title="Copy preheader"
+                />
+              )}
+            </div>
+            <div className={styles.contentBox}>
+              {commonTemplate?.preheader || "No preheader"}
+            </div>
+          </div>
+
+          <Divider className={styles.divider} />
+
+          <div className={styles.section}>
+            <div className={styles.sectionHeader}>
+              <Text strong>HTML Content</Text>
+              {commonTemplate?.html && (
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<CopyOutlined />}
+                  onClick={() => handleCopy(commonTemplate.html, "HTML content")}
+                  className={styles.copyButton}
+                  title="Copy HTML"
+                />
+              )}
+            </div>
+            <div className={styles.htmlContent}>
+              {commonTemplate?.html || "No HTML content"}
+            </div>
+          </div>
+        </div>
+      </Modal>
+      <Divider />
       <Text type="secondary">
         Upload the pre-rendered emails JSON. The server will parse and import
         contacts, recipients, and rendered emails.
       </Text>
-      <div style={{ marginTop: 12, position: "relative" }}>
+      <div className={styles.uploadContainer}>
         <Upload.Dragger
           accept=".json,application/json"
           multiple={false}
@@ -56,24 +173,16 @@ const RenderedEmailsUploader: React.FC<Props> = ({
           customRequest={customRequest}
           disabled={uploading}
         >
-          <p className="ant-upload-drag-icon">
+          <div className={styles.uploadDragIcon}>
             <UploadOutlined style={{ fontSize: 32 }} />
-          </p>
-          <p className="ant-upload-text">Click or drag JSON file to upload</p>
-          <p className="ant-upload-hint">
+          </div>
+          <p className={styles.uploadText}>Click or drag JSON file to upload</p>
+          <p className={styles.uploadHint}>
             The file should include a top-level <code>recipients</code> array.
           </p>
         </Upload.Dragger>
         {uploading && (
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              display: "grid",
-              placeItems: "center",
-              background: "rgba(255,255,255,.6)",
-            }}
-          >
+          <div className={styles.uploadOverlay}>
             <Spin />
           </div>
         )}
@@ -87,19 +196,21 @@ const RenderedEmailsUploader: React.FC<Props> = ({
             &nbsp;
             <b>Rendered emails upserted:</b> {result.upsertedEmails}
           </div>
-          <div style={{ marginTop: 8 }}>
+          <div className={styles.section}>
             <b>Total recipients in campaign:</b> {result.totalRecipients}
           </div>
-          <div style={{ marginTop: 8 }}>
+          <div className={styles.section}>
             <b>By persona:</b>{" "}
-            {Object.entries(result.byPersona || {}).map(([key, value]: [string, any]) => (
-              <span key={key} style={{ marginRight: 8 }}>
-                {key}: {value}
-              </span>
-            ))}
+            {Object.entries(result.byPersona || {}).map(
+              ([key, value]: [string, any]) => (
+                <span key={key} className={styles.personaItem}>
+                  {key}: {value}
+                </span>
+              )
+            )}
           </div>
           {Array.isArray(result.errors) && result.errors.length > 0 && (
-            <div style={{ marginTop: 8, color: "#ff4d4f" }}>
+            <div className={styles.errorText}>
               <b>Errors ({result.errors.length}):</b>
               <div>
                 {result.errors.slice(0, 5).map((e: any, idx: number) => (
