@@ -22,13 +22,17 @@ const CTASection = () => {
         <Row justify="center">
           <Col span={24}>
             <Typography.Title level={1} className="cta-title">
-              Psychographics drive customer behavior
+              Email marketing boosts sales and customer loyalty,
+              <br />
+              but small businesses lack resources to execute.
             </Typography.Title>
             <Typography.Text
               type="secondary"
               style={{ textAlign: "center", display: "block", color: "#fff" }}
             >
-              Start to understand why customers think and act the way they do
+              Heron Analytica runs campaigns for you, automatically.
+              <br />
+              Spin up your first automated, hyper-personalized campaign today.
             </Typography.Text>
           </Col>
         </Row>

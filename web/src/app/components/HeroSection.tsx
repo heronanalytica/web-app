@@ -8,7 +8,7 @@ const HeroSection = () => {
       <div
         style={{
           height: "1300px",
-          width: "100vw",
+          width: "100%",
           backgroundImage: "url('/images/background_shading.png')",
           position: "absolute",
           backgroundRepeat: "no-repeat",
@@ -36,14 +36,13 @@ const HeroSection = () => {
               marginTop: "60px",
             }}
           >
-            Unlock AI-Powered
+            Automate every email
             <br />
-            Psychographic
-            <br />
-            Segmentation
+            Personalize every message
           </Typography.Title>
           <Typography.Text type="secondary" style={{ textAlign: "center" }}>
-            Move beyond basic DIY market research and customer segmentation
+            Heron Analytica takes care of your campaigns, so you can take care
+            of your customers
           </Typography.Text>
 
           <motion.div

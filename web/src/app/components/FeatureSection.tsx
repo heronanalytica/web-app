@@ -12,15 +12,15 @@ const FeatureSection: React.FC = () => {
         {[
           {
             image: "/images/progressional_quality.png",
-            title: "Progressional quality",
+            title: "Generating on-brand email effortlessly",
             description:
-              "Get the same precision and depth of analysis that you’d expect from a market research company. Achieve professional-grade insights powered by an advanced algorithm crafted by professional market researchers and data scientists.",
+              "Heron Analytica handles the complexity—messaging, variants, targeting, and send logic.",
           },
           {
             image: "/images/save_time_and_cut_costs.png",
             title: "Save Time and Cut Costs",
             description:
-              "Cut research time by 2x and save 3x the cost by eliminating the need for hiring a market research company.",
+              "Launch complete campaigns fast without hiring, agencies, or endless manual work.",
           },
           {
             image: "/images/no_coding_no_complexity.png",
