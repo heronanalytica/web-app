@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Flex, Typography } from "antd";
+import Image from "next/image";
 
 const HeroSection = () => {
   return (
@@ -56,7 +57,14 @@ const HeroSection = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1 }}
           >
-            <iframe
+            <Image
+              src="/images/showcase.png"
+              alt="Showcase"
+              width={1200}
+              height={620}
+              className="video-container"
+            />
+            {/* <iframe
               width="1100"
               height="620"
               src="https://www.youtube.com/embed/bx3xf9BKX6Q"
@@ -64,7 +72,7 @@ const HeroSection = () => {
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
               className="video-container"
-            ></iframe>
+            ></iframe> */}
           </motion.div>
         </Flex>
       </motion.div>
