@@ -11,6 +11,7 @@ const IntegrationSection = () => {
         backgroundPosition: "center",
         backgroundSize: "cover",
         padding: "20px 10px",
+        marginTop: "50px",
       }}
     >
       <Flex
@@ -25,8 +26,7 @@ const IntegrationSection = () => {
               level={1}
               style={{ textAlign: "center", color: "#fff", fontSize: "3rem" }}
             >
-              Transform Your Marketing Campaigns and <br />
-              Improve Return On Investment
+              Stop juggling marketing. Start delighting customers
             </Typography.Title>
           </Col>
         </Row>

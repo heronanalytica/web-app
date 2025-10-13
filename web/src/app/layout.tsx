@@ -18,7 +18,7 @@ const roboto = Roboto({
 
 export const metadata: Metadata = {
   title: "Heron Analytica",
-  description: "Unlock AI-Powered Psychographic Segmentation",
+  description: "Automate every email. Personalize every message",
 };
 
 const displayComebackSoon = process.env.NEXT_PUBLIC_OFFLINE === "true";
