@@ -313,26 +313,6 @@ export class CampaignService {
     });
   }
 
-  private async setStep(
-    campaignId: string,
-    key: string,
-    status: 'waiting' | 'in_progress' | 'done' | 'error',
-  ) {
-    const current = await this.dbService.campaign.findUnique({
-      where: { id: campaignId },
-      select: { analysisSteps: true },
-    });
-    const steps = (current?.analysisSteps as AnyObj[]) ?? [];
-    const exists = steps.find((s) => s.key === key);
-    const updated = exists
-      ? steps.map((s) => (s.key === key ? { ...s, status } : s))
-      : [...steps, { key, label: key, status }];
-    await this.dbService.campaign.update({
-      where: { id: campaignId },
-      data: { analysisSteps: updated as Prisma.InputJsonValue },
-    });
-  }
-
   /**
    * Single call used by the UI:
    *  - ask AI for the common template (no writes)
@@ -583,6 +563,18 @@ export class CampaignService {
         "JSON must include a top-level 'recipients' array (or be an array)",
       );
     }
+
+    // Delete all existing recipients and related data for this campaign
+    await this.dbService.$transaction([
+      // Delete rendered emails first due to foreign key constraints
+      this.dbService.campaignRenderedEmail.deleteMany({
+        where: { campaignId },
+      }),
+      // Then delete the recipients
+      this.dbService.campaignRecipient.deleteMany({
+        where: { campaignId },
+      }),
+    ]);
 
     // 4) reuse existing importer
     const result = await this.importRenderedEmailsFromJsonAdmin(campaignId, {
