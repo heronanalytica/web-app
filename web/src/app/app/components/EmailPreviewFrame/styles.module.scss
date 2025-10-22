@@ -43,6 +43,25 @@
     background: transparent;
   }
 
+  .headerContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    width: 100%;
+
+    .fullscreenButton {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-secondary);
+
+      &:hover {
+        color: var(--primary);
+      }
+    }
+  }
+
   /* Card-like email container */
   .emailContainer {
     margin: 0 auto;
@@ -55,6 +74,24 @@
     box-sizing: border-box;
     flex: 1;
     width: 100%;
+    min-height: 200px; // Ensure minimum height for empty states
+
+    &.fullscreenIframe {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      border-radius: 0;
+      border: none;
+      box-shadow: none;
+      display: flex;
+      flex-direction: column;
+
+      .previewIframe {
+        flex: 1;
+        min-height: 0;
+      }
+    }
 
     &:focus-within {
       box-shadow: 0 0 0 6px var(--ring), var(--shadow-md);
@@ -214,7 +251,6 @@
   }
 }
 
-/* Optional: a subtle dark mode tweak if your app toggles a `dark` class on body */
 :global(.dark) .previewContainer {
   --bg: #0b1220;
   --bg-card: #0f172a; /* slate-900 */
