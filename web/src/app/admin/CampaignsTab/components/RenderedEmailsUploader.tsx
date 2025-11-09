@@ -14,7 +14,7 @@ import { UploadOutlined, CodeOutlined, CopyOutlined } from "@ant-design/icons";
 import { fetcher } from "@/lib/fetcher";
 import styles from "./RenderedEmailsUploader.module.scss";
 import { FILE_TYPES, useS3Upload } from "@/hooks/useS3Upload";
-import { CommonTemplateDto } from "@/types/campaignStepState";
+import { CommonTemplateDto, GeneratorBriefDto } from "@/types/campaignStepState";
 
 const { Text } = Typography;
 
@@ -22,12 +22,14 @@ interface Props {
   campaignId: string;
   commonTemplate?: CommonTemplateDto;
   onImported?: (summary: any) => void;
+  customerTemplateInput?: GeneratorBriefDto;
 }
 
 const RenderedEmailsUploader: React.FC<Props> = ({
   campaignId,
   commonTemplate,
   onImported,
+  customerTemplateInput,
 }) => {
   const [msg, contextHolder] = message.useMessage();
   const [result, setResult] = useState<any>(null);
@@ -69,6 +71,31 @@ const RenderedEmailsUploader: React.FC<Props> = ({
   return (
     <Card title="Rendered Emails JSON (Admin Upload)">
       {contextHolder}
+      <div className={styles.section}>
+        <Text strong>Customer Template Input</Text>
+        <div className={styles.contentBox}>
+          <div>
+            <Text strong>Objective: </Text>
+            <Text>{customerTemplateInput?.objective || 'N/A'}</Text>
+          </div>
+          <div>
+            <Text strong>Tone: </Text>
+            <Text>{customerTemplateInput?.tone || 'N/A'}</Text>
+          </div>
+          <div>
+            <Text strong>Business Results: </Text>
+            <Text>{customerTemplateInput?.businessResults || 'N/A'}</Text>
+          </div>
+          <div>
+            <Text strong>Key Messages: </Text>
+            <Text>{customerTemplateInput?.keyMessages || 'N/A'}</Text>
+          </div>
+          <div>
+            <Text strong>CTA: </Text>
+            <Text>{customerTemplateInput?.cta || 'N/A'}</Text>
+          </div>
+        </div>
+      </div>
       <div className={styles.section}>
         <Button
           type="primary"
