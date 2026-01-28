@@ -20,7 +20,7 @@ export default function Contact() {
   const [error, setError] = useState("");
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -70,11 +70,9 @@ export default function Contact() {
           backgroundRepeat: "no-repeat",
           backgroundPosition: "center",
           backgroundSize: "cover",
-          height: "100vh",
-          top: 0,
-          position: "absolute",
+          height: "100%",
           width: "100vw",
-          padding: "100px 0 0 0",
+          padding: "50px 0",
         }}
       >
         <div style={{ textAlign: "center", marginTop: "50px" }}>
@@ -94,11 +92,9 @@ export default function Contact() {
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center",
         backgroundSize: "cover",
-        height: "100vh",
-        top: 0,
-        position: "absolute",
+        height: "100%",
         width: "100vw",
-        padding: "100px 0 0 0",
+        padding: "50px 0",
       }}
     >
       <div

@@ -105,7 +105,7 @@ export default function ClientLayout({
                       icon: <HomeOutlined />,
                       onClick: () =>
                         router.push(
-                          isAdmin ? ROUTES.ADMIN_HOMEPAGE : ROUTES.APP_HOMEPAGE
+                          isAdmin ? ROUTES.ADMIN_HOMEPAGE : ROUTES.APP_HOMEPAGE,
                         ),
                     },
                     {
@@ -202,7 +202,13 @@ export default function ClientLayout({
           </Drawer>
         </div>
 
-        <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
           {children}
         </div>
 
@@ -218,7 +224,7 @@ export default function ClientLayout({
             <HeronLogo className={styles.footerLogo} />
 
             <Flex justify="space-between" align="center">
-              <Flex align="center" gap="20px" justify="center">
+              <Flex align="center" gap="20px" wrap="wrap">
                 <Link href={ROUTES.HOMEPAGE} className={styles.footerLink}>
                   Home
                 </Link>
