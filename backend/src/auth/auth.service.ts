@@ -35,18 +35,24 @@ export class AuthService {
     }
   }
 
+  private async getUserByEmail(email: string) {
+    const formattedEmail = email.toLocaleLowerCase();
+    const existingUser = await this.dbService.user.findUnique({
+      where: { email: formattedEmail },
+    });
+    return existingUser;
+  }
+
   async signup(dto: SignupDto) {
     await this.checkFF();
-
-    const existingUser = await this.dbService.user.findUnique({
-      where: { email: dto.email },
-    });
+    const formattedEmail = dto.email.toLocaleLowerCase();
+    const existingUser = await this.getUserByEmail(formattedEmail);
     if (existingUser) throw new UnauthorizedException('Email already in use');
 
     const hashed = await bcrypt.hash(dto.password, 10);
     const user = await this.dbService.user.create({
       data: {
-        email: dto.email,
+        email: formattedEmail,
         password: hashed,
       },
     });
@@ -62,10 +68,8 @@ export class AuthService {
 
   async login(dto: LoginDto) {
     await this.checkFF();
-
-    const user = await this.dbService.user.findUnique({
-      where: { email: dto.email },
-    });
+    const formattedEmail = dto.email.toLocaleLowerCase();
+    const user = await this.getUserByEmail(formattedEmail);
     if (!user) throw new UnauthorizedException('Invalid credentials');
 
     const valid = await bcrypt.compare(dto.password, user.password);
