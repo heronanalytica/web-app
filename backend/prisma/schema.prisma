@@ -103,6 +103,9 @@ model Campaign {
   CampaignRecipient     CampaignRecipient[]
   AudienceImport        AudienceImport[]
   CampaignRenderedEmail CampaignRenderedEmail[]
+
+  @@index([userId, status])
+  @@index([userId, createdAt(sort: Desc)])
 }
 
 model UserUploadFile {
