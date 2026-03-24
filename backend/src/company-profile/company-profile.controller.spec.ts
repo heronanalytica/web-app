@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CompanyProfileController } from './company-profile.controller';
 import { CompanyProfileService } from './company-profile.service';
 import { UnauthorizedException } from '@nestjs/common';
+import { Request } from 'express';
+import { AiMarketingService } from 'src/ai-marketing/ai-marketing.service';
 
 describe('CompanyProfileController', () => {
   let controller: CompanyProfileController;
@@ -18,9 +20,14 @@ describe('CompanyProfileController', () => {
       update: jest.fn(),
     };
 
+    const mockAiMarketingService = {};
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CompanyProfileController],
-      providers: [{ provide: CompanyProfileService, useValue: serviceMock }],
+      providers: [
+        { provide: CompanyProfileService, useValue: serviceMock },
+        { provide: AiMarketingService, useValue: mockAiMarketingService }
+      ],
     }).compile();
 
     controller = module.get<CompanyProfileController>(CompanyProfileController);
