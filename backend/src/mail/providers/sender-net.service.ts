@@ -44,12 +44,20 @@ interface SenderNetCampaign {
   recipient_count?: number;
 }
 
+type RecipientIdentity = {
+  firstname: string;
+  lastname: string;
+};
+
 @Injectable()
 export class SenderNetService implements IMailProvider {
   private readonly logger = new Logger(SenderNetService.name);
   private readonly config: MailProviderConfig;
   private readonly apiBaseUrl = 'https://api.sender.net/v2';
   private readonly http: AxiosInstance;
+  private static readonly MAX_GROUP_CREATE_ATTEMPTS = 5;
+  private static readonly RECIPIENT_WAIT_ATTEMPTS = 5;
+  private static readonly RECIPIENT_WAIT_DELAY_MS = 1500;
 
   constructor(private readonly configService: ConfigService) {
     this.config = {
@@ -94,8 +102,20 @@ export class SenderNetService implements IMailProvider {
     return `${baseTitle}-${suffix}`;
   }
 
+  private buildRecipientIdentity(name?: string): RecipientIdentity {
+    const [firstname, ...rest] = name?.split(' ') || [''];
+    return {
+      firstname,
+      lastname: rest.join(' '),
+    };
+  }
+
   private async createOrGetGroup(baseTitle: string): Promise<string> {
-    for (let attempt = 0; attempt < 5; attempt++) {
+    for (
+      let attempt = 0;
+      attempt < SenderNetService.MAX_GROUP_CREATE_ATTEMPTS;
+      attempt++
+    ) {
       const title = this.buildAttemptGroupTitle(baseTitle, attempt);
 
       try {
@@ -184,6 +204,65 @@ export class SenderNetService implements IMailProvider {
     }
   }
 
+  private async ensureRecipientGroup(
+    campaignId: string,
+    email: string,
+  ): Promise<string> {
+    const baseTitle = this.buildRecipientGroupBaseTitle(campaignId, email);
+    return this.createOrGetGroup(baseTitle);
+  }
+
+  private async ensureSubscriberForGroup(
+    email: string,
+    identity: RecipientIdentity,
+    groupId: string,
+  ): Promise<string> {
+    return this.createOrUpdateSubscriber(
+      email,
+      identity.firstname,
+      identity.lastname,
+      groupId,
+    );
+  }
+
+  private async createPersonalizedCampaign(
+    campaignName: string,
+    recipientEmail: string,
+    groupId: string,
+    subject: string,
+    fromName: string,
+    fromEmail: string,
+    preheader: string,
+    html: string,
+  ): Promise<string> {
+    const campaignResp = await this.http.post<
+      SenderNetResponse<SenderNetCampaign>
+    >('/campaigns', {
+      title: `${campaignName} - ${recipientEmail}`,
+      subject: subject || 'Your Campaign',
+      from: fromName || this.config.senderName,
+      reply_to: fromEmail || this.config.senderEmail,
+      preheader,
+      content_type: 'html',
+      content: html || '<p>No Content</p>',
+      groups: [groupId],
+    });
+
+    if (!campaignResp.data.success) {
+      throw new Error(
+        `Campaign creation failed: ${JSON.stringify(campaignResp.data.message)}`,
+      );
+    }
+
+    this.logger.debug('Created campaign', campaignResp.data);
+    return campaignResp.data.data.id;
+  }
+
+  private async sendCreatedCampaign(campaignId: string): Promise<void> {
+    const sendResp = await this.http.post(`/campaigns/${campaignId}/send`);
+    this.logger.debug('SendResp', sendResp.data);
+  }
+
   // -----------------------------
   // Main Send Flow
   // -----------------------------
@@ -194,8 +273,8 @@ export class SenderNetService implements IMailProvider {
   private async waitForRecipients(
     campaignId: string,
     expectedMinimum = 1,
-    attempts = 5,
-    delayMs = 1500,
+    attempts = SenderNetService.RECIPIENT_WAIT_ATTEMPTS,
+    delayMs = SenderNetService.RECIPIENT_WAIT_DELAY_MS,
   ): Promise<void> {
     for (let attempt = 1; attempt <= attempts; attempt++) {
       const resp = await this.http.get<SenderNetResponse<SenderNetCampaign>>(
@@ -226,54 +305,28 @@ export class SenderNetService implements IMailProvider {
 
     for (const recipient of recipients) {
       try {
-        // Step 1: Group
-        const groupTitle = this.buildRecipientGroupBaseTitle(
+        const identity = this.buildRecipientIdentity(recipient.name);
+        const groupId = await this.ensureRecipientGroup(
           campaign.id,
           recipient.email,
         );
-        const groupId = await this.createOrGetGroup(groupTitle);
-
-        // Step 2: Subscriber
-        const [firstname, ...rest] = recipient.name?.split(' ') || [''];
-        const lastname = rest.join(' ');
-        const subscriberId = await this.createOrUpdateSubscriber(
+        const subscriberId = await this.ensureSubscriberForGroup(
           recipient.email,
-          firstname,
-          lastname,
+          identity,
           groupId,
         );
-
-        // Step 3: Campaign
-        const campaignResp = await this.http.post<
-          SenderNetResponse<SenderNetCampaign>
-        >('/campaigns', {
-          title: `${campaign.name} - ${recipient.email}`,
-          subject: recipient.subject || 'Your Campaign',
-          from: recipient.fromName || this.config.senderName,
-          reply_to: recipient.fromEmail || this.config.senderEmail,
-          preheader: recipient.preheader || '',
-          content_type: 'html',
-          content: recipient.html || '<p>No Content</p>',
-          groups: [groupId],
-        });
-
-        if (!campaignResp.data.success) {
-          throw new Error(
-            `Campaign creation failed: ${JSON.stringify(campaignResp.data.message)}`,
-          );
-        }
-
-        const senderCampaignId = campaignResp.data.data.id;
-        this.logger.debug('Created campaign', campaignResp.data);
-
-        // Step 4: Wait until Sender attaches the selected group/subscriber
-        await this.waitForRecipients(senderCampaignId);
-
-        // Step 5: Send campaign
-        const sendResp = await this.http.post(
-          `/campaigns/${senderCampaignId}/send`,
+        const senderCampaignId = await this.createPersonalizedCampaign(
+          campaign.name,
+          recipient.email,
+          groupId,
+          recipient.subject,
+          recipient.fromName,
+          recipient.fromEmail,
+          recipient.preheader || '',
+          recipient.html,
         );
-        this.logger.debug('SendResp', sendResp.data);
+        await this.waitForRecipients(senderCampaignId);
+        await this.sendCreatedCampaign(senderCampaignId);
 
         results.push({
           success: true,
