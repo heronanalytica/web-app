@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getAllPosts } from "@/lib/mdx";
+import { formatDate } from "@/lib";
 
 export default function BlogIndex() {
   const posts = getAllPosts();
@@ -12,11 +13,7 @@ export default function BlogIndex() {
             <Link href={`/blog/${slug}`} className="blog-link">
               <h2 className="blog-post-title">{frontmatter.title}</h2>
               <p className="blog-post-meta">
-                {new Date(frontmatter.date).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "2-digit",
-                  year: "numeric",
-                })}{" "}
+                {formatDate(frontmatter.date)}{" "}
                 • {frontmatter.readTime}
               </p>
             </Link>
