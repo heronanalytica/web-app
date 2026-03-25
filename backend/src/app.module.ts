@@ -8,6 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import { FileModule } from './file/file.module';
 import { MailModule } from './mail/mail.module';
 import { CompanyProfileModule } from './company-profile/company-profile.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { CompanyProfileModule } from './company-profile/company-profile.module';
     CampaignModule,
     FileModule,
     CompanyProfileModule,
+    AdminModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),

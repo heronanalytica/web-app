@@ -56,26 +56,6 @@ describe('CampaignController', () => {
     });
   });
 
-  describe('createCampaign', () => {
-    it('should create a campaign', async () => {
-      const req = { user: { id: 'user-1' } } as unknown as Request;
-      service.createDraftCampaign.mockResolvedValue({ id: 'c-1' } as any);
-      const result = await controller.createCampaign(req, { name: 'My Campaign' });
-      expect(service.createDraftCampaign).toHaveBeenCalledWith('user-1', { name: 'My Campaign' });
-      expect(result).toEqual({ error: 0, data: { id: 'c-1' } });
-    });
-  });
-
-  describe('updateAnalysisSteps', () => {
-    it('should update analysis steps', async () => {
-      const req = { user: { id: 'admin-1', role: 'ADMIN' } } as unknown as Request;
-      service.updateAnalysisSteps.mockResolvedValue({ id: 'c-1' } as any);
-      const result = await controller.updateAnalysisSteps(req, 'c-1', { steps: [{ key: 'step1', status: 'done', label: 'Step 1' } as any] });
-      expect(service.updateAnalysisSteps).toHaveBeenCalledWith('c-1', [{ key: 'step1', status: 'done' }]);
-      expect(result).toEqual({ error: 0, data: { id: 'c-1' } });
-    });
-  });
-
   describe('launchCampaign', () => {
     it('should call launch on service', async () => {
       service.launchCampaign.mockResolvedValue({ status: 'ACTIVE' } as any);

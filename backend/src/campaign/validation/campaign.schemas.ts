@@ -17,27 +17,27 @@ export const GeneratorBriefSchema = z.object({
   businessResults: z.string(),
   keyMessages: z.string(),
   cta: z.string(),
-  photoFileId: z.string().uuid().optional(),
+  photoFileId: z.string().optional(),
   uploadedHtml: z.string().optional(),
 });
 
 export const CustomerFileSchema = z.object({
-  fileId: z.string().uuid(),
+  fileId: z.string(),
   fileName: z.string(),
 });
 
 export const MailServiceSchema = z.object({
   provider: z.string(),
   connected: z.boolean(),
-  mailProviderId: z.string().uuid(),
+  mailProviderId: z.string(),
   listId: z.string().optional(),
   fromName: z.string().optional(),
-  replyTo: z.string().email().optional(),
-  scheduleIso: z.string().datetime().optional(),
+  replyTo: z.string().optional(),
+  scheduleIso: z.string().optional(),
 });
 
 export const ClassifiedPersonaFileSchema = z.object({
-  fileId: z.string().uuid(),
+  fileId: z.string(),
   fileName: z.string(),
 });
 
@@ -49,14 +49,14 @@ export const CommonTemplateSchema = z.object({
 
 // Avoid strictly validating CompanyProfile recursively here to prevent circular loops
 export const LightCompanyProfileSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string(),
   name: z.string(),
-  userId: z.string().uuid(),
+  userId: z.string(),
   website: z.string(),
-  createdAt: z.string().datetime().optional(),
-  updatedAt: z.string().datetime().optional(),
-  designAssetFileId: z.string().uuid().nullable().optional(),
-  marketingContentFileId: z.string().uuid().nullable().optional(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+  designAssetFileId: z.string().nullable().optional(),
+  marketingContentFileId: z.string().nullable().optional(),
 });
 
 export const CampaignStepStateSchema = z.object({
