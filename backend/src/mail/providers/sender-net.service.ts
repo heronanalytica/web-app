@@ -2,6 +2,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios, { AxiosError, AxiosInstance } from 'axios';
+import * as crypto from 'crypto';
 import {
   IMailProvider,
   MailProviderConfig,
@@ -40,6 +41,7 @@ interface SenderNetCampaign {
   id: string;
   subject: string;
   title: string;
+  recipient_count?: number;
 }
 
 @Injectable()
@@ -70,34 +72,74 @@ export class SenderNetService implements IMailProvider {
   // -----------------------------
   // Groups
   // -----------------------------
-  private async createOrGetGroup(title: string): Promise<string> {
-    try {
-      const resp = await this.http.post<SenderNetResponse<SenderNetGroup>>(
-        '/groups',
-        { title },
-      );
-      return resp.data.data.id;
-    } catch (err) {
-      const axiosErr = err as SenderNetAxiosError;
-      if (
-        typeof axiosErr.response?.data?.message === 'string' &&
-        axiosErr.response.data.message.includes('already exists')
-      ) {
-        // Fetch groups and return the existing one
-        const groupsResp =
-          await this.http.get<SenderNetResponse<SenderNetGroup[]>>('/groups');
-        const found = groupsResp.data.data.find((g) => g.title === title);
-        if (!found)
-          throw new Error(`Group "${title}" exists but not retrievable`);
-        return found.id;
-      }
-      throw err;
+  private buildRecipientGroupBaseTitle(
+    campaignId: string,
+    email: string,
+  ): string {
+    const emailHash = crypto
+      .createHash('sha1')
+      .update(email.trim().toLowerCase())
+      .digest('hex')
+      .slice(0, 12);
+
+    return `cmp-${campaignId.slice(0, 8)}-${emailHash}`;
+  }
+
+  private buildAttemptGroupTitle(baseTitle: string, attempt: number): string {
+    if (attempt === 0) {
+      return baseTitle;
     }
+
+    const suffix = crypto.randomBytes(3).toString('hex');
+    return `${baseTitle}-${suffix}`;
+  }
+
+  private async createOrGetGroup(baseTitle: string): Promise<string> {
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const title = this.buildAttemptGroupTitle(baseTitle, attempt);
+
+      try {
+        const resp = await this.http.post<SenderNetResponse<SenderNetGroup>>(
+          '/groups',
+          { title },
+        );
+        return resp.data.data.id;
+      } catch (err) {
+        const axiosErr = err as SenderNetAxiosError;
+        if (
+          typeof axiosErr.response?.data?.message === 'string' &&
+          axiosErr.response.data.message.includes('already exists')
+        ) {
+          this.logger.warn(
+            `Sender group title collision for "${title}", retrying with a new suffix`,
+          );
+          continue;
+        }
+        throw err;
+      }
+    }
+
+    throw new Error(
+      `Unable to create a unique Sender group for base title "${baseTitle}"`,
+    );
   }
 
   // -----------------------------
   // Subscribers
   // -----------------------------
+  private async findSubscriberByEmail(
+    email: string,
+  ): Promise<SenderNetSubscriber | null> {
+    const subsResp = await this.http.get<
+      SenderNetResponse<SenderNetSubscriber[]>
+    >('/subscribers', { params: { email } });
+    return (
+      subsResp.data.data.find(
+        (subscriber) => subscriber.email.toLowerCase() === email.toLowerCase(),
+      ) ?? null
+    );
+  }
+
   private async createOrUpdateSubscriber(
     email: string,
     firstname: string,
@@ -123,18 +165,17 @@ export class SenderNetService implements IMailProvider {
         axiosErr.response.data.message.includes('already exists')
       ) {
         // Fetch subscriber by email
-        const subsResp = await this.http.get<
-          SenderNetResponse<SenderNetSubscriber[]>
-        >('/subscribers', { params: { email } });
-        const found = subsResp.data.data.find(
-          (s) => s.email.toLowerCase() === email.toLowerCase(),
-        );
+        const found = await this.findSubscriberByEmail(email);
         if (!found)
           throw new Error(`Subscriber ${email} exists but not retrievable`);
 
-        // Ensure they are in the group
+        // Update the existing subscriber so Sender associates it with this group.
         await this.http.patch(`/subscribers/${found.id}`, {
+          email,
+          firstname,
+          lastname,
           groups: [groupId],
+          trigger_automation: false,
         });
 
         return found.id;
@@ -146,6 +187,39 @@ export class SenderNetService implements IMailProvider {
   // -----------------------------
   // Main Send Flow
   // -----------------------------
+  private async sleep(ms: number): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  private async waitForRecipients(
+    campaignId: string,
+    expectedMinimum = 1,
+    attempts = 5,
+    delayMs = 1500,
+  ): Promise<void> {
+    for (let attempt = 1; attempt <= attempts; attempt++) {
+      const resp = await this.http.get<SenderNetResponse<SenderNetCampaign>>(
+        `/campaigns/${campaignId}`,
+      );
+      const recipientCount = resp.data.data.recipient_count ?? 0;
+
+      if (recipientCount >= expectedMinimum) {
+        return;
+      }
+
+      if (attempt < attempts) {
+        this.logger.debug(
+          `Waiting for Sender campaign ${campaignId} recipients (${recipientCount}/${expectedMinimum})`,
+        );
+        await this.sleep(delayMs);
+      }
+    }
+
+    throw new Error(
+      `Sender campaign ${campaignId} still has no selected recipients after waiting`,
+    );
+  }
+
   async sendCampaign(options: SendCampaignOptions): Promise<SendResult> {
     const { campaign, recipients } = options;
     const results: SendResult[] = [];
@@ -153,7 +227,10 @@ export class SenderNetService implements IMailProvider {
     for (const recipient of recipients) {
       try {
         // Step 1: Group
-        const groupTitle = `Campaign-${campaign.id}-${recipient.email}`;
+        const groupTitle = this.buildRecipientGroupBaseTitle(
+          campaign.id,
+          recipient.email,
+        );
         const groupId = await this.createOrGetGroup(groupTitle);
 
         // Step 2: Subscriber
@@ -189,7 +266,10 @@ export class SenderNetService implements IMailProvider {
         const senderCampaignId = campaignResp.data.data.id;
         this.logger.debug('Created campaign', campaignResp.data);
 
-        // Step 4: Send campaign
+        // Step 4: Wait until Sender attaches the selected group/subscriber
+        await this.waitForRecipients(senderCampaignId);
+
+        // Step 5: Send campaign
         const sendResp = await this.http.post(
           `/campaigns/${senderCampaignId}/send`,
         );

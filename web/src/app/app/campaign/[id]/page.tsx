@@ -21,7 +21,7 @@ const CampaignDetailPage = () => {
     const fetchCampaign = async () => {
       setLoading(true);
       try {
-        const data = await fetcher.get(`/api/campaigns/${id}`); // Fetch any campaign by ID
+        const data = await fetcher.get<Campaign>(`/api/campaigns/${id}`); // Fetch any campaign by ID
         setCampaign(data);
       } catch {
         messageApi.error("Failed to load campaign");
