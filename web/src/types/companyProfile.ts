@@ -1,13 +1,18 @@
-import { GeneratedOverallProfile, GeneratedMarketingTone } from "./campaignStepState";
+import {
+  GeneratedOverallProfile,
+  GeneratedMarketingTone,
+} from "./campaignStepState";
 
 export interface CompanyProfile {
   id: string;
+  userId: string;
   name: string;
-  website: string;
-  marketingContentFileId: string;
-  designAssetFileId: string;
-  businessInfo?: string;
+  website?: string | null;
+  marketingContentFileId?: string | null;
+  designAssetFileId?: string | null;
+  businessInfo?: string | null;
   generatedOverallProfile?: GeneratedOverallProfile;
   generatedMarketingTone?: GeneratedMarketingTone;
-  createdAt?: string;
+  createdAt: string;
+  updatedAt: string;
 }

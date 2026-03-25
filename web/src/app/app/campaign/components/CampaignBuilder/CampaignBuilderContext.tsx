@@ -60,16 +60,12 @@ export const CampaignBuilderProvider: React.FC<{
   totalSteps: number;
   children: React.ReactNode;
 }> = ({ campaign, totalSteps, children }) => {
-  // Some campaign objects may not have currentStep (for non-draft campaigns)
-  // Use (campaign as any).currentStep to suppress TS error
   const [currentStep, setCurrentStep] = useState<number>(
-    campaign && typeof (campaign as any).currentStep === "number"
-      ? (campaign as any).currentStep
-      : 0
+    campaign?.currentStep ?? 0
   );
   const [canGoNext, setCanGoNext] = useState(false);
   const [stepState, setStepState] = useState<CampaignStepState>(
-    (campaign && (campaign as any).stepState) || {}
+    campaign?.stepState ?? {}
   );
   const canGoBack = currentStep > 0;
   const beforeNextRef = React.useRef<null | (() => Promise<void>)>(null);
