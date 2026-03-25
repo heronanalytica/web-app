@@ -1,187 +1,265 @@
 export const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL;
 
-type RequestOptions = RequestInit & {
-  params?: Record<string, any>;
+type Primitive = string | number | boolean | null | undefined;
+type QueryValue = Primitive | Primitive[];
+
+export type RequestOptions = RequestInit & {
+  params?: Record<string, QueryValue>;
 };
 
 type BackendResponse<T> = {
-  message: string;
-  error: string | null;
-  data: T;
+  message?: string;
+  error?: string | null;
+  data?: T;
 };
 
+type ParsedResponse<T> = {
+  data: T | undefined;
+  json?: BackendResponse<T>;
+  text?: string;
+};
+
+export class FetcherError extends Error {
+  status: number;
+  statusText: string;
+  response?: Response;
+  data?: unknown;
+
+  constructor({
+    message,
+    status,
+    statusText,
+    response,
+    data,
+  }: {
+    message: string;
+    status: number;
+    statusText: string;
+    response?: Response;
+    data?: unknown;
+  }) {
+    super(message);
+    this.name = "FetcherError";
+    this.status = status;
+    this.statusText = statusText;
+    this.response = response;
+    this.data = data;
+  }
+}
+
+function buildUrl(path: string, params?: Record<string, QueryValue>) {
+  const url = new URL(`${BASE_URL}${path}`);
+
+  if (!params) return url;
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === null) return;
+
+    const values = Array.isArray(value) ? value : [value];
+    values.forEach((entry) => {
+      if (entry === undefined || entry === null) return;
+      url.searchParams.append(key, String(entry));
+    });
+  });
+
+  return url;
+}
+
+async function parseResponse<T>(res: Response): Promise<ParsedResponse<T>> {
+  if (res.status === 204 || res.status === 205) {
+    return { data: undefined };
+  }
+
+  const contentType = res.headers.get("content-type") ?? "";
+
+  if (contentType.includes("application/json")) {
+    const json = (await res.json()) as BackendResponse<T>;
+    return { data: json.data, json };
+  }
+
+  const text = await res.text();
+  return { data: undefined, text };
+}
+
+function getErrorMessage<T>(
+  res: Response,
+  parsed: ParsedResponse<T>,
+  fallback: string
+) {
+  if (parsed.json?.error) return parsed.json.error;
+  if (parsed.json?.message) return parsed.json.message;
+  if (parsed.text?.trim()) return parsed.text.trim();
+  return fallback;
+}
+
+async function request<T>(
+  path: string,
+  {
+    method = "GET",
+    headers,
+    params,
+    body,
+    ...rest
+  }: RequestOptions & { body?: BodyInit | null } = {},
+  fallbackMessage = "Request failed"
+): Promise<T> {
+  const url = buildUrl(path, params);
+  const res = await fetch(url.toString(), {
+    method,
+    credentials: "include",
+    headers,
+    body,
+    ...rest,
+  });
+
+  const parsed = await parseResponse<T>(res);
+
+  if (!res.ok || parsed.json?.error) {
+    throw new FetcherError({
+      message: getErrorMessage(res, parsed, fallbackMessage),
+      status: res.status,
+      statusText: res.statusText,
+      response: res,
+      data: parsed.json?.data,
+    });
+  }
+
+  return parsed.data as T;
+}
+
 export const fetcher = {
-  get: async <T = any>(
-    path: string,
-    options: RequestOptions = {}
-  ): Promise<T> => {
-    const url = new URL(`${BASE_URL}${path}`);
-
-    if (options.params) {
-      Object.entries(options.params).forEach(([key, value]) =>
-        url.searchParams.append(key, String(value))
-      );
-    }
-
-    const { headers, ...rest } = options;
-    const res = await fetch(url.toString(), {
-      method: "GET",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        ...(headers || {}),
-      },
-      ...rest,
-    });
-
-    const json: BackendResponse<T> = await res.json();
-
-    if (!res.ok || json.error) {
-      throw new Error(json.error || json.message || "Request failed");
-    }
-
-    return json.data;
-  },
-
-  post: async <T = any>(
-    path: string,
-    body: any = {},
-    options: RequestOptions = {}
-  ): Promise<T> => {
-    const { headers, ...rest } = options;
-    const res = await fetch(`${BASE_URL}${path}`, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        ...(headers || {}),
-      },
-      body: JSON.stringify(body),
-      ...rest,
-    });
-
-    const json: BackendResponse<T> = await res.json();
-
-    if (!res.ok || json.error) {
-      throw new Error(json.error || json.message || "Request failed");
-    }
-
-    return json.data;
-  },
-
-  delete: async <T = any>(
+  get: async <T = unknown>(
     path: string,
     options: RequestOptions = {}
   ): Promise<T> => {
     const { headers, ...rest } = options;
-    const res = await fetch(`${BASE_URL}${path}`, {
-      method: "DELETE",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        ...(headers || {}),
+
+    return request<T>(
+      path,
+      {
+        ...rest,
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...(headers || {}),
+        },
       },
-      ...rest,
-    });
-
-    const json: BackendResponse<T> = await res.json();
-
-    if (!res.ok || json.error) {
-      throw new Error(json.error || json.message || "Request failed");
-    }
-
-    return json.data;
+      "Request failed"
+    );
   },
 
-  patch: async <T = any>(
+  post: async <T = unknown>(
     path: string,
-    body: any = {},
+    body: unknown = {},
     options: RequestOptions = {}
   ): Promise<T> => {
     const { headers, ...rest } = options;
-    const res = await fetch(`${BASE_URL}${path}`, {
-      method: "PATCH",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        ...(headers || {}),
+
+    return request<T>(
+      path,
+      {
+        ...rest,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(headers || {}),
+        },
+        body: JSON.stringify(body),
       },
-      body: JSON.stringify(body),
-      ...rest,
-    });
-
-    const json: BackendResponse<T> = await res.json();
-
-    if (!res.ok || json.error) {
-      throw new Error(json.error || json.message || "Request failed");
-    }
-
-    return json.data;
+      "Request failed"
+    );
   },
 
-  put: async <T = any>(
+  delete: async <T = unknown>(
     path: string,
-    body: any = {},
     options: RequestOptions = {}
   ): Promise<T> => {
     const { headers, ...rest } = options;
-    const res = await fetch(`${BASE_URL}${path}`, {
-      method: "PUT",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        ...(headers || {}),
+
+    return request<T>(
+      path,
+      {
+        ...rest,
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          ...(headers || {}),
+        },
       },
-      body: JSON.stringify(body),
-      ...rest,
-    });
-
-    const json: BackendResponse<T> = await res.json();
-
-    if (!res.ok || json.error) {
-      throw new Error(json.error || json.message || "Request failed");
-    }
-
-    return json.data;
+      "Request failed"
+    );
   },
 
-  /**
-   * Returns the raw fetch Response (for file downloads, etc)
-   */
+  patch: async <T = unknown>(
+    path: string,
+    body: unknown = {},
+    options: RequestOptions = {}
+  ): Promise<T> => {
+    const { headers, ...rest } = options;
+
+    return request<T>(
+      path,
+      {
+        ...rest,
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...(headers || {}),
+        },
+        body: JSON.stringify(body),
+      },
+      "Request failed"
+    );
+  },
+
+  put: async <T = unknown>(
+    path: string,
+    body: unknown = {},
+    options: RequestOptions = {}
+  ): Promise<T> => {
+    const { headers, ...rest } = options;
+
+    return request<T>(
+      path,
+      {
+        ...rest,
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...(headers || {}),
+        },
+        body: JSON.stringify(body),
+      },
+      "Request failed"
+    );
+  },
+
   raw: async (path: string, options: RequestInit = {}) => {
-    const url = new URL(`${BASE_URL}${path}`);
-    const res = await fetch(url.toString(), {
+    const url = buildUrl(path);
+    return fetch(url.toString(), {
       credentials: "include",
       ...options,
     });
-    return res;
   },
 
-  upload: async <T = any>(
+  upload: async <T = unknown>(
     path: string,
     formData: FormData,
     options: RequestOptions = {}
   ): Promise<T> => {
-    const url = new URL(`${BASE_URL}${path}`);
     const { headers, ...rest } = options;
 
-    const res = await fetch(url.toString(), {
-      method: "POST",
-      credentials: "include",
-      body: formData,
-      headers: {
-        // Don't set Content-Type header, let the browser set it with the correct boundary
-        ...(headers || {}),
+    return request<T>(
+      path,
+      {
+        ...rest,
+        method: "POST",
+        headers: {
+          ...(headers || {}),
+        },
+        body: formData,
       },
-      ...rest,
-    });
-
-    const json: BackendResponse<T> = await res.json();
-
-    if (!res.ok || json.error) {
-      throw new Error(json.error || json.message || "Upload failed");
-    }
-
-    return json.data;
+      "Upload failed"
+    );
   },
 };
