@@ -1,4 +1,5 @@
 import { getPostBySlug, getAllPosts } from "@/lib/mdx";
+import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import { notFound } from "next/navigation";
 import remarkGfm from "remark-gfm";
@@ -33,9 +34,11 @@ export default async function BlogPost(props: BlogPostProps) {
 
       {/* Cover Image with Responsive Styles */}
       <div style={{ maxWidth: "100%", boxSizing: "border-box" }}>
-        <img
+        <Image
           src={post.frontmatter.coverImage}
           alt={post.frontmatter.title}
+          width={1600}
+          height={900}
           style={{
             width: "100%",
             height: "auto",
@@ -49,17 +52,21 @@ export default async function BlogPost(props: BlogPostProps) {
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          img: (props) => (
-            <img
-              {...props}
-              style={{
-                maxWidth: "100%",
-                height: "auto",
-                display: "block",
-                margin: "16px auto",
-              }}
-            />
-          ),
+          img: ({ src, alt }) =>
+            src ? (
+              <Image
+                src={src}
+                alt={alt ?? ""}
+                width={1200}
+                height={800}
+                style={{
+                  maxWidth: "100%",
+                  height: "auto",
+                  display: "block",
+                  margin: "16px auto",
+                }}
+              />
+            ) : null,
         }}
       >
         {post.content}
