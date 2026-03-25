@@ -26,16 +26,19 @@ import PersonalizationGridStep from "../PersonalizationGridStep";
 interface CampaignBuilderProps {
   campaign: Campaign | null;
   loading: boolean;
+  onCampaignChange?: (campaign: Campaign) => void;
 }
 
 export const CampaignBuilder: React.FC<CampaignBuilderProps> = ({
   campaign,
   loading,
+  onCampaignChange,
 }) => {
   return (
     <CampaignBuilderProvider
       campaign={campaign}
       totalSteps={CAMPAIGN_TOTAL_STEPS}
+      onCampaignChange={onCampaignChange}
     >
       <CampaignBuilderInner loading={loading} />
     </CampaignBuilderProvider>

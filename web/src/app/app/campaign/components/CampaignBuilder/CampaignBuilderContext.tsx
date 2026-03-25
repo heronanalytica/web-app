@@ -25,7 +25,7 @@ export interface CampaignBuilderContextType {
   removeStepState: <K extends keyof CampaignStepState>(key: K) => void;
   registerBeforeNext: (fn: (() => Promise<void>) | null) => void;
   runBeforeNext: () => Promise<void>;
-  launchCampaign: () => Promise<void>;
+  launchCampaign: () => Promise<Campaign | null>;
 }
 
 const CampaignBuilderContext = createContext<
@@ -58,8 +58,9 @@ import { ROUTES } from "@/constants/routes";
 export const CampaignBuilderProvider: React.FC<{
   campaign: Campaign | null;
   totalSteps: number;
+  onCampaignChange?: (campaign: Campaign) => void;
   children: React.ReactNode;
-}> = ({ campaign, totalSteps, children }) => {
+}> = ({ campaign, totalSteps, onCampaignChange, children }) => {
   const [currentStep, setCurrentStep] = useState<number>(
     campaign?.currentStep ?? 0
   );
@@ -141,15 +142,15 @@ export const CampaignBuilderProvider: React.FC<{
 
   const launchCampaign = useCallback(async () => {
     if (!campaign?.id) return;
-    await fetcher.post<Campaign>(
+    const updatedCampaign = await fetcher.post<Campaign>(
       `/api/campaigns/${campaign.id}/launch`,
       {
         id: campaign.id,
       }
     );
-    // Refresh this page to load the latest campaign data
-    window.location.reload();
-  }, [campaign]);
+    onCampaignChange?.(updatedCampaign);
+    return updatedCampaign;
+  }, [campaign, onCampaignChange]);
 
   const value: CampaignBuilderContextType & { campaign: Campaign | null } = {
     currentStep,

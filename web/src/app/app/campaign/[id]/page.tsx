@@ -7,7 +7,7 @@ import { fetcher } from "@/lib/fetcher";
 import { ROUTES } from "@/constants/routes";
 import { Campaign, CampaignStatus } from "@/types/campaign";
 import { CampaignBuilder } from "../components/CampaignBuilder";
-import { CampaignView } from '../components/CampaignView';
+import { CampaignView } from "../components/CampaignView";
 
 const CampaignDetailPage = () => {
   const { id } = useParams();
@@ -40,7 +40,11 @@ const CampaignDetailPage = () => {
     <>
       {contextHolder}
       {campaign.status === CampaignStatus.DRAFT ? (
-        <CampaignBuilder campaign={campaign} loading={loading} />
+        <CampaignBuilder
+          campaign={campaign}
+          loading={loading}
+          onCampaignChange={setCampaign}
+        />
       ) : (
         <CampaignView campaign={campaign} />
       )}
