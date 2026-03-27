@@ -3,6 +3,7 @@ import { Campaign } from "@/types/campaign";
 import { CampaignStatus } from "@/types/campaign";
 import { DownloadOutlined, FileOutlined } from "@ant-design/icons";
 import { fetcher } from "@/lib/fetcher";
+import { formatDateTime } from "@/lib";
 
 interface BasicInfoCardProps {
   campaign: Campaign;
@@ -22,7 +23,7 @@ const getStatusTag = (status: CampaignStatus) => {
 };
 
 const FileDownloadItem: React.FC<{
-  fileId?: string;
+  fileId?: string | null;
   fileName?: string;
   label: string;
 }> = ({ fileId, fileName, label }) => {
@@ -73,10 +74,10 @@ const BasicInfoCard: React.FC<BasicInfoCardProps> = ({ campaign }) => {
           {campaign.user?.email || "Unknown"}
         </Descriptions.Item>
         <Descriptions.Item label="Created At">
-          {new Date(campaign.createdAt).toLocaleString()}
+          {formatDateTime(campaign.createdAt)}
         </Descriptions.Item>
         <Descriptions.Item label="Last Updated">
-          {new Date(campaign.updatedAt).toLocaleString()}
+          {formatDateTime(campaign.updatedAt)}
         </Descriptions.Item>
 
         {/* File Downloads Section */}

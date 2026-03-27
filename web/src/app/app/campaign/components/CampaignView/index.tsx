@@ -2,6 +2,7 @@ import React from "react";
 import { Typography, Card, Row, Col, Tag } from "antd";
 import { CheckCircleFilled } from "@ant-design/icons";
 import { Campaign } from "@/types/campaign";
+import { formatDateTime } from "@/lib";
 import styles from "./style.module.scss";
 
 const { Title, Text } = Typography;
@@ -46,7 +47,7 @@ export const CampaignView: React.FC<CampaignViewProps> = ({ campaign }) => {
                 </Text>
                 <div className={styles.value}>
                   {campaign.launchedAt
-                    ? new Date(campaign.launchedAt).toLocaleString()
+                    ? formatDateTime(campaign.launchedAt)
                     : "N/A"}
                 </div>
               </div>

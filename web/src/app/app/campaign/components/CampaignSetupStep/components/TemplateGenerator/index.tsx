@@ -19,6 +19,13 @@ import ImagePreviewButton from "./ImagePreviewButton";
 import { BASE_URL } from "@/lib/fetcher";
 
 const { Text } = Typography;
+const GENERATOR_FORM_FIELDS = [
+  "objective",
+  "tone",
+  "businessResults",
+  "keyMessages",
+  "cta",
+] as const satisfies readonly string[];
 
 interface TemplateGeneratorProps {
   onTemplateGenerated: (template: string) => void;
@@ -30,7 +37,7 @@ const TemplateGenerator: React.FC<TemplateGeneratorProps> = ({
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
   const [generator, setGenerator] = useStepState(
-    CampaignStepStateKey.Generator
+    CampaignStepStateKey.Generator,
   );
   const { setCanGoNext } = useCampaignBuilder();
 
@@ -47,21 +54,25 @@ const TemplateGenerator: React.FC<TemplateGeneratorProps> = ({
     }
   }, [generator, form, setCanGoNext]);
 
-  // Helper: ensure we always pass a full GeneratorBriefDto to setGenerator
-  const asFullGenerator = (
-    patch: Partial<GeneratorBriefDto>
-  ): GeneratorBriefDto => ({
-    // required fields with sensible defaults matching your initialValues
-    objective: generator?.objective ?? "Sales generation",
-    tone: generator?.tone ?? "Professional",
-    // optional fields – keep previous if any
-    businessResults: generator?.businessResults ?? "",
-    keyMessages: generator?.keyMessages ?? "",
-    cta: generator?.cta ?? "",
-    photoFileId: generator?.photoFileId,
-    // apply patch last
-    ...patch,
-  });
+  // Preserve in-progress form edits when photo upload/remove updates step state.
+  const buildGeneratorState = React.useCallback(
+    (patch: Partial<GeneratorBriefDto>): GeneratorBriefDto => {
+      const formValues = form.getFieldsValue([...GENERATOR_FORM_FIELDS]);
+
+      return {
+        objective:
+          formValues.objective ?? generator?.objective ?? "Sales generation",
+        tone: formValues.tone ?? generator?.tone ?? "Professional",
+        businessResults:
+          formValues.businessResults ?? generator?.businessResults ?? "",
+        keyMessages: formValues.keyMessages ?? generator?.keyMessages ?? "",
+        cta: formValues.cta ?? generator?.cta ?? "",
+        photoFileId: generator?.photoFileId,
+        ...patch,
+      };
+    },
+    [form, generator],
+  );
 
   // Photo upload via shared hook — only persist photoId
   const { uploading, beforeUpload, customRequest, deleteById } = useS3Upload({
@@ -69,7 +80,7 @@ const TemplateGenerator: React.FC<TemplateGeneratorProps> = ({
     maxSizeMB: 5,
     acceptMimes: ["image/"], // any image/*
     onAfterRegister: (reg) => {
-      setGenerator(asFullGenerator({ photoFileId: reg.id }), true);
+      setGenerator(buildGeneratorState({ photoFileId: reg.id }), true);
       messageApi.success("Photo uploaded");
     },
     onError: (e) => messageApi.error(e.message),
@@ -83,7 +94,7 @@ const TemplateGenerator: React.FC<TemplateGeneratorProps> = ({
     try {
       if (id) await deleteById(id);
     } finally {
-      setGenerator(asFullGenerator({ photoFileId: undefined }), true);
+      setGenerator(buildGeneratorState({ photoFileId: undefined }), true);
       messageApi.success("Photo removed");
     }
   };
@@ -92,22 +103,22 @@ const TemplateGenerator: React.FC<TemplateGeneratorProps> = ({
     try {
       // 1) save into stepState so backend can read it later
       setGenerator(
-        asFullGenerator({
+        buildGeneratorState({
           objective: values.objective,
           tone: values.tone,
           businessResults: values.businessResults,
           keyMessages: values.keyMessages,
           cta: values.cta,
         }),
-        true
+        true,
       );
 
       // 2) keep local preview UX as-is
       const imgSrc = generator?.photoFileId
         ? new URL(
             `${BASE_URL}/api/file/download/${encodeURIComponent(
-              generator.photoFileId
-            )}`
+              generator.photoFileId,
+            )}`,
           )
         : null;
 
@@ -136,7 +147,7 @@ const TemplateGenerator: React.FC<TemplateGeneratorProps> = ({
           }</p>
           <p style="margin:0 0 20px 0"><strong>Key messages:</strong><br/>${values.keyMessages.replace(
             /\n/g,
-            "<br/>"
+            "<br/>",
           )}</p>
           <p style="margin:0 0 12px 0"><strong>Call to action:</strong></p>
           ${

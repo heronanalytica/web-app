@@ -1,3 +1,4 @@
+import { EAuthRole } from "./auth";
 import { CampaignStepState } from "./campaignStepState";
 import { CompanyProfile } from "./companyProfile";
 
@@ -18,24 +19,25 @@ export interface User {
   id: string;
   email: string;
   name?: string;
-  role?: string;
+  role?: EAuthRole;
 }
 
 export interface Campaign {
   id: string;
+  userId: string;
   name: string;
-  description?: string;
   status: CampaignStatus;
-  currentStep?: number;
-  user?: User;
+  currentStep?: number | null;
+  user?: User | null;
   createdAt: string;
   updatedAt: string;
-  stepState?: CampaignStepState;
-  analysisSteps?: AnalysisStep[];
-  companyProfile?: CompanyProfile;
-  classifiedPersonaFileId?: string;
-  classifiedPersonaFile: ClassifiedPersonaFile;
-  [key: string]: any; // For any additional fields that might come from the API
+  stepState?: CampaignStepState | null;
+  analysisSteps?: AnalysisStep[] | null;
+  companyProfile?: CompanyProfile | null;
+  classifiedPersonaFileId?: string | null;
+  classifiedPersonaFile?: ClassifiedPersonaFile | null;
+  launchedAt?: string | null;
+  lastSavedAt?: string | null;
 }
 
 export interface ClassifiedPersonaFile {

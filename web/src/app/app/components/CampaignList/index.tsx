@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import styles from "./styles.module.scss";
 
 import { Campaign } from "@/types/campaign";
+import { formatDateTime } from "@/lib";
 
 interface CampaignListProps {
   campaigns: Campaign[];
@@ -52,7 +53,7 @@ const CampaignList: React.FC<CampaignListProps> = ({ campaigns }) => {
             </Tag>
           </div>
           <div className={styles.campaignMeta}>
-            Created: {new Date(campaign.createdAt).toLocaleString()}
+            Created: {formatDateTime(campaign.createdAt)}
           </div>
         </Card>
       ))}

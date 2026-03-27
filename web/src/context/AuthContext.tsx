@@ -1,13 +1,12 @@
 "use client";
 import { createContext, useEffect, useCallback, useState } from "react";
-import { useRouter, usePathname } from "next/navigation"; // 👈 need pathname
+import { useRouter, usePathname } from "next/navigation";
 import { ROUTES } from "@/constants/routes";
-import { fetcher } from "@/lib/fetcher";
-
-type User = { id: string; email: string; role: string };
+import { fetcher, FetcherError } from "@/lib/fetcher";
+import { AuthUser, EAuthRole } from "@/types/auth";
 
 type AuthContextValue = {
-  user: User | null;
+  user: AuthUser | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
   loading: boolean;
@@ -35,19 +34,28 @@ const SKIP_AUTH_REDIRECT: string[] = [
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
-  const pathname = usePathname(); // current route
-  const [user, setUser] = useState<User | null>(null);
+  const pathname = usePathname();
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchUser = useCallback(async () => {
     try {
-      const data = await fetcher.get<User>("/api/auth/me");
+      const data = await fetcher.get<AuthUser>("/api/auth/me");
       setUser(data);
-    } catch {
-      setUser(null);
-      if (!SKIP_AUTH_REDIRECT.includes(pathname)) {
-        router.push(ROUTES.LOGIN);
+    } catch (error) {
+      const isAuthFailure =
+        error instanceof FetcherError &&
+        (error.status === 401 || error.status === 403);
+
+      if (isAuthFailure) {
+        setUser(null);
+        if (!SKIP_AUTH_REDIRECT.includes(pathname)) {
+          router.replace(ROUTES.LOGIN);
+        }
+        return;
       }
+
+      console.error("Failed to refresh auth session:", error);
     } finally {
       setLoading(false);
     }
@@ -57,7 +65,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     fetchUser();
   }, [fetchUser]);
 
-  const isAdmin = user?.role === "ADMIN";
+  const isAdmin = user?.role === EAuthRole.ADMIN;
 
   const logout = useCallback(async () => {
     try {

@@ -17,6 +17,10 @@ export interface MailServiceDto {
   provider: string;
   connected: boolean;
   mailProviderId: string; // MailProviderToken.id
+  listId?: string;
+  fromName?: string;
+  replyTo?: string;
+  scheduleIso?: string;
 }
 
 export interface ClassifiedPersonaFileDto {
@@ -51,13 +55,20 @@ export interface CommonTemplateDto {
 export interface CompanyProfileDto {
   id: string;
   name: string;
-  website: string;
-  marketingContentFileId: string;
-  designAssetFileId: string;
-  businessInfo?: string;
+  userId?: string;
+  website?: string | null;
+  marketingContentFileId?: string | null;
+  designAssetFileId?: string | null;
+  businessInfo?: string | null;
   generatedOverallProfile?: GeneratedOverallProfile;
   generatedMarketingTone?: GeneratedMarketingTone;
   createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface StepSummaryDto {
+  totalRecipients?: number;
+  byPersona?: Record<string, number>;
 }
 
 export interface GeneratorBriefDto {
@@ -75,6 +86,7 @@ export interface CampaignStepState {
   mailService?: MailServiceDto;
   classifiedPersonaFile?: ClassifiedPersonaFileDto;
   companyProfile?: CompanyProfileDto;
+  summary?: StepSummaryDto;
   launched?: boolean;
   generator?: GeneratorBriefDto;
   commonTemplate?: CommonTemplateDto;

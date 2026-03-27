@@ -30,7 +30,7 @@ export function useAdminCampaigns() {
       setError(null);
       try {
         const data = await fetcher.get<PaginatedResponse<Campaign>>(
-          `/api/campaigns/admin/all?page=${page}&limit=${limit}`
+          `/api/campaigns/admin/all?page=${page}&limit=${limit}`,
         );
 
         setCampaigns(data.items);
@@ -48,7 +48,7 @@ export function useAdminCampaigns() {
         setLoading(false);
       }
     },
-    []
+    [],
   );
 
   const updateAnalysisStep = useCallback(
@@ -56,7 +56,7 @@ export function useAdminCampaigns() {
       campaignId: string,
       stepKey: string,
       status: "waiting" | "in_progress" | "done" | "error",
-      message?: string
+      message?: string,
     ) => {
       try {
         const updatedCampaign = await fetcher.patch<Campaign>(
@@ -69,15 +69,15 @@ export function useAdminCampaigns() {
                 message,
               },
             ],
-          }
+          },
         );
 
         // Update the campaigns list if it exists
         setCampaigns(
           (prevCampaigns) =>
             prevCampaigns?.map((campaign) =>
-              campaign.id === campaignId ? updatedCampaign : campaign
-            ) || null
+              campaign.id === campaignId ? updatedCampaign : campaign,
+            ) || null,
         );
 
         return updatedCampaign;
@@ -86,7 +86,7 @@ export function useAdminCampaigns() {
         throw err;
       }
     },
-    []
+    [],
   );
 
   const updateCampaignStep = useCallback(
@@ -94,24 +94,24 @@ export function useAdminCampaigns() {
       userId: string,
       campaignId: string,
       currentStep: number,
-      stepState: CampaignStepState
+      stepState: CampaignStepState,
     ) => {
       try {
-        const updatedCampaign = await fetcher.patch(
+        const updatedCampaign = await fetcher.patch<Campaign>(
           `/api/campaigns/${campaignId}/admin/draft`,
           {
             userId,
             currentStep,
             stepState,
-          }
+          },
         );
 
         // Update the campaigns list if it exists
         setCampaigns(
           (prevCampaigns) =>
             prevCampaigns?.map((campaign) =>
-              campaign.id === campaignId ? updatedCampaign : campaign
-            ) || null
+              campaign.id === campaignId ? updatedCampaign : campaign,
+            ) || null,
         );
 
         return updatedCampaign;
@@ -120,7 +120,7 @@ export function useAdminCampaigns() {
         throw err;
       }
     },
-    []
+    [],
   );
 
   return {
@@ -147,7 +147,7 @@ export function useAdminCampaign(campaignId: string) {
 
     try {
       const data = await fetcher.get<Campaign>(
-        `/api/campaigns/admin/${campaignId}`
+        `/api/campaigns/admin/${campaignId}`,
       );
       setCampaign(data);
     } catch (err: any) {

@@ -14,23 +14,29 @@ const App = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const [modalOpen, setModalOpen] = React.useState(false);
   const [campaignName, setCampaignName] = React.useState("");
-  const { createCampaign } = useCampaign();
   const router = useRouter();
   const { isAuthenticated, loading } = useAuth();
-  const { campaigns, loading: campaignLoading, fetchCampaigns } = useCampaign();
+  const { campaigns, loading: campaignLoading, fetchCampaigns, createCampaign } =
+    useCampaign();
 
   useEffect(() => {
     if (isAuthenticated) {
       fetchCampaigns();
     }
   }, [fetchCampaigns, isAuthenticated]);
+
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      router.replace(ROUTES.LOGIN);
+    }
+  }, [isAuthenticated, loading, router]);
+
   if (loading || campaignLoading) {
     return <Spin fullscreen />;
   }
 
   if (!isAuthenticated) {
-    router.push(ROUTES.LOGIN);
-    return;
+    return <Spin fullscreen />;
   }
 
   const handleCreateCampaign = async () => {

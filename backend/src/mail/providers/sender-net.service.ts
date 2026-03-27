@@ -2,6 +2,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios, { AxiosError, AxiosInstance } from 'axios';
+import * as crypto from 'crypto';
 import {
   IMailProvider,
   MailProviderConfig,
@@ -40,7 +41,13 @@ interface SenderNetCampaign {
   id: string;
   subject: string;
   title: string;
+  recipient_count?: number;
 }
+
+type RecipientIdentity = {
+  firstname: string;
+  lastname: string;
+};
 
 @Injectable()
 export class SenderNetService implements IMailProvider {
@@ -48,6 +55,9 @@ export class SenderNetService implements IMailProvider {
   private readonly config: MailProviderConfig;
   private readonly apiBaseUrl = 'https://api.sender.net/v2';
   private readonly http: AxiosInstance;
+  private static readonly MAX_GROUP_CREATE_ATTEMPTS = 5;
+  private static readonly RECIPIENT_WAIT_ATTEMPTS = 5;
+  private static readonly RECIPIENT_WAIT_DELAY_MS = 1500;
 
   constructor(private readonly configService: ConfigService) {
     this.config = {
@@ -70,34 +80,86 @@ export class SenderNetService implements IMailProvider {
   // -----------------------------
   // Groups
   // -----------------------------
-  private async createOrGetGroup(title: string): Promise<string> {
-    try {
-      const resp = await this.http.post<SenderNetResponse<SenderNetGroup>>(
-        '/groups',
-        { title },
-      );
-      return resp.data.data.id;
-    } catch (err) {
-      const axiosErr = err as SenderNetAxiosError;
-      if (
-        typeof axiosErr.response?.data?.message === 'string' &&
-        axiosErr.response.data.message.includes('already exists')
-      ) {
-        // Fetch groups and return the existing one
-        const groupsResp =
-          await this.http.get<SenderNetResponse<SenderNetGroup[]>>('/groups');
-        const found = groupsResp.data.data.find((g) => g.title === title);
-        if (!found)
-          throw new Error(`Group "${title}" exists but not retrievable`);
-        return found.id;
-      }
-      throw err;
+  private buildRecipientGroupBaseTitle(
+    campaignId: string,
+    email: string,
+  ): string {
+    const emailHash = crypto
+      .createHash('sha1')
+      .update(email.trim().toLowerCase())
+      .digest('hex')
+      .slice(0, 12);
+
+    return `cmp-${campaignId.slice(0, 8)}-${emailHash}`;
+  }
+
+  private buildAttemptGroupTitle(baseTitle: string, attempt: number): string {
+    if (attempt === 0) {
+      return baseTitle;
     }
+
+    const suffix = crypto.randomBytes(3).toString('hex');
+    return `${baseTitle}-${suffix}`;
+  }
+
+  private buildRecipientIdentity(name?: string): RecipientIdentity {
+    const [firstname, ...rest] = name?.split(' ') || [''];
+    return {
+      firstname,
+      lastname: rest.join(' '),
+    };
+  }
+
+  private async createOrGetGroup(baseTitle: string): Promise<string> {
+    for (
+      let attempt = 0;
+      attempt < SenderNetService.MAX_GROUP_CREATE_ATTEMPTS;
+      attempt++
+    ) {
+      const title = this.buildAttemptGroupTitle(baseTitle, attempt);
+
+      try {
+        const resp = await this.http.post<SenderNetResponse<SenderNetGroup>>(
+          '/groups',
+          { title },
+        );
+        return resp.data.data.id;
+      } catch (err) {
+        const axiosErr = err as SenderNetAxiosError;
+        if (
+          typeof axiosErr.response?.data?.message === 'string' &&
+          axiosErr.response.data.message.includes('already exists')
+        ) {
+          this.logger.warn(
+            `Sender group title collision for "${title}", retrying with a new suffix`,
+          );
+          continue;
+        }
+        throw err;
+      }
+    }
+
+    throw new Error(
+      `Unable to create a unique Sender group for base title "${baseTitle}"`,
+    );
   }
 
   // -----------------------------
   // Subscribers
   // -----------------------------
+  private async findSubscriberByEmail(
+    email: string,
+  ): Promise<SenderNetSubscriber | null> {
+    const subsResp = await this.http.get<
+      SenderNetResponse<SenderNetSubscriber[]>
+    >('/subscribers', { params: { email } });
+    return (
+      subsResp.data.data.find(
+        (subscriber) => subscriber.email.toLowerCase() === email.toLowerCase(),
+      ) ?? null
+    );
+  }
+
   private async createOrUpdateSubscriber(
     email: string,
     firstname: string,
@@ -123,18 +185,17 @@ export class SenderNetService implements IMailProvider {
         axiosErr.response.data.message.includes('already exists')
       ) {
         // Fetch subscriber by email
-        const subsResp = await this.http.get<
-          SenderNetResponse<SenderNetSubscriber[]>
-        >('/subscribers', { params: { email } });
-        const found = subsResp.data.data.find(
-          (s) => s.email.toLowerCase() === email.toLowerCase(),
-        );
+        const found = await this.findSubscriberByEmail(email);
         if (!found)
           throw new Error(`Subscriber ${email} exists but not retrievable`);
 
-        // Ensure they are in the group
+        // Update the existing subscriber so Sender associates it with this group.
         await this.http.patch(`/subscribers/${found.id}`, {
+          email,
+          firstname,
+          lastname,
           groups: [groupId],
+          trigger_automation: false,
         });
 
         return found.id;
@@ -143,57 +204,129 @@ export class SenderNetService implements IMailProvider {
     }
   }
 
+  private async ensureRecipientGroup(
+    campaignId: string,
+    email: string,
+  ): Promise<string> {
+    const baseTitle = this.buildRecipientGroupBaseTitle(campaignId, email);
+    return this.createOrGetGroup(baseTitle);
+  }
+
+  private async ensureSubscriberForGroup(
+    email: string,
+    identity: RecipientIdentity,
+    groupId: string,
+  ): Promise<string> {
+    return this.createOrUpdateSubscriber(
+      email,
+      identity.firstname,
+      identity.lastname,
+      groupId,
+    );
+  }
+
+  private async createPersonalizedCampaign(
+    campaignName: string,
+    recipientEmail: string,
+    groupId: string,
+    subject: string,
+    fromName: string,
+    fromEmail: string,
+    preheader: string,
+    html: string,
+  ): Promise<string> {
+    const campaignResp = await this.http.post<
+      SenderNetResponse<SenderNetCampaign>
+    >('/campaigns', {
+      title: `${campaignName} - ${recipientEmail}`,
+      subject: subject || 'Your Campaign',
+      from: fromName || this.config.senderName,
+      reply_to: fromEmail || this.config.senderEmail,
+      preheader,
+      content_type: 'html',
+      content: html || '<p>No Content</p>',
+      groups: [groupId],
+    });
+
+    if (!campaignResp.data.success) {
+      throw new Error(
+        `Campaign creation failed: ${JSON.stringify(campaignResp.data.message)}`,
+      );
+    }
+
+    this.logger.debug('Created campaign', campaignResp.data);
+    return campaignResp.data.data.id;
+  }
+
+  private async sendCreatedCampaign(campaignId: string): Promise<void> {
+    const sendResp = await this.http.post(`/campaigns/${campaignId}/send`);
+    this.logger.debug('SendResp', sendResp.data);
+  }
+
   // -----------------------------
   // Main Send Flow
   // -----------------------------
+  private async sleep(ms: number): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  private async waitForRecipients(
+    campaignId: string,
+    expectedMinimum = 1,
+    attempts = SenderNetService.RECIPIENT_WAIT_ATTEMPTS,
+    delayMs = SenderNetService.RECIPIENT_WAIT_DELAY_MS,
+  ): Promise<void> {
+    for (let attempt = 1; attempt <= attempts; attempt++) {
+      const resp = await this.http.get<SenderNetResponse<SenderNetCampaign>>(
+        `/campaigns/${campaignId}`,
+      );
+      const recipientCount = resp.data.data.recipient_count ?? 0;
+
+      if (recipientCount >= expectedMinimum) {
+        return;
+      }
+
+      if (attempt < attempts) {
+        this.logger.debug(
+          `Waiting for Sender campaign ${campaignId} recipients (${recipientCount}/${expectedMinimum})`,
+        );
+        await this.sleep(delayMs);
+      }
+    }
+
+    throw new Error(
+      `Sender campaign ${campaignId} still has no selected recipients after waiting`,
+    );
+  }
+
   async sendCampaign(options: SendCampaignOptions): Promise<SendResult> {
     const { campaign, recipients } = options;
     const results: SendResult[] = [];
 
     for (const recipient of recipients) {
       try {
-        // Step 1: Group
-        const groupTitle = `Campaign-${campaign.id}-${recipient.email}`;
-        const groupId = await this.createOrGetGroup(groupTitle);
-
-        // Step 2: Subscriber
-        const [firstname, ...rest] = recipient.name?.split(' ') || [''];
-        const lastname = rest.join(' ');
-        const subscriberId = await this.createOrUpdateSubscriber(
+        const identity = this.buildRecipientIdentity(recipient.name);
+        const groupId = await this.ensureRecipientGroup(
+          campaign.id,
           recipient.email,
-          firstname,
-          lastname,
+        );
+        const subscriberId = await this.ensureSubscriberForGroup(
+          recipient.email,
+          identity,
           groupId,
         );
-
-        // Step 3: Campaign
-        const campaignResp = await this.http.post<
-          SenderNetResponse<SenderNetCampaign>
-        >('/campaigns', {
-          title: `${campaign.name} - ${recipient.email}`,
-          subject: recipient.subject || 'Your Campaign',
-          from: recipient.fromName || this.config.senderName,
-          reply_to: recipient.fromEmail || this.config.senderEmail,
-          preheader: recipient.preheader || '',
-          content_type: 'html',
-          content: recipient.html || '<p>No Content</p>',
-          groups: [groupId],
-        });
-
-        if (!campaignResp.data.success) {
-          throw new Error(
-            `Campaign creation failed: ${JSON.stringify(campaignResp.data.message)}`,
-          );
-        }
-
-        const senderCampaignId = campaignResp.data.data.id;
-        this.logger.debug('Created campaign', campaignResp.data);
-
-        // Step 4: Send campaign
-        const sendResp = await this.http.post(
-          `/campaigns/${senderCampaignId}/send`,
+        const senderCampaignId = await this.createPersonalizedCampaign(
+          campaign.name,
+          recipient.email,
+          groupId,
+          recipient.subject,
+          recipient.fromName,
+          recipient.fromEmail,
+          recipient.preheader || '',
+          recipient.html,
         );
-        this.logger.debug('SendResp', sendResp.data);
+        await this.waitForRecipients(senderCampaignId);
+        await this.sendCreatedCampaign(senderCampaignId);
 
         results.push({
           success: true,

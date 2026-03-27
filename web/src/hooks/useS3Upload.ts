@@ -1,10 +1,10 @@
-// lib/useS3Upload.ts
 import { useCallback, useRef, useState } from "react";
 import { Upload } from "antd";
-import { fetcher } from "@/lib/fetcher";
-import type { UploadRequestOption as RcCustomRequestOptions } from "rc-upload/lib/interface";
-import type { RcFile } from "antd/es/upload/interface";
 import type { UploadProps } from "antd";
+import type { RcFile } from "antd/es/upload/interface";
+import type { UploadRequestOption as RcCustomRequestOptions } from "rc-upload/lib/interface";
+
+import { fetcher } from "@/lib/fetcher";
 
 export const FILE_TYPES = {
   CUSTOMER: "customer",
@@ -16,17 +16,16 @@ export const FILE_TYPES = {
 
 export type FileType = (typeof FILE_TYPES)[keyof typeof FILE_TYPES];
 
-// nice-to-have helpers
 export const FILE_TYPE_VALUES: FileType[] = Object.values(FILE_TYPES);
 export function assertNever(x: never): never {
   throw new Error(`Unhandled case: ${x}`);
 }
 
 export type RegisteredFile = {
-  id: string; // backend id
-  key: string; // s3 key
+  id: string;
+  key: string;
   fileName: string;
-  storageUrl: string; // e.g. s3://bucket/key
+  storageUrl: string;
   contentType: string;
 };
 
@@ -38,10 +37,24 @@ export type UploadStage =
   | "register"
   | "success";
 
+type UploadableFile = Blob & {
+  name?: string;
+  type?: string;
+};
+
+type PresignResponse = {
+  url: string;
+  key: string;
+};
+
+type RegisterResponse = {
+  id: string;
+};
+
 export interface UseS3UploadOptions {
   fileType: FileType;
-  maxSizeMB?: number; // default 50
-  acceptMimes?: string[]; // e.g. ["image/png","image/jpeg","text/csv"] or ["image/"]
+  maxSizeMB?: number;
+  acceptMimes?: string[];
   onAfterRegister?: (file: RegisteredFile) => void | Promise<void>;
   getExtraMeta?: (file: File) => Record<string, unknown>;
   onSuccess?: (file: RegisteredFile) => void;
@@ -51,10 +64,26 @@ export interface UseS3UploadOptions {
   };
 }
 
+const LIST_IGNORE = Upload.LIST_IGNORE;
+
 const getFileExtension = (filename: string): string =>
   filename.slice(((filename.lastIndexOf(".") - 1) >>> 0) + 2);
 
+const toError = (error: unknown, fallbackMessage: string) =>
+  error instanceof Error ? error : new Error(fallbackMessage);
+
+const getFileMeta = (file: UploadableFile) => ({
+  blob: file as Blob,
+  fileName: file.name ?? "file",
+  contentType: file.type || "application/octet-stream",
+});
+
+const isSupportedUploadInput = (
+  file: RcCustomRequestOptions["file"],
+): file is RcFile | Blob => typeof file !== "string";
+
 type BeforeUploadFn = NonNullable<UploadProps["beforeUpload"]>;
+
 export function useS3Upload({
   fileType,
   maxSizeMB = 50,
@@ -72,130 +101,131 @@ export function useS3Upload({
 
   const beforeUpload = useCallback<BeforeUploadFn>(
     (file) => {
-      const sizeMB = ("size" in file ? file.size : 0) / 1024 / 1024;
+      const sizeMB = file.size / 1024 / 1024;
       if (sizeMB > maxSizeMB) {
         onError?.(new Error(`File must be <= ${maxSizeMB}MB`), "before:size");
-        return (Upload as any).LIST_IGNORE ?? false;
+        return LIST_IGNORE;
       }
-      const type = (file as any).type as string | undefined;
-      if (acceptMimes?.length && type) {
-        const ok = acceptMimes.some((m) => type === m || type.startsWith(m));
-        if (!ok) {
+
+      if (acceptMimes?.length && file.type) {
+        const isAccepted = acceptMimes.some(
+          (mime) => file.type === mime || file.type.startsWith(mime),
+        );
+
+        if (!isAccepted) {
           onError?.(new Error("Unsupported file type"), "before:type");
-          return (Upload as any).LIST_IGNORE ?? false;
+          return LIST_IGNORE;
         }
       }
+
       return true;
     },
-    [maxSizeMB, acceptMimes, onError]
+    [acceptMimes, maxSizeMB, onError],
   );
 
-  // IMPORTANT: signature returns void and accepts RcCustomRequestOptions
   const customRequest = useCallback(
     (options: RcCustomRequestOptions) => {
       void (async () => {
         const { onError: antOnError, onSuccess: antOnSuccess } = options;
         setError(null);
 
-        // rc-upload gives: RcFile | Blob | string
-        const raw = options.file as RcFile | Blob | string;
-
-        if (typeof raw === "string") {
-          const err = new Error("Unsupported file input (string)");
-          onError?.(err, "before:type");
-          antOnError?.(err);
+        if (!isSupportedUploadInput(options.file)) {
+          const unsupportedInputError = new Error(
+            "Unsupported file input (string)",
+          );
+          onError?.(unsupportedInputError, "before:type");
+          antOnError?.(unsupportedInputError);
           return;
         }
 
-        // Use Blob for upload body; derive name/type as available
-        const blob: Blob = raw as Blob;
-        const filename: string = (raw as any).name ?? "file";
-        const contentType: string =
-          (raw as any).type || "application/octet-stream";
+        const uploadFile = options.file as UploadableFile;
+        const { blob, fileName, contentType } = getFileMeta(uploadFile);
 
-        // StrictMode guard
-        const keySig = `${filename}|${blob.size}|${contentType}|${fileType}`;
+        const keySig = `${fileName}|${blob.size}|${contentType}|${fileType}`;
         if (inFlightKeyRef.current === keySig) return;
         inFlightKeyRef.current = keySig;
 
         setUploading(true);
         try {
-          // 1) presign
-          let url: string, key: string;
+          let presign: PresignResponse;
           try {
-            ({ url, key } = await fetcher.post<{ url: string; key: string }>(
-              "/api/file/upload",
-              {
-                fileType,
-                contentType,
-                fileExtension: getFileExtension(filename),
-                ...(extraUploadBody ?? {}),
-              }
-            ));
-          } catch (e: any) {
-            const err = new Error(e?.message || "Failed to get presigned URL");
-            onError?.(err, "presign");
-            antOnError?.(err);
-            throw err;
+            presign = await fetcher.post<PresignResponse>("/api/file/upload", {
+              fileType,
+              contentType,
+              fileExtension: getFileExtension(fileName),
+              ...(extraUploadBody ?? {}),
+            });
+          } catch (error) {
+            const presignError = new Error(
+              toError(error, "Failed to get presigned URL").message,
+            );
+            onError?.(presignError, "presign");
+            antOnError?.(presignError);
+            throw presignError;
           }
 
-          // 2) PUT to S3
-          const putRes = await fetch(url, {
+          const putRes = await fetch(presign.url, {
             method: "PUT",
-            body: blob, // Blob/File is fine here
+            body: blob,
             headers: {
               "Content-Type": contentType,
               "Content-Disposition": `attachment; filename="${encodeURIComponent(
-                filename
+                fileName,
               )}"`,
             },
           });
+
           if (!putRes.ok) {
-            const txt = await putRes.text().catch(() => "");
-            const err = new Error(
-              `Upload failed: ${putRes.status} ${putRes.statusText} ${txt}`
+            const bodyText = await putRes.text().catch(() => "");
+            const uploadError = new Error(
+              `Upload failed: ${putRes.status} ${putRes.statusText} ${bodyText}`,
             );
-            onError?.(err, "put");
-            antOnError?.(err);
-            throw err;
+            onError?.(uploadError, "put");
+            antOnError?.(uploadError);
+            throw uploadError;
           }
 
-          // 3) register metadata
-          let meta: { id: string };
+          let meta: RegisterResponse;
           try {
-            const metaPayload = {
-              key,
-              fileName: filename,
+            meta = await fetcher.post<RegisterResponse>("/api/file", {
+              key: presign.key,
+              fileName,
               type: fileType,
-              ...(getExtraMeta ? getExtraMeta(raw as any as File) : {}),
-            };
-            meta = await fetcher.post<{ id: string }>("/api/file", metaPayload);
-            if (!meta?.id)
+              ...(getExtraMeta ? getExtraMeta(uploadFile as File) : {}),
+            });
+
+            if (!meta.id) {
               throw new Error("No ID returned from metadata endpoint.");
-          } catch (e: any) {
-            const err = new Error(e?.message || "Failed to save file metadata");
-            onError?.(err, "register");
-            antOnError?.(err);
-            throw err;
+            }
+          } catch (error) {
+            const registerError = new Error(
+              toError(error, "Failed to save file metadata").message,
+            );
+            onError?.(registerError, "register");
+            antOnError?.(registerError);
+            throw registerError;
           }
 
           const registered: RegisteredFile = {
             id: meta.id,
-            key,
-            fileName: filename,
-            storageUrl: `s3://${key}`,
+            key: presign.key,
+            fileName,
+            storageUrl: `s3://${presign.key}`,
             contentType,
           };
+
           setLastFile(registered);
 
-          if (onAfterRegister) await onAfterRegister(registered);
+          if (onAfterRegister) {
+            await onAfterRegister(registered);
+          }
           onSuccess?.(registered);
           antOnSuccess?.(registered);
-        } catch (e: any) {
-          const err = e instanceof Error ? e : new Error("Upload failed");
-          setError(err.message);
-          antOnError?.(err);
-          onError?.(err);
+        } catch (error) {
+          const uploadError = toError(error, "Upload failed");
+          setError(uploadError.message);
+          antOnError?.(uploadError);
+          onError?.(uploadError);
         } finally {
           setUploading(false);
           inFlightKeyRef.current = null;
@@ -203,21 +233,23 @@ export function useS3Upload({
       })();
     },
     [
+      extraUploadBody,
       fileType,
       getExtraMeta,
       onAfterRegister,
-      onSuccess,
       onError,
-      extraUploadBody,
-    ]
+      onSuccess,
+    ],
   );
 
   const deleteById = useCallback(
     async (id: string) => {
       await fetcher.delete(`/api/file/${id}`);
-      if (lastFile?.id === id) setLastFile(null);
+      if (lastFile?.id === id) {
+        setLastFile(null);
+      }
     },
-    [lastFile]
+    [lastFile],
   );
 
   return {

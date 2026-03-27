@@ -1,9 +1,6 @@
-"use client";
-
+import { redirect } from "next/navigation";
 import { ROUTES } from "@/constants/routes";
-import { useRouter } from "next/navigation";
 
 export default function CampaignPage() {
-  const router = useRouter();
-  router.push(ROUTES.APP_HOMEPAGE);
+  redirect(ROUTES.APP_HOMEPAGE);
 }

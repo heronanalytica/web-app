@@ -1,6 +1,7 @@
 import React from "react";
 import { Col, Flex, Row, Typography } from "antd";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { howItWorkContent } from "../constants";
 
 function HowItWorks() {
@@ -93,9 +94,11 @@ function HowItWorks() {
                   backgroundSize: "cover",
                 }}
               >
-                <img
+                <Image
                   src={item.image}
                   alt={item.title}
+                  width={960}
+                  height={360}
                   style={{
                     maxWidth: "90%",
                     maxHeight: "90%", // Limit the height for consistency

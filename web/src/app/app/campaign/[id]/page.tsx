@@ -7,7 +7,7 @@ import { fetcher } from "@/lib/fetcher";
 import { ROUTES } from "@/constants/routes";
 import { Campaign, CampaignStatus } from "@/types/campaign";
 import { CampaignBuilder } from "../components/CampaignBuilder";
-import { CampaignView } from '../components/CampaignView';
+import { CampaignView } from "../components/CampaignView";
 
 const CampaignDetailPage = () => {
   const { id } = useParams();
@@ -21,7 +21,7 @@ const CampaignDetailPage = () => {
     const fetchCampaign = async () => {
       setLoading(true);
       try {
-        const data = await fetcher.get(`/api/campaigns/${id}`); // Fetch any campaign by ID
+        const data = await fetcher.get<Campaign>(`/api/campaigns/${id}`); // Fetch any campaign by ID
         setCampaign(data);
       } catch {
         messageApi.error("Failed to load campaign");
@@ -40,7 +40,11 @@ const CampaignDetailPage = () => {
     <>
       {contextHolder}
       {campaign.status === CampaignStatus.DRAFT ? (
-        <CampaignBuilder campaign={campaign} loading={loading} />
+        <CampaignBuilder
+          campaign={campaign}
+          loading={loading}
+          onCampaignChange={setCampaign}
+        />
       ) : (
         <CampaignView campaign={campaign} />
       )}

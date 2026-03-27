@@ -16,7 +16,11 @@ import {
   useCampaignBuilder,
   useStepState,
 } from "../CampaignBuilder/CampaignBuilderContext";
-import { CampaignStepStateKey } from "@/types/campaignStepState";
+import {
+  CampaignStepStateKey,
+  CommonTemplateDto,
+} from "@/types/campaignStepState";
+import { Campaign } from "@/types/campaign";
 import { fetcher } from "@/lib/fetcher";
 
 const { Text } = Typography;
@@ -34,7 +38,7 @@ const ReviewConfirmStep: React.FC = () => {
   const [form] = Form.useForm();
   const { campaign, setCanGoNext } = useCampaignBuilder(); // <- bring in save
   const [template, setTemplate] = useStepState(
-    CampaignStepStateKey.CommonTemplate
+    CampaignStepStateKey.CommonTemplate,
   );
   const [loading, setLoading] = React.useState(false);
   const [regenLoading, setRegenLoading] = React.useState(false);
@@ -53,7 +57,7 @@ const ReviewConfirmStep: React.FC = () => {
         preheader: form.getFieldValue("preheader"),
         html: form.getFieldValue("html"),
       }),
-    [form]
+    [form],
   );
 
   // Load the latest stepState from server if commonTemplate is missing
@@ -62,7 +66,9 @@ const ReviewConfirmStep: React.FC = () => {
       if (!campaign?.id || template?.html) return;
       setLoading(true);
       try {
-        const fresh = await fetcher.get(`/api/campaigns/${campaign.id}`);
+        const fresh = await fetcher.get<Campaign>(
+          `/api/campaigns/${campaign.id}`,
+        );
         const serverTemplate = normalize(fresh?.stepState?.commonTemplate);
         if (serverTemplate.html) {
           setTemplate(serverTemplate, true); // persist to store
@@ -106,8 +112,8 @@ const ReviewConfirmStep: React.FC = () => {
     if (!campaign?.id) return;
     setRegenLoading(true);
     try {
-      const res = await fetcher.post(
-        `/api/campaigns/${campaign.id}/common-template`
+      const res = await fetcher.post<Partial<CommonTemplateDto>>(
+        `/api/campaigns/${campaign.id}/common-template`,
       );
       const fresh = normalize({
         subject: res?.subject ?? "Untitled",
@@ -210,7 +216,7 @@ const ReviewConfirmStep: React.FC = () => {
                       validator: (_, v) =>
                         /<[^>]+>/.test(v || "")
                           ? Promise.reject(
-                              "Preheader must be plain text (no HTML)"
+                              "Preheader must be plain text (no HTML)",
                             )
                           : Promise.resolve(),
                     },
