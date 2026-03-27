@@ -14,7 +14,7 @@ import {
   CheckOutlined,
   CloseOutlined,
 } from "@ant-design/icons";
-import type { AnalysisStep } from "@/types/campaign";
+import type { AnalysisStep, Campaign } from "@/types/campaign";
 import { stepTitles } from "@/app/app/campaign/components/CampaignBuilder/constants";
 import styles from "./CampaignProgressCard.module.scss";
 
@@ -22,10 +22,7 @@ const { Step } = Steps;
 const { Text } = Typography;
 
 interface CampaignProgressCardProps {
-  campaign: {
-    currentStep?: number;
-    analysisSteps?: AnalysisStep[];
-  };
+  campaign: Pick<Campaign, "currentStep" | "analysisSteps">;
   onStatusUpdate: (stepKey: string, status: string) => void;
   onStepComplete?: () => void;
   onNextFromTemplate?: () => void;
@@ -193,9 +190,7 @@ const CampaignProgressCard: React.FC<CampaignProgressCardProps> = ({
         {atTemplateWaitingStep && onNextFromTemplate && (
           <div style={{ marginTop: 8 }}>
             <div>
-              <i>
-                * Please upload Rendered Emails JSON before proceeding
-              </i>
+              <i>* Please upload Rendered Emails JSON before proceeding</i>
             </div>
             <Button
               type="primary"

@@ -1,5 +1,6 @@
 import { Card, Typography, Button, Space, Divider, message, Input } from "antd";
 import { Campaign } from "@/types/campaign";
+import { CompanyProfile } from "@/types/companyProfile";
 import { EditOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { fetcher } from "@/lib/fetcher";
@@ -27,12 +28,12 @@ const CompanyProfileCard: React.FC<CompanyProfileCardProps> = ({
     try {
       setLoading(true);
       // Call the analyze endpoint
-      const newCompanyProfile = await fetcher.post(
+      const newCompanyProfile = await fetcher.post<CompanyProfile>(
         `/api/company-profiles/analyze`,
         {
           campaignId: campaign.id,
           companyProfileId: companyProfile?.id,
-        }
+        },
       );
 
       if (newCompanyProfile && companyProfile) {
@@ -111,7 +112,7 @@ const CompanyProfileCard: React.FC<CompanyProfileCardProps> = ({
     field: string,
     label: string,
     value: string,
-    isMarkdown: boolean = false
+    isMarkdown: boolean = false,
   ) => {
     if (editingField === field) {
       return (
@@ -200,13 +201,13 @@ const CompanyProfileCard: React.FC<CompanyProfileCardProps> = ({
               "generatedOverallProfile",
               "Company Profile",
               companyProfile.generatedOverallProfile?.summary || "",
-              true
+              true,
             )}
             <Divider style={{ margin: "16px 0" }} />
             {renderEditableField(
               "generatedMarketingTone",
               "Marketing Tone",
-              companyProfile.generatedMarketingTone?.summary || ""
+              companyProfile.generatedMarketingTone?.summary || "",
             )}
           </>
         )}

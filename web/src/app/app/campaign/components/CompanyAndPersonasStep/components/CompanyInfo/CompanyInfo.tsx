@@ -2,25 +2,13 @@ import React from "react";
 import { Typography, Tag } from "antd";
 import { GlobalOutlined } from "@ant-design/icons";
 import { capitalizeFirstLetter, capitalizeWords } from "@/lib";
+import { CompanyProfile } from "@/types/companyProfile";
 import styles from "../../styles.module.scss";
 
 const { Title, Text } = Typography;
 
 interface CompanyInfoProps {
-  companyProfile: {
-    name?: string;
-    website?: string;
-    businessInfo?: string;
-    generatedOverallProfile?: {
-      values?: string[];
-      brand_positioning?: string;
-      tone_of_voice?: string;
-      summary?: string;
-    };
-    generatedMarketingTone?: {
-      summary?: string;
-    };
-  };
+  companyProfile: CompanyProfile;
 }
 
 export const CompanyInfo: React.FC<CompanyInfoProps> = ({ companyProfile }) => {

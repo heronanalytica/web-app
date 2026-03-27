@@ -24,7 +24,7 @@ export default function CompanyProfileStep() {
   const { setCanGoNext, save } = useCampaignBuilder();
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<CompanyProfileDto | null>(
-    null
+    null,
   );
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [pendingSaveAfterRemove, setPendingSaveAfterRemove] = useState(false);
@@ -32,7 +32,7 @@ export default function CompanyProfileStep() {
   useEffect(() => {
     setLoading(true);
     fetcher
-      .get("/api/company-profiles")
+      .get<CompanyProfileDto[]>("/api/company-profiles")
       .then((data) => {
         setProfiles(data || []);
       })
@@ -73,7 +73,7 @@ export default function CompanyProfileStep() {
       setLoading(true);
       const newProfile = await fetcher.post<CompanyProfileDto>(
         "/api/company-profiles",
-        payload
+        payload,
       );
       setProfiles((prev) => [newProfile, ...prev]);
       setSelected(newProfile.id);
@@ -218,10 +218,7 @@ export default function CompanyProfileStep() {
             />
           </Form.Item>
           {/* Hidden fields that actually store the values */}
-          <Form.Item
-            name="marketingContentFileId"
-            hidden
-          >
+          <Form.Item name="marketingContentFileId" hidden>
             <input type="hidden" />
           </Form.Item>
           <Form.Item name="marketingContentFileName" hidden>

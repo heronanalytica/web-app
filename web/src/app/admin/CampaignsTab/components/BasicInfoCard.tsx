@@ -23,7 +23,7 @@ const getStatusTag = (status: CampaignStatus) => {
 };
 
 const FileDownloadItem: React.FC<{
-  fileId?: string;
+  fileId?: string | null;
   fileName?: string;
   label: string;
 }> = ({ fileId, fileName, label }) => {

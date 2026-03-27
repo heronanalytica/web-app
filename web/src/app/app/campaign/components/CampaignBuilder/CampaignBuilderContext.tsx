@@ -20,7 +20,7 @@ export interface CampaignBuilderContextType {
   updateStepState: <K extends keyof CampaignStepState>(
     key: K,
     value: CampaignStepState[K],
-    saveAfter?: boolean
+    saveAfter?: boolean,
   ) => void;
   removeStepState: <K extends keyof CampaignStepState>(key: K) => void;
   registerBeforeNext: (fn: (() => Promise<void>) | null) => void;
@@ -36,7 +36,7 @@ export const useCampaignBuilder = () => {
   const ctx = useContext(CampaignBuilderContext);
   if (!ctx)
     throw new Error(
-      "useCampaignBuilder must be used within CampaignBuilderProvider"
+      "useCampaignBuilder must be used within CampaignBuilderProvider",
     );
   return ctx;
 };
@@ -62,11 +62,11 @@ export const CampaignBuilderProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ campaign, totalSteps, onCampaignChange, children }) => {
   const [currentStep, setCurrentStep] = useState<number>(
-    campaign?.currentStep ?? 0
+    campaign?.currentStep ?? 0,
   );
   const [canGoNext, setCanGoNext] = useState(false);
   const [stepState, setStepState] = useState<CampaignStepState>(
-    campaign?.stepState ?? {}
+    campaign?.stepState ?? {},
   );
   const canGoBack = currentStep > 0;
   const beforeNextRef = React.useRef<null | (() => Promise<void>)>(null);
@@ -74,7 +74,7 @@ export const CampaignBuilderProvider: React.FC<{
     (fn: (() => Promise<void>) | null) => {
       beforeNextRef.current = fn;
     },
-    []
+    [],
   );
   const runBeforeNext = React.useCallback(async () => {
     if (beforeNextRef.current) {
@@ -106,7 +106,7 @@ export const CampaignBuilderProvider: React.FC<{
         stepState: payload.stepState,
       });
     },
-    [campaign]
+    [campaign],
   );
 
   const save = useCallback(async () => {
@@ -118,7 +118,7 @@ export const CampaignBuilderProvider: React.FC<{
     <K extends keyof CampaignStepState>(
       key: K,
       value: CampaignStepState[K],
-      saveAfter?: boolean
+      saveAfter?: boolean,
     ) => {
       setStepState((prev) => {
         const next = { ...prev, [key]: value };
@@ -129,7 +129,7 @@ export const CampaignBuilderProvider: React.FC<{
         return next;
       });
     },
-    [currentStep, saveDraft]
+    [currentStep, saveDraft],
   );
 
   const removeStepState = <K extends keyof CampaignStepState>(key: K) => {
@@ -141,12 +141,12 @@ export const CampaignBuilderProvider: React.FC<{
   };
 
   const launchCampaign = useCallback(async () => {
-    if (!campaign?.id) return;
+    if (!campaign?.id) return null;
     const updatedCampaign = await fetcher.post<Campaign>(
       `/api/campaigns/${campaign.id}/launch`,
       {
         id: campaign.id,
-      }
+      },
     );
     onCampaignChange?.(updatedCampaign);
     return updatedCampaign;

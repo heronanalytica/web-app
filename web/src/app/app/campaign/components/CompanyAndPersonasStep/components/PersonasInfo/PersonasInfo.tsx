@@ -7,7 +7,7 @@ import { ClassifiedPersonaFile } from "@/types/campaign";
 const { Text } = Typography;
 
 interface PersonasInfoProps {
-  classifiedPersonaFile?: ClassifiedPersonaFile;
+  classifiedPersonaFile?: ClassifiedPersonaFile | null;
 }
 
 export const PersonasInfo: React.FC<PersonasInfoProps> = ({
